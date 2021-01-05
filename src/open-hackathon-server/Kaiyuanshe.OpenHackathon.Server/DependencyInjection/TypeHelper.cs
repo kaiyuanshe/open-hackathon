@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 {
-    public static class TypeHelper
+    public static class AutofacHelper
     {
         /// <summary>
         /// Get all instantiable sub types in the same assembly

@@ -25,13 +25,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             var storageAccount = storageAccountProvider.HackathonServerStorage;
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
         }
-
-        /// <summary>
-        /// Unit Test Only
-        /// </summary>
-        public StorageContext()
-        {
-
-        }
     }
 }

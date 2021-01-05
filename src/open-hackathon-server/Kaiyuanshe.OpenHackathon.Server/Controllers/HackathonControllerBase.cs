@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
+    [ApiController]
     public abstract class HackathonControllerBase : ControllerBase
     {
     }

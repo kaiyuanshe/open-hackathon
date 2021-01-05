@@ -77,13 +77,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
             cloudTable.CreateIfNotExistsAsync().Wait();
         }
 
-        /// <summary>
-        /// For test only
-        /// </summary>
-        protected AzureTable()
-        {
-        }
-
         protected CloudTable UnderlyingCloudTable => tableServiceProxy.GetTableReference(tableName);
 
         /// <summary>
@@ -202,7 +195,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         public virtual async Task<TableQuerySegment<TEntity>> ExecuteQuerySegmentedAsync(
             TableQuery<TEntity> query, TableContinuationToken continuationToken, CancellationToken cancellationToken = default)
         {
-            return await ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+            query = query ?? new TableQuery<TEntity>();
+            return await UnderlyingCloudTable.ExecuteQuerySegmentedAsync(query, continuationToken, null, null, cancellationToken);
         }
 
         /// <summary>
@@ -221,6 +215,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         {
             CloudTable table = UnderlyingCloudTable;
             TableContinuationToken continuationToken = null;
+            query = query ?? new TableQuery<TEntity>();
             do
             {
                 var queryResult = await table.ExecuteQuerySegmentedAsync(query, continuationToken, null, null, cancellationToken);
@@ -235,6 +230,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         {
             CloudTable table = UnderlyingCloudTable;
             TableContinuationToken continuationToken = null;
+            query = query ?? new TableQuery<TEntity>();
             do
             {
                 var queryResult = await table.ExecuteQuerySegmentedAsync(query, continuationToken, null, null, cancellationToken);
