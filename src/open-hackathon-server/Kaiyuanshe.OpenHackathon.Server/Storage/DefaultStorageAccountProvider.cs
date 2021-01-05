@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage
@@ -18,9 +19,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
     {
         string connectionString;
 
-        public DefaultStorageAccountProvider(IHackathonConfig hackathonConfig)
+        public DefaultStorageAccountProvider(IConfiguration configuration)
         {
-            connectionString = hackathonConfig.GetConfig(HackathonConfigKeys.Storage.ConnectionString, "UseDevelopmentStorage=true");
+            connectionString = configuration["Storage:Hackathon:ConnectionString"];
         }
 
         public CloudStorageAccount HackathonServerStorage => CloudStorageAccount.Parse(connectionString);

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
-    public interface IHackathonTable
+    public interface IHackathonTable : IAzureTable<HackathonEntity>
     {
 
     }
