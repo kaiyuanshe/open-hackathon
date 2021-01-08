@@ -40,9 +40,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public string[] Banners { get; set; }
         public HackathonStatus Status { get; set; }
         /// <summary>
-        /// Id of User who creates this hackathon
+        /// Id of User who creates this hackathon. PartitionKey of Users table
         /// </summary>
-        public string CreatedBy { get; set; }
+        public string CreatorId { get; set; }
         /// <summary>
         /// Maximum allowed participant
         /// </summary>
@@ -51,17 +51,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// whether or not user registration needs admin's manual approval
         /// </summary>
         public bool AutoApprove { get; set; }
-        /// <summary>
-        /// an array of organizer's Id
-        /// </summary>
         public string[] Tags { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime EventStartTime { get; set; }
         public DateTime EventEndTime { get; set; }
-        public DateTime RegisterStartTime { get; set; }
-        public DateTime RegisterEndTime { get; set; }
+        public DateTime EnrollmentStartTime { get; set; }
+        public DateTime EnrollmentEndTime { get; set; }
         public DateTime JudgeStartTime { get; set; }
         public DateTime JudgeEndTime { get; set; }
-        public DateTime ArchiveTime { get; set; }
     }
 }
