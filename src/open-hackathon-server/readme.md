@@ -1,5 +1,5 @@
 # Kaiyuanshe.Openhackathon.Server
-The next generation of backend server for Open Hackathon Platform
+The next generation of backend server for Open Hackathon Platform.
 
 ## Develop
 
