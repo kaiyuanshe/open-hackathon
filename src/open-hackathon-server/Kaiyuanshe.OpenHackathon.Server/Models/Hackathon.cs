@@ -1,4 +1,4 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
+using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using Newtonsoft.Json;
 using System;
