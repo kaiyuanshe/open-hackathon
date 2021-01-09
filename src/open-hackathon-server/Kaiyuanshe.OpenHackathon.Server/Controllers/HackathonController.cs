@@ -1,10 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.WindowsAzure.Storage.Table;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

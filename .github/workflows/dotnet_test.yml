@@ -1,0 +1,67 @@
+name: .NET Core Build with Tests
+
+on:
+  push:
+    branches: 
+    - master
+    paths:
+    - src/**
+  pull_request:
+    branches: 
+    - master
+    paths:
+    - src/**
+
+defaults:
+  run:
+    shell: bash
+    working-directory: "./src/open-hackathon-server"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      config: 'Release'
+      
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101    
+      
+      # restore dependencies  
+    - name: Install dependencies
+      run: dotnet restore
+      
+      # build project
+    - name: Build
+      run: dotnet build --configuration $config --no-restore
+      
+    - name: set pr build number (if pr)
+      id: PRNUMBER
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: kkak10/pr-number-action@v1.3
+      
+      # set report file and title 
+    - name: Set Test Title
+      run: | 
+            if ${{ github.event_name == 'pull_request' }}
+            then
+              echo "title=Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_id}})" >> $GITHUB_ENV
+              echo "file_name=TestReport.pr.${{github.run_id}}.md" >> $GITHUB_ENV
+            else
+              echo "title=Test Run ${{github.run_id}}" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{github.run_id}}.md" >> $GITHUB_ENV
+            fi
+      
+      # run tests with built project
+    - name: Test PR
+      run: dotnet test --no-restore --no-build --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
+      
+      # upload report as build artifact
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'testresult'
+        path: ${{github.workspace}}/${{env.file_name}}

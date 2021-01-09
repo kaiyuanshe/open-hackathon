@@ -6,7 +6,11 @@ name: python build and push
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: 
+    - master
+    paths:
+    - 'open-hackathon-client/**'
+    - 'open-hackathon-server/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

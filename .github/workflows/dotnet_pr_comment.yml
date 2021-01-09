@@ -1,0 +1,29 @@
+name: Comment on the dotnet pull request
+
+# read-write repo token
+# access to secrets
+on:
+  workflow_run:
+    workflows: [".NET Core Build with Tests"]
+    types:
+      - completed
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: >
+      ${{ github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ github.event.workflow_run.workflow_id }}
+          workflow_conclusion: success
+
+      - name: comment PR
+        uses: machine-learning-apps/pr-comment@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: 'TestReport.pr.${{ github.event.workflow_run.id }}.md'
