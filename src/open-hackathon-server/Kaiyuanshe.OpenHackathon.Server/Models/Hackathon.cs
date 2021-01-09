@@ -1,12 +1,8 @@
-﻿using DataAnnotationsExtensions;
-using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
@@ -81,7 +77,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Maximum uses allowed to enroll this hackathon. Required.
         /// </summary>
-        [Min(1)]
+        [Range(1, int.MaxValue)]
         [JsonProperty("max_enrollment")]
         public int MaxEnrollment { get; set; }
 
@@ -107,13 +103,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// The timestamp when the hackathon starts.
         /// </summary>
-        [JsonProperty("event_started_at")] 
+        [JsonProperty("event_started_at")]
         public DateTime EventStartTime { get; set; }
-        
+
         /// <summary>
         /// The timestamp when the hackathon ends
         /// </summary>
-        [JsonProperty("event_ended_at")] 
+        [JsonProperty("event_ended_at")]
         public DateTime EventEndTime { get; set; }
 
         /// <summary>
@@ -125,7 +121,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// The timestamp when the hackathon stops accepting user enrollement
         /// </summary>
-        [JsonProperty("enrollment_ended_at")] 
+        [JsonProperty("enrollment_ended_at")]
         public DateTime EnrollmentEndTime { get; set; }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models.Validations
     [AttributeUsage(AttributeTargets.Property)]
     public class HackathonBannersPolicyAttribute : ValidationAttribute
     {
-        static readonly int MaxBannerCount = 10;
+        public static readonly int MaxBannerCount = 10;
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
