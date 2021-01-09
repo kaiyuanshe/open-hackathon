@@ -1,7 +1,7 @@
 Open Hackathon Platform
 ======
 
-
+![dotnet build, push and publish](https://github.com/kaiyuanshe/open-hackathon/workflows/dotnet%20build,%20push%20and%20publish/badge.svg)
 
 # Introduction
 Open Hackathon Platform
