@@ -1,11 +1,6 @@
 name: .NET Core Build with Tests
 
 on:
-  push:
-    branches: 
-    - master
-    paths:
-    - src/**
   pull_request:
     branches: 
     - master

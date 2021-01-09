@@ -113,7 +113,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public DateTime EventEndTime { get; set; }
 
         /// <summary>
-        /// The timestamp when the hackathon begins to accept user enrollement
+        /// The timestamp when the hackathon begins to accept user enrollement.
         /// </summary>
         [JsonProperty("enrollment_started_at")]
         public DateTime EnrollmentStartTime { get; set; }
