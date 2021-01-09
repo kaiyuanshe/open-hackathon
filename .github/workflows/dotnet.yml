@@ -81,7 +81,6 @@ jobs:
         file: ./src/deploy/hackathon-docker/Dockerfile
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
-        sep-tags: ','
         labels: ${{ steps.docker_meta.outputs.labels }}
   
     - uses: benjlevesque/short-sha@v1.2
