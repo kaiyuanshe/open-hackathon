@@ -43,9 +43,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="404">Not Found. The response indicates hackathon with specified id doesn't exist.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), 200)]
-        public async Task<Hackathon> CreateOrUpdate(Hackathon parameter, CancellationToken cancellation)
+        public async Task<object> CreateOrUpdate(Hackathon parameter, CancellationToken cancellation)
         {
-
+            return Ok(parameter);
         }
     }
 }
