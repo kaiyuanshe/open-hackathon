@@ -12,10 +12,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     public class Hackathon
     {
         /// <summary>
-        /// Readonly unique Id of a Hackathon. Auto-generated in server side.
+        /// Unique Id of a Hackathon. Auto-generated in server side. 
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; internal set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Name of a hackathon. Required. Length between 1-100

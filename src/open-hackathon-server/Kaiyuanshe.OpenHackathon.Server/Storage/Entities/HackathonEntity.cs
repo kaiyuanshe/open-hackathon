@@ -7,7 +7,9 @@ using System.Text;
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     /// <summary>
-    /// Hackathons.
+    /// Hackathons. 
+    /// PartitionKey: auto-generated string. 
+    /// RowKey: string.Empty
     /// </summary>
     public class HackathonEntity : AdvancedTableEntity
     {
