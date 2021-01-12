@@ -12,13 +12,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     public class Hackathon
     {
         /// <summary>
-        /// Unique Id of a Hackathon. Auto-generated in server side. 
+        /// Unique Id of a Hackathon. Auto-generated in server side. Required for UPDATE request.
         /// </summary>
         [JsonProperty("id")]
         public string Id { get; set; }
 
         /// <summary>
-        /// Name of a hackathon. Required. Length between 1-100
+        /// Name of a hackathon. Required. Length between 1-100.
         /// </summary>
         [Required]
         [StringLength(100, MinimumLength = 1)]
@@ -98,7 +98,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// The timestamp when the hackathon is created
         /// </summary>
         [JsonProperty("created_at")]
-        public DateTime CreatedTime { get; set; }
+        public DateTime CreateTime { get; internal set; }
+
+        /// <summary>
+        /// The timestamp when the hackathon is created
+        /// </summary>
+        [JsonProperty("created_at")]
+        public DateTime LastUpdateTime { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon starts.

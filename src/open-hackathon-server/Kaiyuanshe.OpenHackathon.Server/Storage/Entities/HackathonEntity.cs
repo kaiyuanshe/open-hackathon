@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// </summary>
         public bool AutoApprove { get; set; }
         public string[] Tags { get; set; }
-        public DateTime CreatedTime { get; set; }
+        public DateTime CreateTime { get; set; }
         public DateTime EventStartTime { get; set; }
         public DateTime EventEndTime { get; set; }
         public DateTime EnrollmentStartTime { get; set; }
