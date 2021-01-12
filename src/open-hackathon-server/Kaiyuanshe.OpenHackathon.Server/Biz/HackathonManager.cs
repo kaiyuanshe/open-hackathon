@@ -25,6 +25,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<HackathonEntity> GetHackathonEntityByIdAsync(string id, CancellationToken cancellationToken);
+        /// <summary>
+        /// Update hackathon from request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
     }
 
     public class HackathonManager : IHackathonManager
@@ -46,6 +53,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             var entity = await StorageContext.HackathonTable.RetrieveAsync(id, string.Empty, cancellationToken);
             return entity;
+        }
+
+        public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken)
+        {
+            await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.Id, string.Empty, (entity) => {
+                entity.Name = request.Name;
+                entity.Ribbon = request.Ribbon;
+                entity.Summary = request.Summary;
+                entity.Description = request.Description;
+                entity.Location = request.Location;
+                entity.Banners = request.Banners;
+                entity.MaxEnrollment = request.MaxEnrollment;
+                entity.AutoApprove = request.AutoApprove;
+                entity.Tags = request.Tags;
+                entity.EventStartTime = request.EventStartTime;
+                entity.EventEndTime = request.EventEndTime;
+                entity.EnrollmentStartTime = request.EnrollmentStartTime;
+                entity.EnrollmentEndTime = request.EnrollmentEndTime;
+                entity.JudgeStartTime = request.JudgeStartTime;
+                entity.JudgeEndTime = request.JudgeEndTime;
+            }, cancellationToken);
+            return await StorageContext.HackathonTable.RetrieveAsync(request.Id, string.Empty, cancellationToken);
         }
     }
 

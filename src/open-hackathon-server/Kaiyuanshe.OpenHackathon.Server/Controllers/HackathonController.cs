@@ -37,14 +37,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// If id is not empty, will retrive the hackathon(return 404 if not found) and update accordingly.
         /// </summary>
         /// <param name="parameter"></param>
-        /// <param name="cancellation"></param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         /// <response code="404">Not Found. The response indicates hackathon with specified id doesn't exist.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), 200)]
-        public async Task<object> CreateOrUpdate(Hackathon parameter, CancellationToken cancellation)
+        public async Task<object> CreateOrUpdate(Hackathon parameter, CancellationToken cancellationToken)
         {
+            if(!string.IsNullOrEmpty(parameter.Id))
+            {
+                var entity = await HackathonManager.GetHackathonEntityByIdAsync(parameter.Id, cancellationToken);
+                if(entity == null)
+                {
+                    return NotFound(ErrorResponse.NotFound($"Hackathon with id {parameter.Id} not found."));
+                }
+                // TO UPDATE
+            }
+            else
+            {
+                // TODO create
+            }
             return Ok(parameter);
         }
     }
