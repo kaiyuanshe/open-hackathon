@@ -14,18 +14,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     public class HackathonEntity : AdvancedTableEntity
     {
         /// <summary>
-        /// Id of Hackathon. Auto-generated, the same as PartitionKey
+        /// name of Hackathon. the same as PartitionKey
         /// </summary>
         [IgnoreProperty]
-        public string Id
+        public string Name
         {
             get
             {
                 return PartitionKey;
             }
         }
-
-        public string Name { get; set; }
+        public string DisplayName { get; set; }
         /// <summary>
         /// A short sentence for advertisement
         /// </summary>
@@ -34,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// Detailed description. Usually rich-text html
         /// </summary>
-        public string Description { get; set; }
+        public string Detail { get; set; }
         public string Location { get; set; }
         /// <summary>
         /// Uploaded pictures for display as banners
@@ -55,11 +54,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public bool AutoApprove { get; set; }
         public string[] Tags { get; set; }
         public DateTime CreateTime { get; set; }
-        public DateTime EventStartTime { get; set; }
-        public DateTime EventEndTime { get; set; }
-        public DateTime EnrollmentStartTime { get; set; }
-        public DateTime EnrollmentEndTime { get; set; }
-        public DateTime JudgeStartTime { get; set; }
-        public DateTime JudgeEndTime { get; set; }
+        public DateTime? EventStartTime { get; set; }
+        public DateTime? EventEndTime { get; set; }
+        public DateTime? EnrollmentStartTime { get; set; }
+        public DateTime? EnrollmentEndTime { get; set; }
+        public DateTime? JudgeStartTime { get; set; }
+        public DateTime? JudgeEndTime { get; set; }
     }
 }

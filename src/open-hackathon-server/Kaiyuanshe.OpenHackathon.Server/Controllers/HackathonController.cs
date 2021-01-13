@@ -1,10 +1,8 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
-using Kaiyuanshe.OpenHackathon.Server.Storage;
-using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <returns>A list of hackathon.</returns>
         /// <response code="200">Success. The response describes a list of hackathon.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(Hackathon[]), 200)]
+        [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
         public async Task<object> ListHackathon(CancellationToken cancellationToken)
         {
@@ -33,31 +31,38 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         /// <summary>
         /// Create or update hackathon. 
-        /// If id is absent, will create a new hackathon. 
-        /// If id is not empty, will retrive the hackathon(return 404 if not found) and update accordingly.
+        /// If hackathon with the {name} exists, will retrive update it accordingly.
+        /// Else create a new hackathon.
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
-        /// <response code="404">Not Found. The response indicates hackathon with specified id doesn't exist.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), 200)]
-        public async Task<object> CreateOrUpdate(Hackathon parameter, CancellationToken cancellationToken)
+        [Route("hackthon/{name}")]
+        public async Task<object> CreateOrUpdate(
+            [FromRoute, Required, RegularExpression("^[a-z0-9]{1,100}$")] string name,
+            [FromBody] Hackathon parameter,
+            CancellationToken cancellationToken)
         {
-            if(!string.IsNullOrEmpty(parameter.Id))
+            if (!ModelState.IsValid)
             {
-                var entity = await HackathonManager.GetHackathonEntityByIdAsync(parameter.Id, cancellationToken);
-                if(entity == null)
-                {
-                    return NotFound(ErrorResponse.NotFound($"Hackathon with id {parameter.Id} not found."));
-                }
-                // TO UPDATE
+                return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
+            }
+
+            parameter.Name = name;
+            var entity = await HackathonManager.GetHackathonEntityByNameAsync(name, cancellationToken);
+            if (entity == null)
+            {
+                var updated = await HackathonManager.UpdateHackathonAsync(parameter, cancellationToken);
+                return Ok(updated);
             }
             else
             {
-                // TODO create
+                var created = await HackathonManager.CreateHackathonAsync(parameter, cancellationToken);
+                return Ok(created);
             }
-            return Ok(parameter);
         }
     }
 }

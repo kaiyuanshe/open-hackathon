@@ -8,7 +8,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
     public interface IResponseBuilder
     {
         Hackathon BuildHackathon(HackathonEntity hackathonEntity);
-        IEnumerable<Hackathon> BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
+        HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -17,11 +17,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return new Hackathon
             {
-                Id = hackathonEntity.Id,
                 AutoApprove = hackathonEntity.AutoApprove,
                 Banners = hackathonEntity.Banners,
                 CreatorId = hackathonEntity.CreatorId,
-                Description = hackathonEntity.Description,
+                Detail = hackathonEntity.Detail,
                 Location = hackathonEntity.Location,
                 Name = hackathonEntity.Name,
                 CreateTime = hackathonEntity.CreateTime,
@@ -40,9 +39,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             };
         }
 
-        public IEnumerable<Hackathon> BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities)
+        public HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities)
         {
-            return hackathonEntities.Select(h => BuildHackathon(h));
+            return new HackathonList
+            {
+                values = hackathonEntities.Select(h => BuildHackathon(h)).ToArray(),
+            };
         }
     }
 }
