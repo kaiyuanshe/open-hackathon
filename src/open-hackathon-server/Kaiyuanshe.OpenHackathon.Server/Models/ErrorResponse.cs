@@ -39,7 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
             /// Contains nested errors that are related to this error.
             /// </summary>
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public IList<ErrorResponseBody> details { get; set; }
+            public IList<string> details { get; set; }
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <param name="target">The target of the particular error (for example, the name of the property in error).</param>
         /// <param name="details">An array of JSON objects that contain name/value pairs for code and message</param>
         /// <returns></returns>
-        public static ErrorResponse Error(string code, string message, string target = null, IList<KeyValuePair<string, string>> details = null)
+        public static ErrorResponse Error(string code, string message, string target = null, IList<string> details = null)
         {
             return new ErrorResponse
             {
@@ -66,15 +66,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
                     code = code,
                     message = message,
                     target = target,
-                    details = details?.Select(detail =>
-                    {
-                        return new ErrorResponseBody
-                        {
-                            code = code,
-                            message = detail.Value,
-                            target = detail.Key,
-                        };
-                    }).ToArray(),
+                    details = details
                 },
             };
         }
@@ -83,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Create a BadArgument error response
         /// </summary>
         /// <returns>BadArgument error response</returns>
-        public static ErrorResponse BadArgument(string message, string target = null, IList<KeyValuePair<string, string>> details = null)
+        public static ErrorResponse BadArgument(string message, string target = null, IList<string> details = null)
         {
             return Error("BadArgument", message, target, details);
         }

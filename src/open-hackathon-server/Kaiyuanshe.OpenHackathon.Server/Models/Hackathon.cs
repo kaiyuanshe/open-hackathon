@@ -12,18 +12,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     public class Hackathon
     {
         /// <summary>
-        /// Unique Id of a Hackathon. Auto-generated in server side. Required for UPDATE request.
+        /// Name of a hackathon. Can only be set when it's created. Readonly afterwards.
+        /// Length between 1-100. Lowercase charactor and numbers only.
         /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; internal set; }
 
         /// <summary>
-        /// Name of a hackathon. Required. Length between 1-100.
+        /// Name for display only. Length between 1-100.
         /// </summary>
-        [Required]
-        [StringLength(100, MinimumLength = 1)]
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [MinLength(1)]
+        [MaxLength(100)]
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// A short sentence for advertisement. Max Length is 100.
@@ -44,8 +45,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         [Required]
         [MaxLength(65535)]
-        [JsonProperty("description")]
-        public string Description { get; set; }
+        [JsonProperty("detail")]
+        public string Detail { get; set; }
 
         /// <summary>
         /// An address where the hackathon is held. Can be used to show a navigation map. Leave it empty if online. Max Length is 100.
@@ -75,17 +76,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string CreatorId { get; internal set; }
 
         /// <summary>
-        /// Maximum uses allowed to enroll this hackathon. Required.
+        /// Maximum uses allowed to enroll this hackathon. 0 means unlimited. default value: 0.
         /// </summary>
         [Range(1, int.MaxValue)]
         [JsonProperty("max_enrollment")]
-        public int MaxEnrollment { get; set; }
+        public int? MaxEnrollment { get; set; }
 
         /// <summary>
-        /// whether or not user registration needs admin's manual approval
+        /// whether or not user registration needs admin's manual approval. default: false
         /// </summary>
         [JsonProperty("auto_approve")]
-        public bool AutoApprove { get; set; }
+        public bool? AutoApprove { get; set; }
 
         /// <summary>
         /// tags. An array of any string. At most 20 tags.
@@ -110,34 +111,52 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// The timestamp when the hackathon starts.
         /// </summary>
         [JsonProperty("event_started_at")]
-        public DateTime EventStartTime { get; set; }
+        public DateTime? EventStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon ends
         /// </summary>
         [JsonProperty("event_ended_at")]
-        public DateTime EventEndTime { get; set; }
+        public DateTime? EventEndTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon begins to accept user enrollement.
         /// </summary>
         [JsonProperty("enrollment_started_at")]
-        public DateTime EnrollmentStartTime { get; set; }
+        public DateTime? EnrollmentStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon stops accepting user enrollement
         /// </summary>
         [JsonProperty("enrollment_ended_at")]
-        public DateTime EnrollmentEndTime { get; set; }
+        public DateTime? EnrollmentEndTime { get; set; }
 
         /// <summary>
         /// The timestamp when the judges begin to review and rate the output showed/uploaded by enrolled users
         /// </summary>
-        [JsonProperty("judge_started_at")] public DateTime JudgeStartTime { get; set; }
+        [JsonProperty("judge_started_at")]
+        public DateTime? JudgeStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the reviews/ratings should be completed.
         /// </summary>
-        [JsonProperty("judge_ended_at")] public DateTime JudgeEndTime { get; set; }
+        [JsonProperty("judge_ended_at")] 
+        public DateTime? JudgeEndTime { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a list of hackathon
+    /// </summary>
+    public class HackathonList
+    {
+        /// <summary>
+        /// List of hackathon
+        /// </summary>
+        public Hackathon[] values { get; set; }
+
+        public HackathonList()
+        {
+            values = new Hackathon[0];
+        }
     }
 }
