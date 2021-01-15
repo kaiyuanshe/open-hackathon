@@ -40,7 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), 200)]
-        [Route("hackthon/{name}")]
+        [Route("hackathon/{name}")]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression("^[a-z0-9]{1,100}$")] string name,
             [FromBody] Hackathon parameter,

@@ -3,7 +3,9 @@ using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using Newtonsoft.Json;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
@@ -43,7 +45,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Detailed description. Usually rich-text html. Required. Max length is 64K.
         /// </summary>
-        [Required]
         [MaxLength(65535)]
         [JsonProperty("detail")]
         public string Detail { get; set; }
@@ -58,7 +59,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// A list of banner images. At least 1 image. Max 10 images supported. All images must be invalid Uri.
         /// </summary>
-        [Required]
         [HackathonBannersPolicy]
         [JsonProperty("banners")]
         public string[] Banners { get; set; }
@@ -140,7 +140,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// The timestamp when the reviews/ratings should be completed.
         /// </summary>
-        [JsonProperty("judge_ended_at")] 
+        [JsonProperty("judge_ended_at")]
         public DateTime? JudgeEndTime { get; set; }
     }
 

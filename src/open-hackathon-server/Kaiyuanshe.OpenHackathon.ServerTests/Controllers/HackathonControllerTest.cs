@@ -37,7 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Mock.VerifyAll(hackManagerMock);
             hackManagerMock.Verify(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
             hackManagerMock.Verify(p => p.CreateHackathonAsync(hack, It.IsAny<CancellationToken>()), Times.Once);
-            hackManagerMock.Verify(p => p.UpdateHackathonAsync(hack, It.IsAny<CancellationToken>()), Times.Never);
+            hackManagerMock.VerifyNoOtherCalls();
             Assert.AreEqual(name, hack.Name);
             Assert.IsTrue(result is OkObjectResult);
         }
@@ -61,8 +61,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackManagerMock);
             hackManagerMock.Verify(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-            hackManagerMock.Verify(p => p.CreateHackathonAsync(hack, It.IsAny<CancellationToken>()), Times.Never);
             hackManagerMock.Verify(p => p.UpdateHackathonAsync(hack, It.IsAny<CancellationToken>()), Times.Once);
+            hackManagerMock.VerifyNoOtherCalls(); 
             Assert.AreEqual(name, hack.Name);
             Assert.IsTrue(result is OkObjectResult);
         }
