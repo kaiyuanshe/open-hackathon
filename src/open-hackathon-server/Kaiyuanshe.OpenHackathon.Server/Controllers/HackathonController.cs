@@ -53,7 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             parameter.Name = name;
             var entity = await HackathonManager.GetHackathonEntityByNameAsync(name, cancellationToken);
-            if (entity == null)
+            if (entity != null)
             {
                 var updated = await HackathonManager.UpdateHackathonAsync(parameter, cancellationToken);
                 return Ok(updated);
