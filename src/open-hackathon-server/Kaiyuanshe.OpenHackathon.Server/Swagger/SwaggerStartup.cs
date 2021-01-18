@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using System.Reflection;
 
-namespace Kaiyuanshe.OpenHackathon.Server
+namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 {
     public class SwaggerStartup
     {
@@ -18,6 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             services.AddSwaggerGen((options) =>
             {
+                // metadata
                 options.SwaggerDoc("v2.0", new OpenApiInfo
                 {
                     Contact = new OpenApiContact
@@ -35,7 +38,14 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     Title = ApiSpecTitle,
                     Version = ApiVersion,
                 });
+
+                // tags
                 options.TagActionsBy(api => new List<string> { "OpenHackathon" });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
             });
         }
 
