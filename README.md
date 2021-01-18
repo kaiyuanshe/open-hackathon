@@ -16,10 +16,18 @@ Pull request is welcome and appreciated.
 Questions go to [dev team](mailto:msopentechdevsh@microsoft.com)
 
 # Documenation
- - For user who wants to browse and attend hackathon events, please see [User Guide](https://github.com/kaiyuanshe/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97)
- - For those who wants to create a new hackathon event or manage existing ones, please follow [Organizer Guide](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/organizer_guide.md)
- - For those who wants to contribute to Open Hackathon, please read [Developer Guide](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/developer_guide.md)
- - Read [manual](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/README.md) for more.
+
+## Event Participator
+For user who wants to browse and attend hackathon events, please see [User Guide](https://github.com/kaiyuanshe/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97)
+
+## Event Organizer
+For those who wants to create a new hackathon event or manage existing ones, please follow [Organizer Guide](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/organizer_guide.md)
+
+## Developer
+For those who wants to contribute to Open Hackathon, pleae choose one of the following. Open Hackathon has mainly two parts, a Web UI presentation layer and a backend api server, both were written in Python in the first place. Recently we are working to move it to modern technologies. The UI layer is being rewritten using Node Js and the backend API is being replaced with Dotnet Core 3.1.
+- To contribute to new Web UI, please visit [OpenHackathon Web 2.0](https://github.com/kaiyuanshe/OpenHackathon-Web) for more details.
+- To contribute to new backend API server, please browse to directory `src`. The docs are ongoing. Basically it's a typical DotNet core Web App.
+- To contribute to v1.0 Web UI and/or API, please read [Developer Guide](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/developer_guide.md). They are being retired, currently only critical fixes accepted. Read [manual](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/README.md) for more.
 
 # Author
 The project is now maintained by Kaiyuanshe.
