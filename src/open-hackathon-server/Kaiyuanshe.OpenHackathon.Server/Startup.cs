@@ -31,6 +31,9 @@ namespace Kaiyuanshe.OpenHackathon.Server
             // for Autofac here, and don't call builder.Populate() - that
             // happens in the AutofacServiceProviderFactory for you.
             services.AddMvc().AddControllersAsServices();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            SwaggerStartup.ConfigureService(services);
         }
 
         // ConfigureContainer is where you can register things directly
@@ -68,6 +71,9 @@ namespace Kaiyuanshe.OpenHackathon.Server
             {
                 endpoints.MapControllers();
             });
+
+            // Configure Swagger
+            SwaggerStartup.Configure(app, env);
         }
 
         private void RegisterControllers(ContainerBuilder builder)
