@@ -46,6 +46,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
+
             });
         }
 
@@ -54,7 +55,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger((options) =>
             {
-
+                options.PreSerializeFilters.Add((doc, req) =>
+                {
+                });
             });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),

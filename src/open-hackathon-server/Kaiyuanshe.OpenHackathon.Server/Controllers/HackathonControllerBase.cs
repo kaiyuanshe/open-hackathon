@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     [ApiController]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
     public abstract class HackathonControllerBase : ControllerBase
     {
         protected IList<string> GetErrors()
