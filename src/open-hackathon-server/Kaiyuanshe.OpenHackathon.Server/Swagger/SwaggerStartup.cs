@@ -47,6 +47,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
 
+                // Operation Filters
+                options.OperationFilter<DefaultResponseOperationFilter>();
             });
         }
 
