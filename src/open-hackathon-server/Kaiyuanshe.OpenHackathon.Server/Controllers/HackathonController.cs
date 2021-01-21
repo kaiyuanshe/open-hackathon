@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -34,12 +35,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// If hackathon with the {name} exists, will retrive update it accordingly.
         /// Else create a new hackathon.
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="parameter" example="foo"></param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
         [HttpPut]
-        [ProducesResponseType(typeof(Hackathon), 200)]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [Route("hackathon/{name}")]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression("^[a-z0-9]{1,100}$")] string name,

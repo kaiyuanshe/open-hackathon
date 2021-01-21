@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Kaiyuanshe.OpenHackathon.Server
 {
@@ -31,7 +33,13 @@ namespace Kaiyuanshe.OpenHackathon.Server
             // won't get called. Don't create a ContainerBuilder
             // for Autofac here, and don't call builder.Populate() - that
             // happens in the AutofacServiceProviderFactory for you.
-            services.AddMvc().AddControllersAsServices();
+            services
+                .AddMvc()
+                .AddControllersAsServices()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             SwaggerStartup.ConfigureService(services);
