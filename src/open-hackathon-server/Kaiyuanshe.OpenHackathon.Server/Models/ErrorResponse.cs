@@ -20,24 +20,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
             /// An error code that describes the error condition more precisely than an HTTP status code. 
             /// Can be used to programmatically handle specific error cases.
             /// </summary>
+            /// <example>Bad Request</example>
             [JsonRequired]
             public string code { get; set; }
 
             /// <summary>
             /// A message that describes the error in detail and provides debugging information.
             /// </summary>
+            /// <example>Request is not valid</example>
             [JsonRequired]
             public string message { get; set; }
 
             /// <summary>
             /// The target of the particular error (for example, the name of the property in error).
             /// </summary>
+            /// <example></example>
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string target { get; set; }
 
             /// <summary>
             /// Contains nested errors that are related to this error.
             /// </summary>
+            /// <example>["Property SomeInteger must be between 1 and 100", "Property SomeString cannot exceed a length of 100"]</example>
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public IList<string> details { get; set; }
         }

@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.IO;
 using System.Reflection;
 
@@ -18,10 +17,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 
         public static void ConfigureService(IServiceCollection services)
         {
-            services.AddSwaggerGen((options) =>
+            services.AddSwaggerGen((c) =>
             {
                 // metadata
-                options.SwaggerDoc("v2.0", new OpenApiInfo
+                c.SwaggerDoc("v2.0", new OpenApiInfo
                 {
                     Contact = new OpenApiContact
                     {
@@ -40,16 +39,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                 });
 
                 // tags
-                options.TagActionsBy(api => new List<string> { "OpenHackathon" });
+                c.TagActionsBy(api => new List<string> { "OpenHackathon" });
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                options.IncludeXmlComments(xmlPath);
+                c.IncludeXmlComments(xmlPath);
 
                 // Operation Filters
-                options.OperationFilter<DefaultResponseOperationFilter>();
+                c.OperationFilter<DefaultResponseOperationFilter>();
+                // Enable Swagger examples: https://github.com/mattfrear/Swashbuckle.AspNetCore.Filters
+                c.ExampleFilters();
+                // Add (Auth) to action summary
+                c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
             });
+
+            services.AddSwaggerExamplesFromAssemblyOf<SwaggerStartup>();
         }
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
