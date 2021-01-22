@@ -81,7 +81,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Id of the user who creates the Hackathon. ReadOnly.
         /// </summary>
-        /// <example>MDQ6VXNlcjE=</example>
+        /// <example>1</example>
         [JsonProperty("creator_id")]
         public string CreatorId { get; internal set; }
 
