@@ -16,6 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 
             //Biz
             builder.RegisterType<HackathonManager>().As<IHackathonManager>().PropertiesAutowired().SingleInstance();
+            builder.RegisterType<LoginManager>().As<ILoginManager>().PropertiesAutowired().SingleInstance();
 
             // Response
             builder.RegisterType<DefaultResponseBuilder>().As<IResponseBuilder>().PropertiesAutowired().SingleInstance();

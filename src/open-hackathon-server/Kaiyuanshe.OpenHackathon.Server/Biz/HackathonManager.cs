@@ -39,10 +39,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
     }
 
-    public class HackathonManager : IHackathonManager
+    public class HackathonManager : ManagerBase, IHackathonManager
     {
-        public IStorageContext StorageContext { get; set; }
-
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
         {
             var entities = new List<HackathonEntity>();

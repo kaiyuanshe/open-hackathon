@@ -75,8 +75,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 
         public string Company { get; set; }
 
-        public string Profile { get; set; }
-
         public string Website { get; set; }
 
         public string Gender { get; set; }
@@ -94,7 +92,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public string Province { get; set; }
 
         public string Country { get; set; }
-
-        public DateTime? CreatedAt { get; set; }
     }
 }
