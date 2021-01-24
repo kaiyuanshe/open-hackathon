@@ -19,31 +19,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Length between 1-100. Lowercase charactor and numbers only.
         /// </summary>
         /// <example>foo</example>
-        [JsonProperty("abc")]
+        [JsonProperty("name")]
         public string Name { get; internal set; }
 
         /// <summary>
-        /// Name for display only. Length between 1-100.
+        /// Name for display only.
         /// </summary>
         /// <example>Hackathon ABC - 2020</example>
         [MinLength(1)]
-        [MaxLength(100)]
+        [MaxLength(256)]
         [JsonProperty("displayName")]
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// A short sentence for advertisement. Max Length is 100.
+        /// A short sentence for advertisement.
         /// </summary>
         /// <example>Let's Hack!</example>
-        [MaxLength(100)]
+        [MaxLength(256)]
         [JsonProperty("ribbon")]
         public string Ribbon { get; set; }
 
         /// <summary>
-        /// Summary or short description. Max Length is 200.
+        /// Summary or short description. 
         /// </summary>
         /// <example>Let's Hack for ABC - a summary</example>
-        [MaxLength(200)]
+        [MaxLength(512)]
         [JsonProperty("summary")]
         public string Summary { get; set; }
 
@@ -56,10 +56,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string Detail { get; set; }
 
         /// <summary>
-        /// An address where the hackathon is held. Can be used to show a navigation map. Leave it empty if online. Max Length is 100.
+        /// An address where the hackathon is held. Can be used to show a navigation map. Leave it empty if online.
         /// </summary>
         /// <example>Shanghai, China</example>
-        [MaxLength(100)]
+        [MaxLength(256)]
         [JsonProperty("location")]
         public string Location { get; set; }
 

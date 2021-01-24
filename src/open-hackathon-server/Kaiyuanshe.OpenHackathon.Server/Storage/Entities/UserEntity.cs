@@ -51,8 +51,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// </summary>
         public string OAuth { get; set; }
 
-        public string[] RegisterSource { get; set; }
-
         public string Avatar { get; set; }
 
         public int? LoginsCount { get; set; }
