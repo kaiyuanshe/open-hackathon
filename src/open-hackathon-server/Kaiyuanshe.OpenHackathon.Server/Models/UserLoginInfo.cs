@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
-    /// Parameters for login(currently only Authing)
+    /// User info
     /// </summary>
-    public class UserLoginInfo
+    public class UserInfo
     {
         /// <summary>
         /// id(from Authing). Globally unique. Reqired.
@@ -86,24 +86,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(128)]
         [JsonProperty("openId")]
         public string OpenId { get; set; }
-
-        /// <summary>
-        /// Token from Authing/Github, which can be used to call Authing/Github's rest API
-        /// </summary>
-        /// <example>5199831f4dd3b79e7c5b7e0ebe75d67aa66e79d4</example>
-        [Required]
-        [MinLength(1)]
-        [MaxLength(1024)]
-        [JsonProperty("token")]
-        public string Token { get; set; }
-
-        /// <summary>
-        /// A timestamp when the token will be expired
-        /// </summary>
-        /// <example>2028-01-14T04:33:35Z</example>
-        [Required]
-        [JsonProperty("tokenExpiredAt")]
-        public DateTime TokenExpiredAt { get; set; }
 
         /// <summary>
         /// OAuth provider. e.g. github. empty if not social login
@@ -275,5 +257,29 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(64)]
         [JsonProperty("country")]
         public string Country { get; set; }
+    }
+
+    /// <summary>
+    /// Parameters for login(currently only Authing)
+    /// </summary>
+    public class UserLoginInfo : UserInfo
+    {
+        /// <summary>
+        /// Token from Authing/Github, which can be used to call Authing/Github's rest API
+        /// </summary>
+        /// <example>5199831f4dd3b79e7c5b7e0ebe75d67aa66e79d4</example>
+        [Required]
+        [MinLength(1)]
+        [MaxLength(1024)]
+        [JsonProperty("token")]
+        public string Token { get; set; }
+
+        /// <summary>
+        /// A timestamp when the token will be expired
+        /// </summary>
+        /// <example>2028-01-14T04:33:35Z</example>
+        [Required]
+        [JsonProperty("tokenExpiredAt")]
+        public DateTime TokenExpiredAt { get; set; }
     }
 }

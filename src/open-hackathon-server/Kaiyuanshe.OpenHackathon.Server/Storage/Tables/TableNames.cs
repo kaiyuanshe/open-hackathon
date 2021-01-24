@@ -7,5 +7,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
     public static class TableNames
     {
         public static readonly string Hackathon = "kyshackathon";
+        public static readonly string User = "kysuser";
+        public static readonly string UserToken = "kysusertoken";
     }
 }

@@ -8,34 +8,34 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
     public interface IAzureTable<TEntity> where TEntity : ITableEntity, new()
     {
-        Task<TableResult> InsertAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TableResult> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-        Task<TableResult> MergeAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TableResult> MergeAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-        Task<TableResult> InsertOrMergeAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TableResult> InsertOrMergeAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-        Task<TableResult> RetrieveAndMergeAsync(string partitionKey, string rowKey, Action<TEntity> func, CancellationToken cancellationToken);
+        Task<TableResult> RetrieveAndMergeAsync(string partitionKey, string rowKey, Action<TEntity> func, CancellationToken cancellationToken = default);
 
-        Task<TableResult> InsertOrReplaceAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TableResult> InsertOrReplaceAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-        Task<TableResult> ReplaceAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TableResult> ReplaceAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-        Task<TableResult> DeleteAsync(string partitionKey, string rowKey, CancellationToken cancellationToken);
+        Task<TableResult> DeleteAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
 
-        Task<TEntity> RetrieveAsync(string partitionKey, string rowKey, CancellationToken cancellationToken);
+        Task<TEntity> RetrieveAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
 
         TableQuerySegment<TEntity> ExecuteQuerySegmented(TableQuery<TEntity> query, TableContinuationToken continuationToken = null);
 
         Task<TableQuerySegment<TEntity>> ExecuteQuerySegmentedAsync(
-            TableQuery<TEntity> query, TableContinuationToken continuationToken, CancellationToken cancellationToken);
+            TableQuery<TEntity> query, TableContinuationToken continuationToken, CancellationToken cancellationToken = default);
 
         Task ExecuteQuerySegmentedAsync(TableQuery<TEntity> query,
             Action<TableQuerySegment<TEntity>> action,
-            CancellationToken cancellationToken);
+            CancellationToken cancellationToken = default);
 
         Task ExecuteQuerySegmentedAsync(TableQuery<TEntity> query,
             Func<TableQuerySegment<TEntity>, Task> asyncAction,
-            CancellationToken cancellationToken);
+            CancellationToken cancellationToken = default);
     }
 
     /// <summary>

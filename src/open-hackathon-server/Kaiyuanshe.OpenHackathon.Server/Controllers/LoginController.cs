@@ -8,6 +8,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class LoginController : HackathonControllerBase
     {
+        [HttpPost]
+        [Route("login")]
         public async Task<object> Authing()
         {
             return Ok();
