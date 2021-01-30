@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30310.162
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaiyuanshe.OpenHackathon.Server", "Kaiyuanshe.OpenHackathon.Server\Kaiyuanshe.OpenHackathon.Server.csproj", "{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaiyuanshe.OpenHackathon.ServerTests", "Kaiyuanshe.OpenHackathon.ServerTests\Kaiyuanshe.OpenHackathon.ServerTests.csproj", "{7829DB8A-4DB5-4B60-AF85-077CE7330511}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaiyuanshe.OpenHackathon.ServerTests", "Kaiyuanshe.OpenHackathon.ServerTests\Kaiyuanshe.OpenHackathon.ServerTests.csproj", "{7829DB8A-4DB5-4B60-AF85-077CE7330511}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -40,6 +40,9 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 });
+            services.AddRazorPages(options=> { 
+                //options.
+            });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             SwaggerStartup.ConfigureService(services);
@@ -79,6 +82,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
             // Configure Swagger
