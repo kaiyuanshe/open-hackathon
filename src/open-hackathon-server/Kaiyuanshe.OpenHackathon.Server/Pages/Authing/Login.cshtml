@@ -1,0 +1,28 @@
+@page
+@model Kaiyuanshe.OpenHackathon.Server.Pages.Authing.LoginModel
+@{
+    Layout = "_Layout";
+}
+
+<h2>Open Hackathon Rest API V2</h2>
+
+<h3>Get Test Token</h3>
+<div>
+    @{
+        if (string.IsNullOrWhiteSpace(Request.Query["client_id"]) || string.IsNullOrWhiteSpace(Request.Query["state"]))
+        {
+            <p>To get a test token, please: </p>
+            <ul>
+                <li>Get a valid github <b>client_id</b>, which redirects to authing upon login successfully.</li>
+                <li>Get a valid authing user pool id.</li>
+                <li>Append client_id and user pool id as query strings. e.g. https://localhost:5001/authing/login?client_id=client_id&state=userPoolId</li>
+            </ul>
+        }
+        else
+        {
+            string client_id = Request.Query["client_id"];
+            string state = Request.Query["state"];
+            <a href="https://github.com/login/oauth/authorize/?client_id=@client_id&state=@state" target="_self">Click to get token</a>
+        }
+    }
+</div>
