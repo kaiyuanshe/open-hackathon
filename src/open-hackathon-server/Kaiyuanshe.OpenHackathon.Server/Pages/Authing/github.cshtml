@@ -1,0 +1,32 @@
+@page
+@model Kaiyuanshe.OpenHackathon.Server.Pages.Authing.GithubModel
+@{
+    Layout = "_Layout";
+}
+
+<h2>Open Hackathon Rest API V2</h2>
+
+<h3>Get Token Result</h3>
+<div>
+    @{
+        if (string.IsNullOrWhiteSpace(@Model.Token))
+        {
+            string code = Request.Query["code"];
+            string message = Request.Query["message"];
+            <p>Fail to get test token.</p>
+            <ul>
+                <li>Code: <code>@code</code></li>
+                <li>Message: <code>@message</code></li>
+            </ul>
+        }
+        else
+        {
+            <p>Token: <code>@Model.Token</code></p>
+            <p>You can access Open Hackathon V2 api with Http header <code>Authorization</code>:
+                <div>
+                    <code>Header["Authorization"]=Token @Model.Token</code> 
+                </div>
+            </p>
+        }
+    }
+</div>
