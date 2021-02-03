@@ -10,6 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
+    [Route("v2")]
     public abstract class HackathonControllerBase : ControllerBase
     {
         protected IList<string> GetErrors()
