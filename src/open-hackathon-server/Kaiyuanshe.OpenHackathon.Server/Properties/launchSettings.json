@@ -19,7 +19,7 @@
     "Kaiyuanshe.OpenHackathon.Server": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "index",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

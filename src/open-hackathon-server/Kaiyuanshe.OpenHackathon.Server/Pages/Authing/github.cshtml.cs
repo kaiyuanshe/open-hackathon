@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
                 return;
             }
 
-            Token = "Testing";
+            Token = "TOKEN";
         }
     }
 }
