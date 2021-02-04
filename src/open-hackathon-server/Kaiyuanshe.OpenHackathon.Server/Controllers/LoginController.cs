@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
@@ -10,9 +11,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     {
         [HttpPost]
         [Route("login")]
-        public async Task<object> Authing()
+        public async Task<object> Authing([FromBody]UserLoginInfo parameter)
         {
-            return Ok();
+            return Ok(parameter);
         }
     }
 }
