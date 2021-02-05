@@ -1,19 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class LoginController : HackathonControllerBase
     {
+        public ILoginManager LoginManager { get; set; }
+
+        public IResponseBuilder ResponseBuilder { get; set; }
+
         [HttpPost]
         [Route("login")]
-        public async Task<object> Authing([FromBody]UserLoginInfo parameter)
+        public async Task<object> Authing([FromBody] UserLoginInfo parameter,
+            CancellationToken cancellationToken)
         {
-            return Ok(parameter);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
+            }
+
+            var userEntity = await LoginManager.AuthingAsync(parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildUserInfo(userEntity));
         }
     }
 }
