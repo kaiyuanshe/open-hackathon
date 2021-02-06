@@ -88,9 +88,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string OpenId { get; set; }
 
         /// <summary>
-        /// OAuth provider. e.g. github. empty if not social login
+        /// Detailed response from social login.
         /// </summary>
-        [MaxLength(64)]
+        [MaxLength(10240)]
         [JsonProperty("oauth")]
         public string OAuth { get; set; }
 
@@ -270,7 +270,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>5199831f4dd3b79e7c5b7e0ebe75d67aa66e79d4</example>
         [Required]
         [MinLength(1)]
-        [MaxLength(1024)]
+        [MaxLength(10240)]
         [JsonProperty("token")]
         public string Token { get; set; }
 

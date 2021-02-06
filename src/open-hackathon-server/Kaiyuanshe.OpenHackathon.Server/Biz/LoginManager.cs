@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Helpers;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
 using System.Collections.Generic;
@@ -123,10 +124,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             // UserTokenEntity. 
             var userToken = new UserTokenEntity
             {
-                PartitionKey = loginInfo.Token,
-                RowKey = string.Empty,
+                PartitionKey = loginInfo.Id,
+                RowKey = DigestHelper.SHA512Digest(loginInfo.Token),
                 TokenExpiredAt = loginInfo.TokenExpiredAt,
-                UserId = loginInfo.Id,
+                Token = loginInfo.Token,
             };
             await StorageContext.UserTokenTable.InsertOrReplaceAsync(userToken, cancellationToken);
 
