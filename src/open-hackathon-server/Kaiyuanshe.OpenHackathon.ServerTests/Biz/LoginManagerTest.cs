@@ -23,6 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var loginInfo = new UserLoginInfo
             {
                 Id = "id",
+                Token = "token",
             };
             var token = new CancellationTokenSource().Token;
 
@@ -59,6 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var loginInfo = new UserLoginInfo
             {
                 Id = "id",
+                Token = "token",
             };
             var token = new CancellationTokenSource().Token;
             var userentity = new UserEntity

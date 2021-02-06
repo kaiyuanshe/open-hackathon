@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using System.Net;
@@ -38,9 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             }
 
             var data = Request.Query["data"];
-            // testing
-            data = "{\"token\":\"sampletoken\",\"userName\":\"zhangsan\",\"nickName\":\"Zhang San\",\"id\":\"111\"}";
-
+            
             var loginUrl = $"{Request.Scheme}://{Request.Host}/v2/login";
             if(Request.Host.Host == "localhost")
             {
@@ -49,11 +48,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             var content = new StringContent(data, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(loginUrl, content);
             string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
             if(response.IsSuccessStatusCode)
             {
                 var jsonObject = JObject.Parse(responseBody);
                 UserName = jsonObject.Value<string>("userName");
-                Token = jsonObject.Value<string>("token");
+
+                // read token from data. oph login api don't return token
+                var user = JsonConvert.DeserializeObject<Models.UserLoginInfo>(data);
+                Token = user.Token;
             }
             else
             {

@@ -8,20 +8,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// <summary>
     /// Token
     /// 
-    /// PartitionKey: token
+    /// PartitionKey: id(from Authing). Globally unique.
     /// RowKey: string.Empty
     /// </summary>
     public class UserTokenEntity : AdvancedTableEntity
     {
-        public string UserId { get; set; }
-
-        public string Token
-        {
+        public string UserId { 
             get
             {
                 return PartitionKey;
-            }
+            } 
         }
+
+        public string Token { get; set; }
 
         public DateTime TokenExpiredAt { get; set; }
     }

@@ -9,20 +9,25 @@
 <h3>Get Test Token</h3>
 <div>
     @{
-        if (string.IsNullOrWhiteSpace(Request.Query["client_id"]) || string.IsNullOrWhiteSpace(Request.Query["state"]))
+        if (string.IsNullOrWhiteSpace(Request.Query["app_id"]))
         {
             <p>To get a test token, please: </p>
             <ul>
-                <li>Get a valid github <b>client_id</b>, which redirects to authing upon login successfully.</li>
-                <li>Get a valid authing user pool id.</li>
-                <li>Append client_id and user pool id as query strings. e.g. https://localhost:5001/authing/login?client_id=client_id&state=userPoolId</li>
+                <li>Following the below <b>Login Help</b>to setup github and authing.</li>
+                <li>Get your <code>App Id</code> from Authing. <b>neither the userPoolId nor github client id</b></li>
+                <li>Append to current page as query <cod>?app_id=your_authing_app_id</cod>. Example: <code>https://localhost:5001/authing/login?app_id=authing_app_id</code></li>
             </ul>
         }
         else
         {
-            string client_id = Request.Query["client_id"];
-            string state = Request.Query["state"];
-            <a href="https://github.com/login/oauth/authorize/?client_id=@client_id&state=@state" target="_self">Click to get token</a>
+            string app_id = Request.Query["app_id"];
+            <a href="https://core.authing.cn/connection/social/github?app_id=@app_id" target="_self">Click to get token</a>
         }
     }
 </div>
+
+<h3>Login Help</h3>
+<ul>
+    <li><a href="https://docs.authing.cn/" target="_blank">Authing docs</a></li>
+    <li><a href="https://docs.authing.cn/social-login/web/github.html" target="_blank">Authing with Github</a></li>
+</ul>
