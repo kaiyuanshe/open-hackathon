@@ -13,6 +13,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
 
         UserInfo BuildUserInfo(UserEntity user);
+
+        UserLoginInfo BuildUserLoginInfo(UserEntity user, UserTokenEntity token);
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -61,6 +63,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             var resp = new UserInfo();
             return ConvertType(user, resp);
+        }
+
+        public UserLoginInfo BuildUserLoginInfo(UserEntity user, UserTokenEntity token)
+        {
+            var resp = new UserLoginInfo();
+            resp = ConvertType(user, resp, (r) => {
+                r.Token = token.Token;
+                r.TokenExpiredAt = token.TokenExpiredAt;
+            });
+            return resp;
         }
     }
 }

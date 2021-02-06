@@ -12,6 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     public interface ILoginManager
     {
         Task<UserEntity> AuthingAsync(UserLoginInfo loginInfo, CancellationToken cancellationToken = default);
+        Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default);
     }
 
     public class LoginManager : ManagerBase, ILoginManager
@@ -124,14 +125,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             // UserTokenEntity. 
             var userToken = new UserTokenEntity
             {
-                PartitionKey = loginInfo.Id,
-                RowKey = DigestHelper.SHA512Digest(loginInfo.Token),
+                PartitionKey = DigestHelper.SHA512Digest(loginInfo.Token),
+                RowKey = string.Empty,
+                UserId = loginInfo.Id,
                 TokenExpiredAt = loginInfo.TokenExpiredAt,
                 Token = loginInfo.Token,
             };
             await StorageContext.UserTokenTable.InsertOrReplaceAsync(userToken, cancellationToken);
 
             return await StorageContext.UserTable.RetrieveAsync(loginInfo.Id, string.Empty, cancellationToken);
+        }
+
+        public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
+        {
+            string hash = DigestHelper.SHA512Digest(token);
+            return await StorageContext.UserTokenTable.RetrieveAsync(hash, string.Empty, cancellationToken);
         }
     }
 }
