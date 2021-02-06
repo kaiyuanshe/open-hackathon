@@ -24,7 +24,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             var userEntity = await LoginManager.AuthingAsync(parameter, cancellationToken);
-            return Ok(ResponseBuilder.BuildUserInfo(userEntity));
+            var tokenEntity = await LoginManager.GetTokenEntityAsync(parameter.Token, cancellationToken);
+            return Ok(ResponseBuilder.BuildUserLoginInfo(userEntity, tokenEntity));
         }
     }
 }

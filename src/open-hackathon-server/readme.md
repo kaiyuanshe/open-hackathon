@@ -10,7 +10,15 @@ Install dotnet core if you haven't: https://docs.microsoft.com/en-us/dotnet/core
 Any storage account will do. If you don't have one, contact [Kaiyuanshe Infrastructure Group](mailto:infra@kaiyuanshe.org) to get one for free(for 6 months).
 
 #### Configure locally
-Add the ConnectionString to [Environment variables](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-5.0#environment-variables). _**Never submit it to Github!**_. Sample command(run as Administrator): `setx Storage__Hackathon__ConnectionString "<The Connection String>" /M`. `setx ... /M` is preferred since it's machine wide and persistent. By contrast, `set ...` only works in current command window.
+Add the ConnectionString to [Environment variables](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-5.0#environment-variables). _**Never submit it to Github!**_. 
+
+##### Windows Sample commands
+run as Administrator: `setx Storage__Hackathon__ConnectionString "<The Connection String>" /M`. `setx ... /M` is preferred since it's machine wide and persistent. By contrast, `set ...` only works in current command window.
+
+##### Mac Sample
+```
+set Storage__Hackathon__ConnectionString="<The Connection String>"
+```
 
 #### Run the application
 if from command line:

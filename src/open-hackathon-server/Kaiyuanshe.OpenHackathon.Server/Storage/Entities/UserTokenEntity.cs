@@ -8,17 +8,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// <summary>
     /// Token
     /// 
-    /// PartitionKey: id(from Authing). Globally unique.
+    /// PartitionKey: SHA512 hash of Token. Max length of PK/RK is 1K. Length of Token is usually >1K
     /// RowKey: string.Empty
     /// </summary>
     public class UserTokenEntity : AdvancedTableEntity
     {
-        public string UserId { 
-            get
-            {
-                return PartitionKey;
-            } 
-        }
+        public string UserId { get; set; }
 
         public string Token { get; set; }
 

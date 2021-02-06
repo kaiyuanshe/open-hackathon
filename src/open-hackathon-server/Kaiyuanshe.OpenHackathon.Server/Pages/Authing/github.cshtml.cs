@@ -48,15 +48,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             var content = new StringContent(data, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(loginUrl, content);
             string responseBody = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseBody);
             if(response.IsSuccessStatusCode)
             {
-                var jsonObject = JObject.Parse(responseBody);
-                UserName = jsonObject.Value<string>("userName");
-
-                // read token from data. oph login api don't return token
-                var user = JsonConvert.DeserializeObject<Models.UserLoginInfo>(data);
+                var user = JsonConvert.DeserializeObject<Models.UserLoginInfo>(responseBody);
                 Token = user.Token;
+                UserName = user.UserName;
             }
             else
             {
