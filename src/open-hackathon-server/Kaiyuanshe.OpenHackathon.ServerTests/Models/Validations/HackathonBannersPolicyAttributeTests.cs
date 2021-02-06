@@ -1,7 +1,8 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Models.Validations.Tests
+namespace Kaiyuanshe.OpenHackathon.ServerTests.Models.Validations.Tests
 {
     [TestFixture]
     public class HackathonBannersPolicyAttributeTests
