@@ -94,5 +94,37 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.VerifyNoOtherCalls();
             Assert.AreEqual("name", resp.UserName);
         }
+
+        [Test]
+        public async Task GetTokenEntityAsyncTest()
+        {
+            // input
+            var cToken = new CancellationTokenSource().Token;
+            var jwt = "whatever";
+            var hash = "ae3d347982977b422948b64011ac14ac76c9ab15898fb562a66a136733aa645fb3a9ccd9bee00cc578c2f44f486af47eb254af7c174244086d174cc52341e63a";
+            var tokenEntity = new UserTokenEntity
+            {
+                UserId = "1",
+            };
+
+            // moc
+            var storage = new Mock<IStorageContext>();
+            var tokenTable = new Mock<IUserTokenTable>();
+            storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
+            tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cToken)).ReturnsAsync(tokenEntity);
+
+            // test
+            var loginManager = new LoginManager
+            {
+                StorageContext = storage.Object,
+            };
+            var resp = await loginManager.GetTokenEntityAsync(jwt, cToken);
+
+            // verify
+            Mock.VerifyAll();
+            tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cToken), Times.Once);
+            tokenTable.VerifyNoOtherCalls();
+            Assert.AreEqual("1", resp.UserId);
+        }
     }
 }
