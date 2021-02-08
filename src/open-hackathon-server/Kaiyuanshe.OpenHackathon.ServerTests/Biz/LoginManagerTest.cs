@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+﻿using Authing.ApiClient.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -125,6 +126,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cToken), Times.Once);
             tokenTable.VerifyNoOtherCalls();
             Assert.AreEqual("1", resp.UserId);
+        }
+
+        public async Task Temp()
+        {
+            var token = "";
+            var authenticationClient = new AuthenticationClient("");
+            var validation = await authenticationClient.CheckLoginStatus(token);
+            Console.WriteLine(validation);
         }
     }
 }
