@@ -20,4 +20,8 @@
     <PackageReference Include="Authing.ApiClient" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
+
 </Project>

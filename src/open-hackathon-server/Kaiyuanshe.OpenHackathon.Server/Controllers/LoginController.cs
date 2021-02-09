@@ -23,6 +23,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
             }
 
+            var tokenStatus = await LoginManager.ValidateAccessTokenAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
+            if (!tokenStatus.Status.GetValueOrDefault(false))
+            {
+                // token invalid
+                return BadRequest(ErrorResponse.BadArgument($"Invalid accessToken. Code: {tokenStatus.Code.GetValueOrDefault(0)}, Message: {tokenStatus.Message}"));
+            }
+
             var userEntity = await LoginManager.AuthingAsync(parameter, cancellationToken);
             var tokenEntity = await LoginManager.GetTokenEntityAsync(parameter.Token, cancellationToken);
             return Ok(ResponseBuilder.BuildUserLoginInfo(userEntity, tokenEntity));

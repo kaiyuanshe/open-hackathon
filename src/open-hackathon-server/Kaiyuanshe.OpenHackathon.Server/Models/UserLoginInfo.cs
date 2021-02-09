@@ -27,6 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>1eab1111d1a111d11c111c11</example>
         [MaxLength(64)]
         [JsonProperty("userPoolId")]
+        [Required]
         public string UserPoolId { get; set; }
 
         /// <summary>
@@ -90,6 +91,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Detailed response from social login.
         /// </summary>
+        /// <example>{"login":"zhangsan","id":1,"avatar_url":"https://avatars.githubusercontent.com/u/1?v=4","type":"User","site_admin":false,"name":"Zhang San","location":"Shanghai China","email":"zhangsan@contoso.com"}</example>
         [MaxLength(10240)]
         [JsonProperty("oauth")]
         public string OAuth { get; set; }
@@ -121,6 +123,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Ip address of last login.
         /// </summary>
+        /// <example>10.0.0.1</example>
         [MaxLength(128)]
         [JsonProperty("lastIp")]
         public string LastIp { get; set; }
@@ -128,6 +131,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Browser infomation of last login
         /// </summary>
+        /// <example>Chrome</example>
         [MaxLength(128)]
         [JsonProperty("browser")]
         public string Browser { get; set; }
@@ -267,7 +271,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Token from Authing/Github, which can be used to call Authing/Github's rest API
         /// </summary>
-        /// <example>5199831f4dd3b79e7c5b7e0ebe75d67aa66e79d4</example>
+        /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWM3OGEyMGY4MjE2ZDRiNGEwYjQ3MjEi...</example>
         [Required]
         [MinLength(1)]
         [MaxLength(10240)]
