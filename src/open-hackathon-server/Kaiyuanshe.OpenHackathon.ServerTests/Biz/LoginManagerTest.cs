@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var tokenTable = new Mock<IUserTokenTable>();
             storage.SetupGet(s => s.UserTable).Returns(usertable.Object);
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
-            usertable.Setup(u => u.RetrieveAsync("id", string.Empty, token)).ReturnsAsync(default(UserEntity));
+            usertable.Setup(u => u.GetUserEntityByIdAsync("id", token)).ReturnsAsync(default(UserEntity));
             usertable.Setup(u => u.InsertAsync(It.IsAny<UserEntity>(), token));
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token));
 
@@ -47,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             //verify
             Mock.VerifyAll();
-            usertable.Verify(u => u.RetrieveAsync("id", string.Empty, token), Times.Exactly(2));
+            usertable.Verify(u => u.GetUserEntityByIdAsync("id", token), Times.Exactly(2));
             usertable.Verify(u => u.InsertAsync(It.IsAny<UserEntity>(), token), Times.Once);
             usertable.VerifyNoOtherCalls();
             tokenTable.Verify(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token), Times.Once);
@@ -75,7 +76,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var tokenTable = new Mock<IUserTokenTable>();
             storage.SetupGet(s => s.UserTable).Returns(usertable.Object);
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
-            usertable.Setup(u => u.RetrieveAsync("id", string.Empty, token)).ReturnsAsync(userentity);
+            usertable.Setup(u => u.GetUserEntityByIdAsync("id", token)).ReturnsAsync(userentity);
             usertable.Setup(u => u.MergeAsync(userentity, token));
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token));
 
@@ -88,7 +89,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             //verify
             Mock.VerifyAll();
-            usertable.Verify(u => u.RetrieveAsync("id", string.Empty, token), Times.Exactly(2));
+            usertable.Verify(u => u.GetUserEntityByIdAsync("id", token), Times.Exactly(2));
             usertable.Verify(u => u.MergeAsync(userentity, token), Times.Once);
             usertable.VerifyNoOtherCalls();
             tokenTable.Verify(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token), Times.Once);
@@ -108,7 +109,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 UserId = "1",
             };
 
-            // moc
+            // moq
             var storage = new Mock<IStorageContext>();
             var tokenTable = new Mock<IUserTokenTable>();
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
@@ -132,10 +133,117 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [TestCase("", "token")]
         [TestCase("pool", null)]
         [TestCase("pool", "")]
-        public void ValidateAccessTokenAsyncTest(string userPoolId, string accessToken)
+        public void ValidateTokenRemotelyAsyncTest(string userPoolId, string accessToken)
         {
             var loginManager = new LoginManager();
-            Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.ValidateAccessTokenAsync(userPoolId, accessToken));
+            Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.ValidateTokenRemotelyAsync(userPoolId, accessToken));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase(" ")]
+        public async Task ValidateTokenAsyncTestRequired(string token)
+        {
+            var loginManager = new LoginManager();
+            var result = await loginManager.ValidateTokenAsync(token);
+
+            Assert.AreNotEqual(ValidationResult.Success, result);
+            Assert.IsTrue(result.ErrorMessage.Contains("required"));
+        }
+
+        [Test]
+        public async Task ValidateTokenAsyncTestNotExist()
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string token = "whatever";
+            string hash = "ae3d347982977b422948b64011ac14ac76c9ab15898fb562a66a136733aa645fb3a9ccd9bee00cc578c2f44f486af47eb254af7c174244086d174cc52341e63a";
+            UserTokenEntity tokenEntity = null;
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var tokenTable = new Mock<IUserTokenTable>();
+            storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
+            tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
+
+            // testing
+            var loginManager = new LoginManager
+            {
+                StorageContext = storage.Object,
+            };
+            var result = await loginManager.ValidateTokenAsync(token);
+
+            // verify
+            Mock.VerifyAll();
+            tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cancellationToken), Times.Once);
+            tokenTable.VerifyNoOtherCalls();
+            Assert.AreNotEqual(ValidationResult.Success, result);
+            Assert.IsTrue(result.ErrorMessage.Contains("doesn't exist"));
+        }
+
+        [Test]
+        public async Task ValidateTokenAsyncTestExpired()
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string token = "whatever";
+            string hash = "ae3d347982977b422948b64011ac14ac76c9ab15898fb562a66a136733aa645fb3a9ccd9bee00cc578c2f44f486af47eb254af7c174244086d174cc52341e63a";
+            UserTokenEntity tokenEntity = new UserTokenEntity
+            {
+                TokenExpiredAt = DateTime.UtcNow.AddDays(-1),
+            };
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var tokenTable = new Mock<IUserTokenTable>();
+            storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
+            tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
+
+            // testing
+            var loginManager = new LoginManager
+            {
+                StorageContext = storage.Object,
+            };
+            var result = await loginManager.ValidateTokenAsync(token);
+
+            // verify
+            Mock.VerifyAll();
+            tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cancellationToken), Times.Once);
+            tokenTable.VerifyNoOtherCalls();
+            Assert.AreNotEqual(ValidationResult.Success, result);
+            Assert.IsTrue(result.ErrorMessage.Contains("expired"));
+        }
+
+        [Test]
+        public async Task ValidateTokenAsyncTestValid()
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string token = "whatever";
+            string hash = "ae3d347982977b422948b64011ac14ac76c9ab15898fb562a66a136733aa645fb3a9ccd9bee00cc578c2f44f486af47eb254af7c174244086d174cc52341e63a";
+            UserTokenEntity tokenEntity = new UserTokenEntity
+            {
+                TokenExpiredAt = DateTime.UtcNow.AddDays(1),
+            };
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var tokenTable = new Mock<IUserTokenTable>();
+            storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
+            tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
+
+            // testing
+            var loginManager = new LoginManager
+            {
+                StorageContext = storage.Object,
+            };
+            var result = await loginManager.ValidateTokenAsync(token);
+
+            // verify
+            Mock.VerifyAll();
+            tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cancellationToken), Times.Once);
+            tokenTable.VerifyNoOtherCalls();
+            Assert.AreEqual(ValidationResult.Success, result);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
             }
 
-            var tokenStatus = await LoginManager.ValidateAccessTokenAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
+            var tokenStatus = await LoginManager.ValidateTokenRemotelyAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
             if (!tokenStatus.Status.GetValueOrDefault(false))
             {
                 // token invalid

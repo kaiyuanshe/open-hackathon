@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             // Moq
             var loginManagerMoq = new Mock<ILoginManager>();
-            loginManagerMoq.Setup(p => p.ValidateAccessTokenAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
+            loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
 
             // test
             var controller = new LoginController
@@ -36,7 +36,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             // Verify
             Mock.VerifyAll();
-            loginManagerMoq.Verify(p => p.ValidateAccessTokenAsync("pool", "token", cancellationToken), Times.Once);
+            loginManagerMoq.Verify(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken), Times.Once);
             loginManagerMoq.VerifyNoOtherCalls();
 
             Assert.IsTrue(resp is BadRequestObjectResult);
@@ -61,7 +61,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var loginManagerMoq = new Mock<ILoginManager>();
             loginManagerMoq.Setup(p => p.AuthingAsync(parameter, cancellationToken)).ReturnsAsync(userEntity);
             loginManagerMoq.Setup(p => p.GetTokenEntityAsync("token", cancellationToken)).ReturnsAsync(tokenEntity);
-            loginManagerMoq.Setup(p => p.ValidateAccessTokenAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
+            loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
 
             // test
             var controller = new LoginController
@@ -75,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Mock.VerifyAll();
             loginManagerMoq.Verify(p => p.AuthingAsync(parameter, cancellationToken), Times.Once);
             loginManagerMoq.Verify(p => p.GetTokenEntityAsync("token", cancellationToken), Times.Once);
-            loginManagerMoq.Verify(p => p.ValidateAccessTokenAsync("pool", "token", cancellationToken), Times.Once);
+            loginManagerMoq.Verify(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken), Times.Once);
             loginManagerMoq.VerifyNoOtherCalls();
             Assert.IsTrue(resp is OkObjectResult);
             Assert.IsTrue(((OkObjectResult)resp).Value is UserLoginInfo);
