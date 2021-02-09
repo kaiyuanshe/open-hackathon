@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
+using Kaiyuanshe.OpenHackathon.Server.Middlewares;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +41,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 });
-            services.AddRazorPages(options=> { 
+            services.AddRazorPages(options =>
+            {
                 //options.
             });
 
@@ -87,6 +89,11 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // Configure Swagger
             SwaggerStartup.Configure(app, env);
+        }
+
+        private void RegisterMiddlewares(IApplicationBuilder app)
+        {
+            app.UseMiddleware<LogRequestResponseMiddleware>();
         }
 
         private void RegisterControllers(ContainerBuilder builder)
