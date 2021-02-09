@@ -11,7 +11,7 @@
     @{
         if (string.IsNullOrWhiteSpace(Request.Query["app_id"]))
         {
-            string exampleUrl = $"{Request.Scheme}://{Request.Host}/authing/login?app_id=YOUR_AUTHING_APP_ID";
+            string exampleUrl = $"https://{Request.Host}/authing/login?app_id=YOUR_AUTHING_APP_ID";
             <p>To get a test token, please: </p>
             <ul>
                 <li>Following the below <b>Login Help</b> to setup github and authing.</li>

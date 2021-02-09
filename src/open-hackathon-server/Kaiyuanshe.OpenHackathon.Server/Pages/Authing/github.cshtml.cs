@@ -16,9 +16,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
     {
         static readonly HttpClient client = new HttpClient();
 
-        public string Token 
-        { 
-            get; 
+        public string Token
+        {
+            get;
             private set;
         }
 
@@ -32,23 +32,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
         {
             string code = Request.Query["code"];
 
-            if(code != "200")
+            if (code != "200")
             {
                 // login failed
                 return;
             }
 
             var data = Request.Query["data"];
-            
-            var loginUrl = $"{Request.Scheme}://{Request.Host}/v2/login";
-            if(Request.Host.Host == "localhost")
+
+            var loginUrl = $"https://{Request.Host}/v2/login";
+            if (Request.Host.Host.Contains("localhost"))
             {
                 loginUrl = $"http://localhost:5000/v2/login";
             }
+            Console.WriteLine(loginUrl);
             var content = new StringContent(data, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(loginUrl, content);
             string responseBody = await response.Content.ReadAsStringAsync();
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var user = JsonConvert.DeserializeObject<Models.UserLoginInfo>(responseBody);
                 Token = user.Token;
@@ -57,7 +58,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             else
             {
                 Console.WriteLine($"code: {response.StatusCode}");
-                Console.WriteLine($"body: {responseBody}");
+                Console.WriteLine($"body: {response.ReasonPhrase}");
             }
         }
     }
