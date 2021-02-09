@@ -11,11 +11,12 @@
     @{
         if (string.IsNullOrWhiteSpace(Request.Query["app_id"]))
         {
+            string exampleUrl = $"{Request.Scheme}://{Request.Host}/authing/login?app_id=YOUR_AUTHING_APP_ID";
             <p>To get a test token, please: </p>
             <ul>
-                <li>Following the below <b>Login Help</b>to setup github and authing.</li>
+                <li>Following the below <b>Login Help</b> to setup github and authing.</li>
                 <li>Get your <code>App Id</code> from Authing. <b>neither the userPoolId nor github client id</b></li>
-                <li>Append to current page as query <cod>?app_id=your_authing_app_id</cod>. Example: <code>https://localhost:5001/authing/login?app_id=authing_app_id</code></li>
+                <li>Append to current page as query <cod>?app_id=your_authing_app_id</cod>. Example: <code>@exampleUrl</code></li>
             </ul>
         }
         else

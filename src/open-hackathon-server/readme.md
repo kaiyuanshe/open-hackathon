@@ -15,7 +15,12 @@ Add the ConnectionString to [Environment variables](https://docs.microsoft.com/e
 ##### Windows Sample commands
 run as Administrator: `setx Storage__Hackathon__ConnectionString "<The Connection String>" /M`. `setx ... /M` is preferred since it's machine wide and persistent. By contrast, `set ...` only works in current command window.
 
-##### Mac Sample
+##### Linux
+```
+export Storage__Hackathon__ConnectionString="<The Connection String>"
+```
+
+##### Mac OS
 ```
 set Storage__Hackathon__ConnectionString="<The Connection String>"
 ```
