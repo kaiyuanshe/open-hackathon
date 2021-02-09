@@ -128,12 +128,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("1", resp.UserId);
         }
 
-        public async Task Temp()
+        [TestCase(null, "token")]
+        [TestCase("", "token")]
+        [TestCase("pool", null)]
+        [TestCase("pool", "")]
+        public void ValidateAccessTokenAsyncTest(string userPoolId, string accessToken)
         {
-            var token = "";
-            var authenticationClient = new AuthenticationClient("");
-            var validation = await authenticationClient.CheckLoginStatus(token);
-            Console.WriteLine(validation);
+            var loginManager = new LoginManager();
+            Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.ValidateAccessTokenAsync(userPoolId, accessToken));
         }
     }
 }

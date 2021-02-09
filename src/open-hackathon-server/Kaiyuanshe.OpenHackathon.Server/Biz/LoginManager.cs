@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Authing.ApiClient.Types;
+using Authing.ApiClient.Auth;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface ILoginManager
     {
+        Task<JWTTokenStatus> ValidateAccessTokenAsync(string userPoolId, string accessToken, CancellationToken cancellationToken = default);
         Task<UserEntity> AuthingAsync(UserLoginInfo loginInfo, CancellationToken cancellationToken = default);
         Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default);
     }
@@ -134,6 +137,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.UserTokenTable.InsertOrReplaceAsync(userToken, cancellationToken);
 
             return await StorageContext.UserTable.RetrieveAsync(loginInfo.Id, string.Empty, cancellationToken);
+        }
+
+        public async Task<JWTTokenStatus> ValidateAccessTokenAsync(string userPoolId, string accessToken, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userPoolId))
+                throw new ArgumentNullException("userPoolId is null or empty");
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new ArgumentNullException("accessToken is null or empty");
+
+            var authenticationClient = new AuthenticationClient(userPoolId);
+            var jwtTokenStatus = await authenticationClient.CheckLoginStatus(accessToken, cancellationToken);
+            return jwtTokenStatus;
         }
 
         public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
