@@ -14,7 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     {
         public IResponseBuilder ResponseBuilder { get; set; }
 
-        public IHackathonManager HackathonManager { get; set; }
+        public IHackathonManagement HackathonManager { get; set; }
 
         /// <summary>
         /// List hackathons.

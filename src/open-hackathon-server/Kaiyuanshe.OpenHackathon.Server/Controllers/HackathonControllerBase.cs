@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using Kaiyuanshe.OpenHackathon.Server.Filters;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
@@ -11,6 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     [Route("v2")]
+    [HackathonClaims]
     public abstract class HackathonControllerBase : ControllerBase
     {
         protected IList<string> GetErrors()

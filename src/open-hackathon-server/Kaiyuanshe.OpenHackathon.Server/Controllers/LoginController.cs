@@ -2,6 +2,7 @@
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,12 +10,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class LoginController : HackathonControllerBase
     {
-        public ILoginManager LoginManager { get; set; }
+        public IUserManagement LoginManager { get; set; }
 
         public IResponseBuilder ResponseBuilder { get; set; }
 
+        /// <summary>
+        /// Post the data from Authing after completing the Login process. Open hackathon API
+        /// relies on the data for user profile and the token.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("login")]
+        [Route("authing")]
+        [Obsolete]
         public async Task<object> Authing([FromBody] UserLoginInfo parameter,
             CancellationToken cancellationToken)
         {
@@ -29,6 +38,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 // token invalid
                 return BadRequest(ErrorResponse.BadArgument($"Invalid accessToken. Code: {tokenStatus.Code.GetValueOrDefault(0)}, Message: {tokenStatus.Message}"));
             }
+
 
             var userEntity = await LoginManager.AuthingAsync(parameter, cancellationToken);
             var tokenEntity = await LoginManager.GetTokenEntityAsync(parameter.Token, cancellationToken);

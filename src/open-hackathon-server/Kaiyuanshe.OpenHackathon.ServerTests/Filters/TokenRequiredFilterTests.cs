@@ -23,7 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Filters
         public void OnActionExecutingTestMissing()
         {
             // setup
-            var loginManagerMock = new Mock<ILoginManager>();
+            var loginManagerMock = new Mock<IUserManagement>();
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();
             var headerMock = new Mock<IHeaderDictionary>();
@@ -56,7 +56,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Filters
         public void OnActionExecutingTestMalformat(string tokenValue)
         {
             // setup
-            var loginManagerMock = new Mock<ILoginManager>();
+            var loginManagerMock = new Mock<IUserManagement>();
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();
             var headerMock = new Mock<IHeaderDictionary>();
@@ -88,7 +88,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Filters
         public void OnActionExecutingTestValidateFailed()
         {
             // setup
-            var loginManagerMock = new Mock<ILoginManager>();
+            var loginManagerMock = new Mock<IUserManagement>();
             loginManagerMock.Setup(p => p.ValidateTokenAsync("TOKEN", It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult("whatever")).Verifiable();
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();
@@ -121,7 +121,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Filters
         public void OnActionExecutingTestPassed()
         {
             // setup
-            var loginManagerMock = new Mock<ILoginManager>();
+            var loginManagerMock = new Mock<IUserManagement>();
             loginManagerMock.Setup(p => p.ValidateTokenAsync("TOKEN", It.IsAny<CancellationToken>())).ReturnsAsync(ValidationResult.Success).Verifiable();
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();

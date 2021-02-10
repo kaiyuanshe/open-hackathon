@@ -56,6 +56,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
             var tokenRequiredAttrs = context.MethodInfo.GetCustomAttributes<TokenRequiredAttribute>();
             if (tokenRequiredAttrs.SingleOrDefault() != null)
             {
+                // Add 401 response to Swagger
                 operation.Responses.Add("401", new OpenApiResponse
                 {
                     Content = new Dictionary<string, OpenApiMediaType>
@@ -66,6 +67,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                         }
                     },
                 });
+
+                // Add Required header
+                if (operation.Parameters == null)
+                    operation.Parameters = new List<OpenApiParameter>();
+
+               
             }
         }
     }
