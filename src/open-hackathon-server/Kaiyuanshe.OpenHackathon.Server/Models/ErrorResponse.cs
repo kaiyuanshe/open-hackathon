@@ -119,6 +119,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         {
             return Error("Forbidden", message);
         }
+
+        /// <summary>
+        /// Create a Unauthorized(401) error response
+        /// </summary>
+        /// <returns></returns>
+        public static ErrorResponse Unauthorized(string message)
+        {
+            return Error("Unauthorized", message);
+        }
     }
 
 }

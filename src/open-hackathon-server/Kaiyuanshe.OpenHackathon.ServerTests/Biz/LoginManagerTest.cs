@@ -1,5 +1,4 @@
-﻿using Authing.ApiClient.Auth;
-using Kaiyuanshe.OpenHackathon.Server.Biz;
+﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -7,9 +6,7 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Moq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
