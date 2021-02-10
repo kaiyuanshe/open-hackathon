@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Filters;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Microsoft.AspNetCore.Http;
@@ -42,6 +43,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [Route("hackathon/{name}")]
+        [TokenRequired]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression("^[a-z0-9]{1,100}$")] string name,
             [FromBody] Hackathon parameter,
