@@ -15,7 +15,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
     public class OperationFilterTest : SwaggerTest
     {
         [Test]
-        public void DefaultResonseOperationFilterTest()
+        public void ErrorResonseOperationFilterTest()
         {
             var generator = Generate(
                    apiDescriptions: new[]
@@ -47,7 +47,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
                    },
                    configure: (options) =>
                    {
-                       options.OperationFilters.Add(new DefaultResponseOperationFilter());
+                       options.OperationFilters.Add(new ErrorResponseOperationFilter());
                    }
             );
 
@@ -64,6 +64,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
             var schema = post.Responses["400"].Content.Values.Single().Schema;
             Assert.IsNotNull(schema.Reference);
             Assert.AreEqual(nameof(ErrorResponse), schema.Reference.Id);
+        }
+
+        [Test]
+        public void UnauthorizedResponseOperationFilterTest()
+        {
+            var generator = Generate(
+                   apiDescriptions: new[]
+                   {
+                       ApiDescriptionFactory.Create<FakeController>(
+                        c => nameof(c.ActionWithTokenRequired),
+                        groupName: "v1",
+                        httpMethod: "GET",
+                        relativePath: "resource"),
+                   },
+                   configure: (options) =>
+                   {
+                       options.OperationFilters.Add(new UnauthorizedResponseOperationFilter());
+                   }
+            );
+
+            var document = generator.GetSwagger("v1");
+
+            var get = document.Paths["/resource"].Operations[OperationType.Get];
+            Assert.AreEqual(2, get.Responses.Count);
+            Assert.IsTrue(get.Responses.ContainsKey("200"));
+            Assert.IsTrue(get.Responses.ContainsKey("401"));
         }
     }
 }

@@ -10,16 +10,16 @@ using System.IO;
 using System.Reflection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Filters;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 {
     /// <summary>
-    /// Add <seealso cref="ErrorResponse"/> to Http responses whose statusCode is >=400.
+    /// Add <seealso cref="ErrorResponse"/> to Http responses whose statusCode is >=400. 
+    /// The statusCode must be explicitly added to the method like: &lt;response code="400"&gt;Bad Request&lt;/response&gt;. 
     /// </summary>
-    public class DefaultResponseOperationFilter : IOperationFilter
+    public class ErrorResponseOperationFilter : IOperationFilter
     {
-        public static readonly string DefaultCode = "default";
-
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository);
@@ -35,6 +35,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                         }
                     };
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Add 401 response to schema for all methods annotated with <seealso cref="TokenRequiredAttribute"/>
+    /// </summary>
+    public class UnauthorizedResponseOperationFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.Responses.ContainsKey("401"))
+            {
+                // in case 401 is explicitly added
+                return;
+            }
+
+            var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository);
+            var tokenRequiredAttrs = context.MethodInfo.GetCustomAttributes<TokenRequiredAttribute>();
+            if (tokenRequiredAttrs.SingleOrDefault() != null)
+            {
+                operation.Responses.Add("401", new OpenApiResponse
+                {
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/json"] = new OpenApiMediaType
+                        {
+                            Schema = errorRespSchema
+                        }
+                    },
+                });
             }
         }
     }

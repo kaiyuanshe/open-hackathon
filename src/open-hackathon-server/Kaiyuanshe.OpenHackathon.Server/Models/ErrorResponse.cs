@@ -18,23 +18,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         {
             /// <summary>
             /// An error code that describes the error condition more precisely than an HTTP status code. 
-            /// Can be used to programmatically handle specific error cases.
+            /// Can be used to programmatically handle specific error cases. Possible values: BadArgument, NotFound, Conflict and so on.
             /// </summary>
-            /// <example>Bad Request</example>
+            /// <example>InternalServerError</example>
             [JsonRequired]
             public string code { get; set; }
 
             /// <summary>
             /// A message that describes the error in detail and provides debugging information.
             /// </summary>
-            /// <example>Request is not valid</example>
+            /// <example>Some error happened</example>
             [JsonRequired]
             public string message { get; set; }
 
             /// <summary>
             /// The target of the particular error (for example, the name of the property in error).
             /// </summary>
-            /// <example></example>
+            /// <example>SomeProperty</example>
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string target { get; set; }
 

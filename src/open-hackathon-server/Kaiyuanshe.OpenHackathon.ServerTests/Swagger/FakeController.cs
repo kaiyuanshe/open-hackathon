@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Kaiyuanshe.OpenHackathon.Server.Filters;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,6 +22,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
 
         [Obsolete]
         public void ActionWithObsoleteAttribute()
+        { }
+
+        [TokenRequired]
+        public void ActionWithTokenRequired()
         { }
 
         public void ActionWithParameterWithRequiredAttribute([Required] string param)
