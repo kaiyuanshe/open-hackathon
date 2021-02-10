@@ -40,9 +40,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             }
 
             var data = Request.Query["data"];
-            User user = JsonConvert.DeserializeObject<User>(data);
-            Token = user.Token;
-            UserName = user.Name;
+            var loginUrl = $"https://{Request.Host}/v2/login";
+            if (Request.Host.Host.Contains("localhost"))
+            {
+                loginUrl = $"http://localhost:5000/v2/login";
+            }
+            Console.WriteLine(loginUrl);
+            var content = new StringContent(data, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(loginUrl, content);
+            string responseBody = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var user = JsonConvert.DeserializeObject<Models.UserInfo>(responseBody);
+                Token = user.Token;
+                UserName = user.Name;
+            }
+            else
+            {
+                Console.WriteLine($"code: {response.StatusCode}");
+                Console.WriteLine($"body: {response.ReasonPhrase}");
+            }
         }
     }
 }
