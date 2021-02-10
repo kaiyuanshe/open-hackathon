@@ -23,8 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("authing")]
-        [Obsolete]
-        public async Task<object> Authing([FromBody] UserLoginInfo parameter,
+        public async Task<object> Authing([FromBody] UserInfo parameter,
             CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -40,9 +39,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
 
-            var userEntity = await LoginManager.AuthingAsync(parameter, cancellationToken);
+            await LoginManager.AuthingAsync(parameter, cancellationToken);
             var tokenEntity = await LoginManager.GetTokenEntityAsync(parameter.Token, cancellationToken);
-            return Ok(ResponseBuilder.BuildUserLoginInfo(userEntity, tokenEntity));
+            return Ok(parameter);
         }
     }
 }

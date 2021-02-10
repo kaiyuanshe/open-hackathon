@@ -1,5 +1,7 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +10,30 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
-    public interface IUserTable : IAzureTable<UserEntity>
+    public interface IUserTable : IAzureTable<DynamicTableEntity>
     {
-        Task<UserEntity> GetUserEntityByIdAsync(string id, CancellationToken cancellationToken = default);
-
+        Task<UserInfo> GetUserByIdAsync(string id, CancellationToken cancellationToken = default);
+        Task<DynamicTableEntity> SaveUserAsync(UserInfo userInfo, CancellationToken cancellationToken = default);
     }
 
-    public class UserTable : AzureTable<UserEntity>, IUserTable
+    public class UserTable : AzureTable<DynamicTableEntity>, IUserTable
     {
         public UserTable(CloudStorageAccount storageAccount, string tableName) : base(storageAccount, tableName)
         {
         }
 
-        public async Task<UserEntity> GetUserEntityByIdAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<UserInfo> GetUserByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return await RetrieveAsync(id.ToLower(), string.Empty, cancellationToken);
+            var entity = await RetrieveAsync(id.ToLower(), string.Empty, cancellationToken);
+            UserInfo resp = new UserInfo();
+            return entity.ToModel(resp);
+        }
+
+        public async Task<DynamicTableEntity> SaveUserAsync(UserInfo userInfo, CancellationToken cancellationToken = default)
+        {
+            var entity = userInfo.ToTableEntity(userInfo.Id.ToLower(), string.Empty);
+            await InsertOrReplaceAsync(entity);
+            return await RetrieveAsync(userInfo.Id.ToLower(), string.Empty);
         }
     }
 }

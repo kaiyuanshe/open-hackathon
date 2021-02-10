@@ -55,48 +55,5 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Assert.AreEqual(i.ToString(), hacklist.values[i].Name);
             }
         }
-
-        [Test]
-        public void BuildUserInfoTest()
-        {
-            var entity = new UserEntity
-            {
-                UserName = "name",
-                City = "city",
-            };
-
-            var builder = new DefaultResponseBuilder();
-            var user = builder.BuildUserInfo(entity);
-
-            Assert.AreEqual("city", user.City);
-            Assert.AreEqual("name", user.UserName);
-            Assert.IsNull(user.Province);
-        }
-
-        [Test]
-        public void BuildUserLoginInfoTest()
-        {
-            var entity = new UserEntity
-            {
-                Province = "province",
-                Phone = "phone",
-                PartitionKey = "pk"
-            };
-            var tokenEntity = new UserTokenEntity
-            {
-                Token = "jwt",
-                TokenExpiredAt = DateTime.UtcNow,
-                UserId = "notused"
-            };
-
-            var builder = new DefaultResponseBuilder();
-            var user = builder.BuildUserLoginInfo(entity, tokenEntity);
-
-            Assert.AreEqual("province", user.Province);
-            Assert.AreEqual("phone", user.Phone);
-            Assert.AreEqual("pk", user.Id);
-            Assert.AreEqual("jwt", user.Token);
-            Assert.AreEqual(tokenEntity.TokenExpiredAt, user.TokenExpiredAt);
-        }
     }
 }
