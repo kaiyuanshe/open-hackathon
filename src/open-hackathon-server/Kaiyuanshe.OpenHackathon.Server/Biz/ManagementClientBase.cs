@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
-    public abstract class ManagerBase
+    public abstract class ManagementClientBase
     {
         public IStorageContext StorageContext { get; set; }
     }

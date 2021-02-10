@@ -24,7 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hack = new Hackathon();
             var name = "test1";
 
-            var hackManagerMock = new Mock<IHackathonManager>();
+            var hackManagerMock = new Mock<IHackathonManagement>();
             hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(default(HackathonEntity));
             hackManagerMock.Setup(p => p.CreateHackathonAsync(hack, It.IsAny<CancellationToken>()))
@@ -49,7 +49,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var entity = new HackathonEntity();
             var name = "test1";
 
-            var hackManagerMock = new Mock<IHackathonManager>();
+            var hackManagerMock = new Mock<IHackathonManagement>();
             hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(entity);
             hackManagerMock.Setup(p => p.UpdateHackathonAsync(hack, It.IsAny<CancellationToken>()))

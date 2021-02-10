@@ -24,7 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var jwtTokenStatus = new JWTTokenStatus { Status = false, Code = 400, Message = "Some Message" };
 
             // Moq
-            var loginManagerMoq = new Mock<ILoginManager>();
+            var loginManagerMoq = new Mock<IUserManagement>();
             loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
 
             // test
@@ -58,7 +58,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var jwtTokenStatus = new JWTTokenStatus { Status = true };
 
             // Moq
-            var loginManagerMoq = new Mock<ILoginManager>();
+            var loginManagerMoq = new Mock<IUserManagement>();
             loginManagerMoq.Setup(p => p.AuthingAsync(parameter, cancellationToken)).ReturnsAsync(userEntity);
             loginManagerMoq.Setup(p => p.GetTokenEntityAsync("token", cancellationToken)).ReturnsAsync(tokenEntity);
             loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);

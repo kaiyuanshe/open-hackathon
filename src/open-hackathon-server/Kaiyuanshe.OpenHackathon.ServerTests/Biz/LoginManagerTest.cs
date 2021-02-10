@@ -37,7 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token));
 
             // test
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object
             };
@@ -78,7 +78,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), token));
 
             // test
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object
             };
@@ -113,7 +113,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cToken)).ReturnsAsync(tokenEntity);
 
             // test
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object,
             };
@@ -132,7 +132,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [TestCase("pool", "")]
         public void ValidateTokenRemotelyAsyncTest(string userPoolId, string accessToken)
         {
-            var loginManager = new LoginManager();
+            var loginManager = new UserManagement();
             Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.ValidateTokenRemotelyAsync(userPoolId, accessToken));
         }
 
@@ -141,7 +141,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [TestCase(" ")]
         public async Task ValidateTokenAsyncTestRequired(string token)
         {
-            var loginManager = new LoginManager();
+            var loginManager = new UserManagement();
             var result = await loginManager.ValidateTokenAsync(token);
 
             Assert.AreNotEqual(ValidationResult.Success, result);
@@ -164,7 +164,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object,
             };
@@ -197,7 +197,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object,
             };
@@ -230,7 +230,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new LoginManager
+            var loginManager = new UserManagement
             {
                 StorageContext = storage.Object,
             };

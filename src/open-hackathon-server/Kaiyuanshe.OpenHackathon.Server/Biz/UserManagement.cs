@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
-    public interface ILoginManager
+    public interface IUserManagement
     {
         /// <summary>
         /// Validate AccessToken locally without calling Authing's API remotely.
@@ -48,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default);
     }
 
-    public class LoginManager : ManagerBase, ILoginManager
+    public class UserManagement : ManagementClientBase, IUserManagement
     {
         public async Task<UserEntity> AuthingAsync(UserLoginInfo loginInfo, CancellationToken cancellationToken = default)
         {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
-    public interface IHackathonManager
+    public interface IHackathonManagement
     {
         /// <summary>
         /// Search hackathon
@@ -39,7 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
     }
 
-    public class HackathonManager : ManagerBase, IHackathonManager
+    public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
         {
