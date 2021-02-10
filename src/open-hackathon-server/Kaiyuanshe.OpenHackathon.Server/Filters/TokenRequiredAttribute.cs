@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 [assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Filters
 {
+    /// <summary>
+    /// A valid token must be present in Http Headers: Headers["Authorization"]="token YOURTOKEN"
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class TokenRequiredAttribute : TypeFilterAttribute
     {

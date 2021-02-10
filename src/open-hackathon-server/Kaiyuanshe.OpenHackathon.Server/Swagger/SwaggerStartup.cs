@@ -47,7 +47,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                 c.IncludeXmlComments(xmlPath);
 
                 // Operation Filters
-                c.OperationFilter<DefaultResponseOperationFilter>();
+                c.OperationFilter<ErrorResponseOperationFilter>();
+                c.OperationFilter<UnauthorizedResponseOperationFilter>();
                 // Enable Swagger examples: https://github.com/mattfrear/Swashbuckle.AspNetCore.Filters
                 c.ExampleFilters();
                 // Add (Auth) to action summary
