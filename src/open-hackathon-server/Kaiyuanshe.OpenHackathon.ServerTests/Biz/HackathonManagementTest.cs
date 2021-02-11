@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     [TestFixture]
-    public class HackathonManagerTest
+    public class HackathonManagementTest
     {
         [Test]
         public async Task GetHackathonEntityByNameAsyncTest()

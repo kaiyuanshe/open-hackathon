@@ -25,7 +25,18 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 if (srcProp != null)
                 {
                     var srcValue = srcProp.GetValue(src);
-                    property.SetValue(resp, srcValue);
+                    if (srcValue == null)
+                        continue;
+
+                    if (IsTypeMatched(srcProp.PropertyType, property.PropertyType))
+                    {
+                        property.SetValue(resp, srcValue);
+                    }
+                    else
+                    {
+                        // type mismatch, try changing type
+                        property.SetValue(resp, ConvertType(srcProp.PropertyType, property.PropertyType, srcValue));
+                    }
                 }
             }
             if (configure != null)
@@ -50,23 +61,28 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty(srcValue.ToString()));
                 }
-                else if (property.PropertyType == typeof(int))
+                else if (property.PropertyType == typeof(int)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(int))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((int)srcValue));
                 }
-                else if (property.PropertyType == typeof(bool))
+                else if (property.PropertyType == typeof(bool)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(bool))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((bool)srcValue));
                 }
-                else if (property.PropertyType == typeof(DateTime))
+                else if (property.PropertyType == typeof(DateTime)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(DateTime))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((DateTime)srcValue));
                 }
-                else if (property.PropertyType == typeof(long))
+                else if (property.PropertyType == typeof(long)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(long))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((long)srcValue));
                 }
-                else if (property.PropertyType == typeof(double))
+                else if (property.PropertyType == typeof(double)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(double))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((double)srcValue));
                 }
@@ -74,7 +90,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((Guid)srcValue));
                 }
-                else if (property.PropertyType.IsEnum)
+                else if (property.PropertyType.IsEnum
+                    || (Nullable.GetUnderlyingType(property.PropertyType) != null && Nullable.GetUnderlyingType(property.PropertyType).IsEnum))
                 {
                     tableEntity.Properties.Add(property.Name, new EntityProperty((int)srcValue));
                 }
@@ -109,7 +126,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType == typeof(int))
+                else if (property.PropertyType == typeof(int)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(int))
                 {
                     try
                     {
@@ -119,7 +137,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType == typeof(bool))
+                else if (property.PropertyType == typeof(bool)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(bool))
                 {
                     try
                     {
@@ -129,7 +148,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType == typeof(DateTime))
+                else if (property.PropertyType == typeof(DateTime)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(DateTime))
                 {
                     try
                     {
@@ -139,7 +159,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType == typeof(long))
+                else if (property.PropertyType == typeof(long)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(long))
                 {
                     try
                     {
@@ -149,7 +170,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType == typeof(double))
+                else if (property.PropertyType == typeof(double)
+                    || Nullable.GetUnderlyingType(property.PropertyType) == typeof(double))
                 {
                     try
                     {
@@ -169,7 +191,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
                     {
                     }
                 }
-                else if (property.PropertyType.IsEnum)
+                else if (property.PropertyType.IsEnum
+                    || (Nullable.GetUnderlyingType(property.PropertyType) != null && Nullable.GetUnderlyingType(property.PropertyType).IsEnum))
                 {
                     try
                     {
@@ -198,6 +221,42 @@ namespace Kaiyuanshe.OpenHackathon.Server
             }
 
             return model;
+        }
+
+        private static bool IsTypeMatched(Type srcType, Type objectType)
+        {
+            return GetRealType(srcType) == GetRealType(objectType);
+        }
+
+        private static Type GetRealType(Type type)
+        {
+            if (Nullable.GetUnderlyingType(type) != null)
+                return Nullable.GetUnderlyingType(type);
+
+            return type;
+        }
+
+        private static object ConvertType(Type srcType, Type objectType, object value)
+        {
+            if (srcType == objectType)
+                return value;
+
+            // handle datetime for better format.
+            if (srcType == typeof(DateTime) && objectType == typeof(string))
+            {
+                // 2021-02-11T01:51:28.1855155Z
+                return ((DateTime)value).ToString("o");
+            }
+
+            try
+            {
+                return Convert.ChangeType(value, objectType);
+            }
+            catch
+            {
+            }
+
+            return null;
         }
     }
 }

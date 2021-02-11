@@ -97,7 +97,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// whether or not user registration needs admin's manual approval. default: false
         /// </summary>
         /// <example>false</example>
-        [JsonProperty("auto_approve")]
+        [JsonProperty("autoApprove")]
         public bool? AutoApprove { get; set; }
 
         /// <summary>
