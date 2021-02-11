@@ -28,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 
             Assert.IsNull(hack.Tags);
             Assert.AreEqual("pk", hack.Name);
-            Assert.IsTrue(hack.AutoApprove);
+            Assert.IsTrue(hack.AutoApprove.Value);
             Assert.AreEqual("loc", hack.Location);
             Assert.AreEqual("abc", hack.CreatorId);
             Assert.IsTrue(hack.JudgeStartTime.HasValue);
