@@ -49,6 +49,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Pages.Authing
             var content = new StringContent(data, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(loginUrl, content);
             string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
             if (response.IsSuccessStatusCode)
             {
                 var user = JsonConvert.DeserializeObject<Models.UserInfo>(responseBody);

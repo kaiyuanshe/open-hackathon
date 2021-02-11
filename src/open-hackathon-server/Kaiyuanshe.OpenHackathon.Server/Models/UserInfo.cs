@@ -18,7 +18,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>zhangsan</example>
         [MaxLength(512)]
-        [Required]
         [JsonProperty("name")]
         public string Name { get; set; }
 
@@ -276,13 +275,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Union Id
         /// </summary>
+        /// <example>8814383</example>
         [JsonProperty("unionid")]
         public string Unionid { get; set; }
 
         /// <summary>
         /// Id from OAuth Provider. e.g. Id of Github. Empty if not login with oauth(social login)
         /// </summary>
-        /// <example>1</example>
+        /// <example>8814383</example>
         [MaxLength(128)]
         [JsonProperty("openId")]
         public string OpenId { get; set; }
@@ -305,6 +305,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Registration Source
         /// </summary>
+        /// <example>["social:github"]</example>
         [JsonProperty("registerSource")]
         public IEnumerable<string> RegisterSource { get; set; }
 
