@@ -22,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("authing")]
+        [Route("login")]
         public async Task<object> Authing([FromBody] UserInfo parameter,
             CancellationToken cancellationToken)
         {
