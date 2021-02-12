@@ -20,7 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         public async Task AuthingAsyncTest()
         {
             // input
-            var loginInfo = new UserInfo
+            var userInfo = new UserInfo
             {
                 Id = "id",
                 Token = "token",
@@ -34,20 +34,30 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var tokenTable = new Mock<IUserTokenTable>();
             storage.SetupGet(s => s.UserTable).Returns(usertable.Object);
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
-            usertable.Setup(u => u.SaveUserAsync(loginInfo, cancellationToken)).ReturnsAsync(dynamicEntity);
+            usertable.Setup(u => u.SaveUserAsync(userInfo, cancellationToken)).ReturnsAsync(dynamicEntity);
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), cancellationToken));
 
             // test
-            var loginManager = new UserManagement
+            var userMgmt = new UserManagement
             {
                 StorageContext = storage.Object
             };
-            await loginManager.AuthingAsync(loginInfo, cancellationToken);
+            await userMgmt.AuthingAsync(userInfo, cancellationToken);
 
             //verify
             Mock.VerifyAll(storage, usertable, tokenTable);
             usertable.VerifyNoOtherCalls();
             tokenTable.VerifyNoOtherCalls();
+        }
+
+        [TestCase(null, "token")]
+        [TestCase("", "token")]
+        [TestCase("pool", null)]
+        [TestCase("pool", "")]
+        public void GetCurrentUserRemotelyAsyncTest(string userPoolId, string accessToken)
+        {
+            var userMgmt = new UserManagement();
+            Assert.ThrowsAsync<ArgumentNullException>(() => userMgmt.GetCurrentUserRemotelyAsync(userPoolId, accessToken));
         }
 
         [Test]
@@ -69,11 +79,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cToken)).ReturnsAsync(tokenEntity);
 
             // test
-            var loginManager = new UserManagement
+            var userMgmt = new UserManagement
             {
                 StorageContext = storage.Object,
             };
-            var resp = await loginManager.GetTokenEntityAsync(jwt, cToken);
+            var resp = await userMgmt.GetTokenEntityAsync(jwt, cToken);
 
             // verify
             Mock.VerifyAll();
@@ -82,34 +92,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("1", resp.UserId);
         }
 
-        [TestCase(null, "token")]
-        [TestCase("", "token")]
-        [TestCase("pool", null)]
-        [TestCase("pool", "")]
-        public void ValidateTokenRemotelyAsyncTest(string userPoolId, string accessToken)
-        {
-            var loginManager = new UserManagement();
-            Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.ValidateTokenRemotelyAsync(userPoolId, accessToken));
-        }
-
-        [TestCase(null, "token")]
-        [TestCase("", "token")]
-        [TestCase("pool", null)]
-        [TestCase("pool", "")]
-        public void GetCurrentUserRemotelyAsyncTest(string userPoolId, string accessToken)
-        {
-            var loginManager = new UserManagement();
-            Assert.ThrowsAsync<ArgumentNullException>(() => loginManager.GetCurrentUserRemotelyAsync(userPoolId, accessToken));
-        }
-
-
         [TestCase(null)]
         [TestCase("")]
         [TestCase(" ")]
         public async Task ValidateTokenAsyncTestRequired(string token)
         {
-            var loginManager = new UserManagement();
-            var result = await loginManager.ValidateTokenAsync(token);
+            var userMgmt = new UserManagement();
+            var result = await userMgmt.ValidateTokenAsync(token);
 
             Assert.AreNotEqual(ValidationResult.Success, result);
             Assert.IsTrue(result.ErrorMessage.Contains("required"));
@@ -131,11 +120,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new UserManagement
+            var userMgmt = new UserManagement
             {
                 StorageContext = storage.Object,
             };
-            var result = await loginManager.ValidateTokenAsync(token);
+            var result = await userMgmt.ValidateTokenAsync(token);
 
             // verify
             Mock.VerifyAll();
@@ -164,11 +153,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new UserManagement
+            var userMgmt = new UserManagement
             {
                 StorageContext = storage.Object,
             };
-            var result = await loginManager.ValidateTokenAsync(token);
+            var result = await userMgmt.ValidateTokenAsync(token);
 
             // verify
             Mock.VerifyAll();
@@ -197,17 +186,65 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Setup(t => t.RetrieveAsync(hash, string.Empty, cancellationToken)).ReturnsAsync(tokenEntity);
 
             // testing
-            var loginManager = new UserManagement
+            var userMgmt = new UserManagement
             {
                 StorageContext = storage.Object,
             };
-            var result = await loginManager.ValidateTokenAsync(token);
+            var result = await userMgmt.ValidateTokenAsync(token);
 
             // verify
             Mock.VerifyAll();
             tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cancellationToken), Times.Once);
             tokenTable.VerifyNoOtherCalls();
             Assert.AreEqual(ValidationResult.Success, result);
+        }
+
+        [Test]
+        public async Task TaskValidateTokenAsyncTestEntityNull()
+        {
+            UserTokenEntity tokenEntity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var userMgmt = new UserManagement();
+            var validationResult = await userMgmt.ValidateTokenAsync(tokenEntity, cancellationToken);
+
+            Assert.AreNotEqual(ValidationResult.Success, validationResult);
+            Assert.IsTrue(validationResult.ErrorMessage.Contains("doesn't exist"));
+        }
+
+        [Test]
+        public async Task TaskValidateTokenAsyncTestEntityExpired()
+        {
+            UserTokenEntity tokenEntity = new UserTokenEntity { TokenExpiredAt = DateTime.UtcNow.AddMinutes(-1) };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var userMgmt = new UserManagement();
+            var validationResult = await userMgmt.ValidateTokenAsync(tokenEntity, cancellationToken);
+
+            Assert.AreNotEqual(ValidationResult.Success, validationResult);
+            Assert.IsTrue(validationResult.ErrorMessage.Contains("expired"));
+        }
+
+        [Test]
+        public async Task TaskValidateTokenAsyncTestEntityValid()
+        {
+            UserTokenEntity tokenEntity = new UserTokenEntity { TokenExpiredAt = DateTime.UtcNow.AddHours(1) };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var userMgmt = new UserManagement();
+            var validationResult = await userMgmt.ValidateTokenAsync(tokenEntity, cancellationToken);
+
+            Assert.AreEqual(ValidationResult.Success, validationResult);
+        }
+
+        [TestCase(null, "token")]
+        [TestCase("", "token")]
+        [TestCase("pool", null)]
+        [TestCase("pool", "")]
+        public void ValidateTokenRemotelyAsyncTest(string userPoolId, string accessToken)
+        {
+            var userMgmt = new UserManagement();
+            Assert.ThrowsAsync<ArgumentNullException>(() => userMgmt.ValidateTokenRemotelyAsync(userPoolId, accessToken));
         }
     }
 }

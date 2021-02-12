@@ -34,13 +34,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Get Claims of user associated with an AccessToken
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
+        ///// <summary>
+        ///// Get Claims of user associated with an AccessToken
+        ///// </summary>
+        ///// <param name="token"></param>
+        ///// <param name="cancellationToken"></param>
+        ///// <returns></returns>
+        //Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get <see cref="UserTokenEntity" /> using AccessToken.
@@ -117,17 +117,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return new ValidationResult(@"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN");
 
             var tokenEntity = await GetTokenEntityAsync(token, cancellationToken);
+            return await ValidateTokenAsync(tokenEntity, cancellationToken);
+        }
+
+        public Task<ValidationResult> ValidateTokenAsync(UserTokenEntity tokenEntity, CancellationToken cancellationToken = default)
+        {
             // existence
             if (tokenEntity == null)
-                return new ValidationResult($"token doesn't exist: {token}");
+                return Task.FromResult(new ValidationResult($"token doesn't exist."));
 
             // expiry
             if (tokenEntity.TokenExpiredAt < DateTime.UtcNow)
             {
-                return new ValidationResult($"token expired, please login: {token}");
+                return Task.FromResult(new ValidationResult($"token expired at {tokenEntity.TokenExpiredAt.ToString("o")}, please login: {tokenEntity.Token}."));
             }
 
-            return ValidationResult.Success;
+            return Task.FromResult(ValidationResult.Success);
         }
 
         public async Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
