@@ -34,16 +34,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
-        ///// <summary>
-        ///// Get Claims of user associated with an AccessToken
-        ///// </summary>
-        ///// <param name="token"></param>
-        ///// <param name="cancellationToken"></param>
-        ///// <returns></returns>
-        //Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Get Claims of user associated with an AccessToken
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get <see cref="UserTokenEntity" /> using AccessToken.
+        /// Get <seealso cref="UserTokenEntity"/> using AccessToken.
         /// </summary>
         /// <param name="token">AccessToken from Authing/Github</param>
         /// <param name="cancellationToken"></param>
@@ -102,6 +102,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             var authenticationClient = new AuthenticationClient(userPoolId);
             return await authenticationClient.CurrentUser(token, cancellationToken);
+        }
+
+        public async Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default)
+        {
+            var tokenEntity = await GetTokenEntityAsync(token, cancellationToken);
+            var tokenValidationResult = await ValidateTokenAsync(tokenEntity, cancellationToken);
+            if (tokenValidationResult != ValidationResult.Success)
+            {
+                // token invalid
+                return new List<Claim>();
+            }
+
+            // TODO PlatformAdministrator
+
+            // TODO HackathonAdministrator
+
+            // TODO HackathonJudge
+
+            // TODO HackathonContestant
+
+            // TODO TeamAdministrator
+
+            // TODO TeamMember
+
+            return new List<Claim>();
         }
 
         public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)

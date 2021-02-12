@@ -16,7 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     {
         /// <summary>
         /// Name of a hackathon. Can only be set when it's created. Readonly afterwards.
-        /// Length between 1-100. Lowercase charactor and numbers only.
+        /// Length between 1-100. alphabeta and numbers only.
         /// </summary>
         /// <example>foo</example>
         [JsonProperty("name")]
