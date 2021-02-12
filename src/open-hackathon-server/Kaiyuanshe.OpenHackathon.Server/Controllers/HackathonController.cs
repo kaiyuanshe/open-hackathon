@@ -45,7 +45,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{name}")]
         [TokenRequired]
         public async Task<object> CreateOrUpdate(
-            [FromRoute, Required, RegularExpression("^[a-z0-9]{1,100}$")] string name,
+            [FromRoute, Required, RegularExpression("^[A-Za-z0-9]{1,100}$")] string name,
             [FromBody] Hackathon parameter,
             CancellationToken cancellationToken)
         {
