@@ -10,27 +10,20 @@ using Authing.ApiClient.Types;
 using Authing.ApiClient.Auth;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.WindowsAzure.Storage.Table;
+using System.Security.Claims;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IUserManagement
     {
-        /// <summary>
-        /// Validate AccessToken locally without calling Authing's API remotely.
-        /// </summary>
-        /// <param name="token">the token to validate</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<ValidationResult> ValidateTokenAsync(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Validate AccessToken by calling Authing Api
+        /// Handle data from succesful Authing login.
         /// </summary>
-        /// <param name="userPoolId">Authing's user Pool Id</param>
-        /// <param name="token">the Token to validate</param>
+        /// <param name="loginInfo">data from Authig</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
+        Task AuthingAsync(UserInfo loginInfo, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get User remotely from Authing
@@ -42,12 +35,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Handle data from succesful Authing login.
+        /// Get Claims of user associated with an AccessToken
         /// </summary>
-        /// <param name="loginInfo">data from Authig</param>
+        /// <param name="token"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task AuthingAsync(UserInfo loginInfo, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get <see cref="UserTokenEntity" /> using AccessToken.
@@ -56,21 +49,34 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Validate AccessToken locally without calling Authing's API remotely.
+        /// </summary>
+        /// <param name="token">the token to validate</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ValidationResult> ValidateTokenAsync(string token, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Validate <see cref="UserTokenEntity"/> locally which contains an AccessToken/>
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ValidationResult> ValidateTokenAsync(UserTokenEntity tokenEntity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Validate AccessToken by calling Authing Api
+        /// </summary>
+        /// <param name="userPoolId">Authing's user Pool Id</param>
+        /// <param name="token">the Token to validate</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
     }
 
     public class UserManagement : ManagementClientBase, IUserManagement
     {
-        public async Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(userPoolId))
-                throw new ArgumentNullException("userPoolId is null or empty");
-            if (string.IsNullOrWhiteSpace(token))
-                throw new ArgumentNullException("accessToken is null or empty");
-
-            var authenticationClient = new AuthenticationClient(userPoolId);
-            return await authenticationClient.CurrentUser(token, cancellationToken);
-        }
-
         public async Task AuthingAsync(UserInfo userInfo, CancellationToken cancellationToken = default)
         {
             await StorageContext.UserTable.SaveUserAsync(userInfo, cancellationToken);
@@ -87,7 +93,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.UserTokenTable.InsertOrReplaceAsync(userToken, cancellationToken);
         }
 
-        public async Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
+        public async Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userPoolId))
                 throw new ArgumentNullException("userPoolId is null or empty");
@@ -95,8 +101,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 throw new ArgumentNullException("accessToken is null or empty");
 
             var authenticationClient = new AuthenticationClient(userPoolId);
-            var jwtTokenStatus = await authenticationClient.CheckLoginStatus(token, cancellationToken);
-            return jwtTokenStatus;
+            return await authenticationClient.CurrentUser(token, cancellationToken);
         }
 
         public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
@@ -123,6 +128,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return ValidationResult.Success;
+        }
+
+        public async Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userPoolId))
+                throw new ArgumentNullException("userPoolId is null or empty");
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentNullException("accessToken is null or empty");
+
+            var authenticationClient = new AuthenticationClient(userPoolId);
+            var jwtTokenStatus = await authenticationClient.CheckLoginStatus(token, cancellationToken);
+            return jwtTokenStatus;
         }
     }
 }
