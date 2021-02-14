@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +60,76 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         {
             var userMgmt = new UserManagement();
             Assert.ThrowsAsync<ArgumentNullException>(() => userMgmt.GetCurrentUserRemotelyAsync(userPoolId, accessToken));
+        }
+
+        [Test]
+        public async Task GetCurrentUserClaimsAsyncTestInvalidToken1()
+        {
+            string token = "token";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserTokenEntity tokenEntity = null;
+
+            var userMgmtMock = new Mock<UserManagement> { CallBase = true };
+            userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
+
+            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+
+            Mock.VerifyAll(userMgmtMock);
+            Assert.AreEqual(0, claims.Count());
+        }
+
+        [Test]
+        public async Task GetCurrentUserClaimsAsyncTestInvalidToken2()
+        {
+            string token = "token";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserTokenEntity tokenEntity = new UserTokenEntity
+            {
+                TokenExpiredAt = DateTime.UtcNow.AddMinutes(-1)
+            };
+
+            var userMgmtMock = new Mock<UserManagement> { CallBase = true };
+            userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
+
+            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+
+            Mock.VerifyAll(userMgmtMock);
+            Assert.AreEqual(0, claims.Count());
+        }
+
+        [Test]
+        public async Task GetCurrentUserClaimsAsyncTestPlatformAdmin()
+        {
+            string token = "token";
+            string userId = "userid";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserTokenEntity tokenEntity = new UserTokenEntity
+            {
+                TokenExpiredAt = DateTime.UtcNow.AddMinutes(1),
+                UserId = userId,
+            };
+            Claim claim = new Claim("type", "value", "valueType", "issuer");
+
+            var userMgmtMock = new Mock<UserManagement> { CallBase = true };
+            userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
+            userMgmtMock.Setup(m => m.GetPlatformRoleClaim(userId, cancellationToken)).ReturnsAsync(claim);
+
+            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+
+            Mock.VerifyAll(userMgmtMock);
+            Assert.AreEqual(2, claims.Count());
+
+            // user id
+            Assert.AreEqual(ClaimConstants.ClaimType.UserId, claims.First().Type);
+            Assert.AreEqual(userId, claims.First().Value);
+            Assert.AreEqual(ClaimValueTypes.String, claims.First().ValueType);
+            Assert.AreEqual(ClaimConstants.Issuer.Default, claims.First().Issuer);
+
+            // platform admin
+            Assert.AreEqual("type", claims.Last().Type);
+            Assert.AreEqual("value", claims.Last().Value);
+            Assert.AreEqual("valueType", claims.Last().ValueType);
+            Assert.AreEqual("issuer", claims.Last().Issuer);
         }
 
         [Test]

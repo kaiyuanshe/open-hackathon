@@ -16,11 +16,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             public const string Default = "Open Hackathon";
         }
 
+        public static class AuthType
+        {
+            public const string Token = "token";
+        }
+
         /// <summary>
         /// Type of <seealso cref="Claim"/>.
         /// </summary>
         public static class ClaimType
         {
+            /// <summary>
+            /// Type for user's Id. Claim value is user.Id
+            /// </summary>
+            public const string UserId = "UserId";
+
             /// <summary>
             /// type for PlatformAdministrator, whoever has this type of Claim is an Admin of Open Hackathon platform. 
             /// Claim value can be any string, typically the user's id.

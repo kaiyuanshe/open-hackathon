@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IUserManagement
@@ -42,7 +43,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="token"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Claim>> GetCurrentUserClaimsAsync(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get <seealso cref="UserTokenEntity"/> using AccessToken.
@@ -106,7 +107,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await authenticationClient.CurrentUser(token, cancellationToken);
         }
 
-        public async Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Claim>> GetCurrentUserClaimsAsync(string token, CancellationToken cancellationToken = default)
         {
             IList<Claim> claims = new List<Claim>();
 
@@ -118,7 +119,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return claims;
             }
 
-            // TODO PlatformAdministrator
+            // User Id
+            claims.Add(ClaimsHelper.UserId(tokenEntity.UserId));
+
+            // PlatformAdministrator
+            var pa = await GetPlatformRoleClaim(tokenEntity.UserId, cancellationToken);
+            if (pa != null)
+            {
+                claims.Add(pa);
+            }
 
             // TODO HackathonAdministrator
 
@@ -133,7 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return claims;
         }
 
-        public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
+        public virtual async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
         {
             string hash = DigestHelper.SHA512Digest(token);
             return await StorageContext.UserTokenTable.RetrieveAsync(hash, string.Empty, cancellationToken);
@@ -176,16 +185,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return jwtTokenStatus;
         }
 
-        internal async Task<Claim> GetPlatformRoleClaim(string userId, CancellationToken cancellationToken)
+        internal virtual async Task<Claim> GetPlatformRoleClaim(string userId, CancellationToken cancellationToken)
         {
             var participant = await StorageContext.ParticipantTable.GetPlatformRole(userId, cancellationToken);
             if (participant != null && participant.IsPlatformAdministrator())
             {
-                return new Claim(
-                    ClaimConstants.ClaimType.PlatformAdministrator,
-                    userId,
-                    ClaimValueTypes.String,
-                    ClaimConstants.Issuer.Default);
+                return ClaimsHelper.PlatformAdministrator(userId);
             }
 
             return null;
