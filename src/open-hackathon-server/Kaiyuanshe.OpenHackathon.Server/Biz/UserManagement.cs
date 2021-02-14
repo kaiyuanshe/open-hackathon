@@ -11,7 +11,9 @@ using Authing.ApiClient.Auth;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Security.Claims;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IUserManagement
@@ -106,12 +108,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public async Task<IEnumerable<Claim>> GetCurrentUserClaims(string token, CancellationToken cancellationToken = default)
         {
+            IList<Claim> claims = new List<Claim>();
+
             var tokenEntity = await GetTokenEntityAsync(token, cancellationToken);
             var tokenValidationResult = await ValidateTokenAsync(tokenEntity, cancellationToken);
             if (tokenValidationResult != ValidationResult.Success)
             {
                 // token invalid
-                return new List<Claim>();
+                return claims;
             }
 
             // TODO PlatformAdministrator
@@ -126,7 +130,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             // TODO TeamMember
 
-            return new List<Claim>();
+            return claims;
         }
 
         public async Task<UserTokenEntity> GetTokenEntityAsync(string token, CancellationToken cancellationToken = default)
@@ -170,6 +174,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             var authenticationClient = new AuthenticationClient(userPoolId);
             var jwtTokenStatus = await authenticationClient.CheckLoginStatus(token, cancellationToken);
             return jwtTokenStatus;
+        }
+
+        internal async Task<Claim> GetPlatformRoleClaim(string userId, CancellationToken cancellationToken)
+        {
+            var participant = await StorageContext.ParticipantTable.GetPlatformRole(userId, cancellationToken);
+            if (participant != null && participant.IsPlatformAdministrator())
+            {
+                return new Claim(
+                    ClaimConstants.ClaimType.PlatformAdministrator,
+                    userId,
+                    ClaimValueTypes.String,
+                    ClaimConstants.Issuer.Default);
+            }
+
+            return null;
         }
     }
 }
