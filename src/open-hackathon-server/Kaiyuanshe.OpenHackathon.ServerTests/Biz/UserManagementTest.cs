@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -245,6 +246,99 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         {
             var userMgmt = new UserManagement();
             Assert.ThrowsAsync<ArgumentNullException>(() => userMgmt.ValidateTokenRemotelyAsync(userPoolId, accessToken));
+        }
+
+        [Test]
+        public async Task GetPlatformRoleClaimTestEnityNotFound()
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string userId = "userid";
+            ParticipantEntity entity = null;
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var participantTable = new Mock<IParticipantTable>();
+            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
+            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
+
+            // test
+            var userMgmt = new UserManagement
+            {
+                StorageContext = storage.Object,
+            };
+            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(storage, participantTable);
+            Assert.IsNull(claim);
+        }
+
+        [TestCase("pk", ParticipantRole.Administrator)]
+        [TestCase("", ParticipantRole.Contestant)]
+        [TestCase("", ParticipantRole.Judge)]
+        [TestCase("", ParticipantRole.None)]
+        public async Task GetPlatformRoleClaimTestNotAdmin(string pk, ParticipantRole role)
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string userId = "userid";
+            ParticipantEntity entity = new ParticipantEntity
+            {
+                PartitionKey = pk,
+                Role = role
+            };
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var participantTable = new Mock<IParticipantTable>();
+            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
+            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
+
+            // test
+            var userMgmt = new UserManagement
+            {
+                StorageContext = storage.Object,
+            };
+            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(storage, participantTable);
+            Assert.IsNull(claim);
+        }
+
+        [Test]
+        public async Task GetPlatformRoleClaimTestValidClaim()
+        {
+            // input
+            CancellationToken cancellationToken = CancellationToken.None;
+            string userId = "userid";
+            ParticipantEntity entity = new ParticipantEntity
+            {
+                Role = ParticipantRole.Administrator
+            };
+
+            // moq
+            var storage = new Mock<IStorageContext>();
+            var participantTable = new Mock<IParticipantTable>();
+            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
+            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
+
+            // test
+            var userMgmt = new UserManagement
+            {
+                StorageContext = storage.Object,
+            };
+            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(storage, participantTable);
+            Assert.IsNotNull(claim);
+            Assert.AreEqual(ClaimConstants.ClaimType.PlatformAdministrator, claim.Type);
+            Assert.AreEqual(userId, claim.Value);
+            Assert.AreEqual(ClaimValueTypes.String, claim.ValueType);
+            Assert.AreEqual(ClaimConstants.Issuer.Default, claim.Issuer);
+
         }
     }
 }
