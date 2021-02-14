@@ -27,7 +27,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Filters
         internal class HackathonClaimsFilter : IActionFilter
         {
             static readonly string TokenPrefix = "token "; // there is a trailling space
-            private IUserManagement loginManager;
+            private IUserManagement userManagement;
+
+            public HackathonClaimsFilter(IUserManagement userManagement)
+            {
+                this.userManagement = userManagement;
+            }
 
             public void OnActionExecuted(ActionExecutedContext context)
             {
@@ -50,11 +55,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Filters
 
                 // validate token existence and expiry
                 string token = authHeader.Substring(TokenPrefix.Length);
-                //var validationResult = loginManager.ValidateTokenAsync(token).Result;
-                //if (validationResult != ValidationResult.Success)
-                //{
-                //    context.Result = Unauthorized(validationResult.ErrorMessage);
-                //}
+                var claims = userManagement.GetCurrentUserClaimsAsync(token).Result;
+                var identity = new ClaimsIdentity(claims, ClaimConstants.AuthType.Token);
+                context.HttpContext.User = new ClaimsPrincipal(identity);
             }
         }
     }
