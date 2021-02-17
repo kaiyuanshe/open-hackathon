@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers

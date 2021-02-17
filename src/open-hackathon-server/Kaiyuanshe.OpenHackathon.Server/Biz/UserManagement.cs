@@ -1,20 +1,14 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
-using Kaiyuanshe.OpenHackathon.Server.Helpers;
+﻿using Authing.ApiClient.Auth;
+using Authing.ApiClient.Types;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Authing.ApiClient.Types;
-using Authing.ApiClient.Auth;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.WindowsAzure.Storage.Table;
-using System.Security.Claims;
-using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IUserManagement

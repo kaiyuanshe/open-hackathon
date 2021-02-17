@@ -6,7 +6,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>

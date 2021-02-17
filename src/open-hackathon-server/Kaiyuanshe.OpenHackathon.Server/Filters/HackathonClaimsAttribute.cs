@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Net.Http.Headers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Runtime.Caching;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Filters
 {
     /// <summary>
@@ -55,7 +52,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Filters
 
                 // validate token existence and expiry
                 string token = authHeader.Substring(TokenPrefix.Length);
-                var claims = userManagement.GetCurrentUserClaimsAsync(token).Result;
+                string cacheKey = $"token-{DigestHelper.SHA512Digest(token)}";
+                var claims = CacheHelper.GetOrAdd(cacheKey,
+                    () => userManagement.GetCurrentUserClaimsAsync(token).Result,
+                    new CacheItemPolicy
+                    {
+                        AbsoluteExpiration = DateTime.UtcNow.AddMinutes(10)
+                    });
                 var identity = new ClaimsIdentity(claims, ClaimConstants.AuthType.Token);
                 context.HttpContext.User = new ClaimsPrincipal(identity);
             }
