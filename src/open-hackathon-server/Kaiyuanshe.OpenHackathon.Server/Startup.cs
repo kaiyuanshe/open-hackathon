@@ -1,9 +1,11 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Kaiyuanshe.OpenHackathon.Server.Authorize;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Middlewares;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -41,10 +43,15 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 });
+
+            // Razor pages
             services.AddRazorPages(options =>
             {
                 //options.
             });
+
+            // AuthN & AuthZ
+            RegisterAuthorizeHandlers(services);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             SwaggerStartup.ConfigureService(services);
@@ -79,6 +86,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -89,6 +97,9 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // Configure Swagger
             SwaggerStartup.Configure(app, env);
+
+            // middleware
+            RegisterMiddlewares(app);
         }
 
         private void RegisterMiddlewares(IApplicationBuilder app)
@@ -100,6 +111,23 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             var controllers = typeof(HackathonControllerBase).SubTypes();
             builder.RegisterTypes(controllers).PropertiesAutowired();
+        }
+
+        private void RegisterAuthorizeHandlers(IServiceCollection services)
+        {
+            services.AddSingleton<IAuthorizationHandler, HackathonAdministratorHandler>();
+
+            services.AddAuthentication(options =>
+            {
+                //options.AddScheme("",)
+            });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(ClaimConstants.Policy.HackathonAdministrator, policy =>
+                {
+                    policy.Requirements.Add(new HackathonAdministratorRequirement());
+                });
+            });
         }
     }
 }

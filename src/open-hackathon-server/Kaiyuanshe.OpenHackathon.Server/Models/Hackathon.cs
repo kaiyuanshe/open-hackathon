@@ -81,7 +81,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Id of the user who creates the Hackathon. ReadOnly.
         /// </summary>
         /// <example>1</example>
-        [JsonProperty("creator_id")]
+        [JsonProperty("creatorId")]
         public string CreatorId { get; internal set; }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>1000</example>
         [Range(1, int.MaxValue)]
-        [JsonProperty("max_enrollment")]
+        [JsonProperty("maxEnrollment")]
         public int? MaxEnrollment { get; set; }
 
         /// <summary>
@@ -111,55 +111,55 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// The timestamp when the hackathon is created
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("created_at")]
+        [JsonProperty("createdAt")]
         public DateTime CreateTime { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon is created
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("created_at")]
+        [JsonProperty("updatedAt")]
         public DateTime LastUpdateTime { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon starts.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("event_started_at")]
+        [JsonProperty("eventStartedAt")]
         public DateTime? EventStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon ends
         /// </summary>
-        [JsonProperty("event_ended_at")]
+        [JsonProperty("eventEndedAt")]
         public DateTime? EventEndTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon begins to accept user enrollement.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("enrollment_started_at")]
+        [JsonProperty("enrollmentStartedAt")]
         public DateTime? EnrollmentStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon stops accepting user enrollement
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("enrollment_ended_at")]
+        [JsonProperty("enrollmentEndedAt")]
         public DateTime? EnrollmentEndTime { get; set; }
 
         /// <summary>
         /// The timestamp when the judges begin to review and rate the output showed/uploaded by enrolled users
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("judge_started_at")]
+        [JsonProperty("judgeStartedAt")]
         public DateTime? JudgeStartTime { get; set; }
 
         /// <summary>
         /// The timestamp when the reviews/ratings should be completed.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("judge_ended_at")]
+        [JsonProperty("judgeEndedAt")]
         public DateTime? JudgeEndTime { get; set; }
     }
 
