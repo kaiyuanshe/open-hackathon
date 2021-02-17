@@ -11,6 +11,7 @@ using System.Reflection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 {
@@ -53,8 +54,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
             }
 
             var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository);
-            var tokenRequiredAttrs = context.MethodInfo.GetCustomAttributes<TokenRequiredAttribute>();
-            if (tokenRequiredAttrs.SingleOrDefault() != null)
+            var authorizeAttrs = context.MethodInfo.GetCustomAttributes<AuthorizeAttribute>();
+            if (authorizeAttrs.SingleOrDefault() != null)
             {
                 // Add 401 response to Swagger
                 operation.Responses.Add("401", new OpenApiResponse
@@ -66,13 +67,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                             Schema = errorRespSchema
                         }
                     },
+                    Description = "Unauthorized. Token missing or invalid.",
                 });
 
                 // Add Required header
                 if (operation.Parameters == null)
                     operation.Parameters = new List<OpenApiParameter>();
 
-               
+
             }
         }
     }

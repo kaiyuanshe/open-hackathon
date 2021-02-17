@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 using Kaiyuanshe.OpenHackathon.Server.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
@@ -15,6 +16,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     [HackathonClaims]
     public abstract class HackathonControllerBase : ControllerBase
     {
+        public IAuthorizationService AuthorizationService { get; set; }
+
         protected IList<string> GetErrors()
         {
             var modelErrors = new List<string>();

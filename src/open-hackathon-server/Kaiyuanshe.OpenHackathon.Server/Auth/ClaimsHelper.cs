@@ -4,26 +4,26 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Authorize
+namespace Kaiyuanshe.OpenHackathon.Server.Auth
 {
     public static class ClaimsHelper
     {
         public static Claim UserId(string userId)
         {
             return new Claim(
-                    ClaimConstants.ClaimType.UserId,
+                    AuthConstant.ClaimType.UserId,
                     userId,
                     ClaimValueTypes.String,
-                    ClaimConstants.Issuer.Default);
+                    AuthConstant.Issuer.Default);
         }
 
         public static Claim PlatformAdministrator(string userId)
         {
             return new Claim(
-                    ClaimConstants.ClaimType.PlatformAdministrator,
+                    AuthConstant.ClaimType.PlatformAdministrator,
                     userId,
                     ClaimValueTypes.String,
-                    ClaimConstants.Issuer.Default);
+                    AuthConstant.Issuer.Default);
         }
 
         public static bool IsPlatformAdministrator(ClaimsPrincipal claimsPrincipal)
@@ -33,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Authorize
 
             return claimsPrincipal.HasClaim(c =>
             {
-                return c.Type == ClaimConstants.ClaimType.PlatformAdministrator;
+                return c.Type == AuthConstant.ClaimType.PlatformAdministrator;
             });
         }
     }

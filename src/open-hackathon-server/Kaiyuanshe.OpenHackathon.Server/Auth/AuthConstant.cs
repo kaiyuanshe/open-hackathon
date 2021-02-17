@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Authorize
+namespace Kaiyuanshe.OpenHackathon.Server.Auth
 {
     /// <summary>
     /// Constants related to <seealso cref="Claim"/>
     /// </summary>
-    public static class ClaimConstants
+    public static class AuthConstant
     {
         public static class Issuer
         {

@@ -1,6 +1,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Kaiyuanshe.OpenHackathon.Server.Authorize;
+using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Middlewares;
@@ -119,11 +119,12 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             services.AddAuthentication(options =>
             {
-                //options.AddScheme("",)
+                options.AddScheme<DefaultAuthHandler>(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token);
+                options.DefaultScheme = AuthConstant.AuthType.Token;
             });
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(ClaimConstants.Policy.HackathonAdministrator, policy =>
+                options.AddPolicy(AuthConstant.Policy.HackathonAdministrator, policy =>
                 {
                     policy.Requirements.Add(new HackathonAdministratorRequirement());
                 });

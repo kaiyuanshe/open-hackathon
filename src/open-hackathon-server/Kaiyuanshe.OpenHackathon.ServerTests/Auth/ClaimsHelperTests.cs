@@ -1,11 +1,11 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Authorize;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 
-namespace Kaiyuanshe.OpenHackathon.ServerTests.Authorize
+namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
 {
     [TestFixture]
     public class ClaimsHelperTests
@@ -31,7 +31,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Authorize
                new ClaimsIdentity(new List<Claim>
                {
                     new Claim("type", "value"),
-                    new Claim(ClaimConstants.ClaimType.PlatformAdministrator, "foo")
+                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "foo")
                }))));
 
         }

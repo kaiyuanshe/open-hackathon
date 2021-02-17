@@ -1,4 +1,4 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Authorize;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -60,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Filters
                     {
                         AbsoluteExpiration = DateTime.UtcNow.AddMinutes(10)
                     });
-                var identity = new ClaimsIdentity(claims, ClaimConstants.AuthType.Token);
+                var identity = new ClaimsIdentity(claims, AuthConstant.AuthType.Token);
                 context.HttpContext.User = new ClaimsPrincipal(identity);
             }
         }

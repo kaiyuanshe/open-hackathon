@@ -1,4 +1,4 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Authorize;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Filters;
 using Kaiyuanshe.OpenHackathon.Server.Models;
@@ -42,10 +42,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [Route("hackathon/{name}")]
-        [Authorize(Policy = ClaimConstants.Policy.HackathonAdministrator)]
+        [Authorize]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression("^[A-Za-z0-9]{1,100}$")] string name,
             [FromBody] Hackathon parameter,
@@ -60,13 +61,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var entity = await HackathonManager.GetHackathonEntityByNameAsync(name, cancellationToken);
             if (entity != null)
             {
+                // make sure only Admin of this hackathon can update it
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
+                if (!authorizationResult.Succeeded)
+                {
+                    return StatusCode(403, ErrorResponse.Forbidden("access denied. Please contact the administrator of the hackathon."));
+                }
+
                 var updated = await HackathonManager.UpdateHackathonAsync(parameter, cancellationToken);
-                return Ok(updated);
+                return Ok(ResponseBuilder.BuildHackathon(updated));
             }
             else
             {
                 var created = await HackathonManager.CreateHackathonAsync(parameter, cancellationToken);
-                return Ok(created);
+                return Ok(ResponseBuilder.BuildHackathon(created));
             }
         }
     }

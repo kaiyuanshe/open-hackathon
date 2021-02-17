@@ -1,19 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Authorize
+namespace Kaiyuanshe.OpenHackathon.Server.Auth
 {
     public class HackathonAdministratorRequirement : IAuthorizationRequirement
     {
 
     }
 
-    public class HackathonAdministratorHandler : AuthorizationHandler<HackathonAdministratorRequirement>
+    public class HackathonAdministratorHandler : AuthorizationHandler<HackathonAdministratorRequirement, HackathonEntity>
     {
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HackathonAdministratorRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HackathonAdministratorRequirement requirement, HackathonEntity resource)
         {
             if (ClaimsHelper.IsPlatformAdministrator(context.User))
             {
