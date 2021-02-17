@@ -1,6 +1,5 @@
+using Kaiyuanshe.OpenHackathon.Server;
 using NUnit.Framework;
-using System.Collections.Generic;
-using Kaiyuanshe.OpenHackathon.Server.Helpers;
 using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers

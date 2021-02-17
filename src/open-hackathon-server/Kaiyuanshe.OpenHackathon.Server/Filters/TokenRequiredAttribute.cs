@@ -11,7 +11,6 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Kaiyuanshe.OpenHackathon.ServerTests")]
 namespace Kaiyuanshe.OpenHackathon.Server.Filters
 {
     /// <summary>
