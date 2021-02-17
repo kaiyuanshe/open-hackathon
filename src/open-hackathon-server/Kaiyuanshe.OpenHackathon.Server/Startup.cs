@@ -119,7 +119,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             services.AddAuthentication(options =>
             {
-
+                //options.AddScheme("",)
             });
             services.AddAuthorization(options =>
             {
