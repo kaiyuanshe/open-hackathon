@@ -1,5 +1,6 @@
 ﻿using Authing.ApiClient.Auth;
 using Authing.ApiClient.Types;
+using Kaiyuanshe.OpenHackathon.Server.Authorize;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;

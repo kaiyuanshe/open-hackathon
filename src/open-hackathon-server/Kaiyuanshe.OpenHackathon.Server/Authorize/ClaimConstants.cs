@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Biz
+namespace Kaiyuanshe.OpenHackathon.Server.Authorize
 {
     /// <summary>
     /// Constants related to <seealso cref="Claim"/>
@@ -66,6 +66,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             /// Claim value: {hackathon Name}.{team Id}
             /// </summary>
             public const string TeamMember = "TeamMember";
+        }
+
+        public static class Policy
+        {
+            /// <summary>
+            /// Policy to administrate a hackathon.
+            /// 
+            /// Allowed claims: PlatformAdministrator, HackathonAdministrator
+            /// </summary>
+            public const string HackathonAdministrator = "HackathonAdministrator";
         }
     }
 }

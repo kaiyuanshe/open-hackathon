@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Biz
+namespace Kaiyuanshe.OpenHackathon.Server.Authorize
 {
     public static class ClaimsHelper
     {
@@ -24,6 +24,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     userId,
                     ClaimValueTypes.String,
                     ClaimConstants.Issuer.Default);
+        }
+
+        public static bool IsPlatformAdministrator(ClaimsPrincipal claimsPrincipal)
+        {
+            if (claimsPrincipal == null)
+                return false;
+
+            return claimsPrincipal.HasClaim(c =>
+            {
+                return c.Type == ClaimConstants.ClaimType.PlatformAdministrator;
+            });
         }
     }
 }
