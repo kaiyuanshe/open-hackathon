@@ -1,4 +1,4 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Authorize;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
@@ -121,10 +121,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(2, claims.Count());
 
             // user id
-            Assert.AreEqual(ClaimConstants.ClaimType.UserId, claims.First().Type);
+            Assert.AreEqual(AuthConstant.ClaimType.UserId, claims.First().Type);
             Assert.AreEqual(userId, claims.First().Value);
             Assert.AreEqual(ClaimValueTypes.String, claims.First().ValueType);
-            Assert.AreEqual(ClaimConstants.Issuer.Default, claims.First().Issuer);
+            Assert.AreEqual(AuthConstant.Issuer.Default, claims.First().Issuer);
 
             // platform admin
             Assert.AreEqual("type", claims.Last().Type);
@@ -406,10 +406,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // verify
             Mock.VerifyAll(storage, participantTable);
             Assert.IsNotNull(claim);
-            Assert.AreEqual(ClaimConstants.ClaimType.PlatformAdministrator, claim.Type);
+            Assert.AreEqual(AuthConstant.ClaimType.PlatformAdministrator, claim.Type);
             Assert.AreEqual(userId, claim.Value);
             Assert.AreEqual(ClaimValueTypes.String, claim.ValueType);
-            Assert.AreEqual(ClaimConstants.Issuer.Default, claim.Issuer);
+            Assert.AreEqual(AuthConstant.Issuer.Default, claim.Issuer);
 
         }
     }

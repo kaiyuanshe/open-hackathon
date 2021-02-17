@@ -46,41 +46,5 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(errorResponse.error.message.Contains("400"));
             Assert.IsTrue(errorResponse.error.message.Contains("Some Message"));
         }
-
-        [Test]
-        public async Task AuthingTest()
-        {
-            // input
-            //var parameter = new UserInfo { Token = "token", UserPoolId = "pool" };
-            //var cancellationToken = CancellationToken.None;
-            //var tokenEntity = new UserTokenEntity { Token = "token2" };
-            //var jwtTokenStatus = new JWTTokenStatus { Status = true };
-
-            //// Moq
-            //var loginManagerMoq = new Mock<IUserManagement>();
-            //loginManagerMoq.Setup(p => p.GetTokenEntityAsync("token", cancellationToken)).ReturnsAsync(tokenEntity);
-            //loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
-
-            //// test
-            //var controller = new LoginController
-            //{
-            //    LoginManager = loginManagerMoq.Object,
-            //    ResponseBuilder = new DefaultResponseBuilder(),
-            //};
-            //var resp = await controller.Authing(parameter, cancellationToken);
-
-            //// Verify
-            //Mock.VerifyAll();
-            //loginManagerMoq.Verify(p => p.AuthingAsync(parameter, cancellationToken), Times.Once);
-            //loginManagerMoq.Verify(p => p.GetTokenEntityAsync("token", cancellationToken), Times.Once);
-            //loginManagerMoq.Verify(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken), Times.Once);
-            //loginManagerMoq.VerifyNoOtherCalls();
-            //Assert.IsTrue(resp is OkObjectResult);
-            //Assert.IsTrue(((OkObjectResult)resp).Value is UserInfo);
-            //var info = ((OkObjectResult)resp).Value as UserInfo;
-            //Assert.AreEqual(null, info.Name);
-            //Assert.AreEqual("contoso", info.Company);
-            //Assert.AreEqual("token2", info.Token);
-        }
     }
 }
