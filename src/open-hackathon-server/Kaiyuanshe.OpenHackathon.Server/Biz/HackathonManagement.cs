@@ -91,6 +91,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken)
         {
+            #region Insert HackathonEntity
             var entity = new HackathonEntity
             {
                 PartitionKey = request.Name,
@@ -103,7 +104,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 MaxEnrollment = request.MaxEnrollment.HasValue ? request.MaxEnrollment.Value : 0,
                 Banners = request.Banners,
                 CreateTime = DateTime.UtcNow,
-                // TODO CreatorId=""
+                CreatorId = request.CreatorId,
                 Detail = request.Detail,
                 DisplayName = request.DisplayName,
                 EventStartTime = request.EventStartTime,
@@ -115,6 +116,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Location = request.Location,
             };
             await StorageContext.HackathonTable.InsertAsync(entity, cancellationToken);
+            #endregion
+
+            #region Add creator as Admin
+            ParticipantEntity participant = new ParticipantEntity
+            {
+                PartitionKey = request.Name,
+                RowKey = request.CreatorId,
+                CreateTime = DateTime.UtcNow,
+                Role = ParticipantRole.Administrator,
+            };
+            await StorageContext.ParticipantTable.InsertAsync(participant, cancellationToken);
+            #endregion
+
             return entity;
         }
     }

@@ -47,7 +47,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string Summary { get; set; }
 
         /// <summary>
-        /// Detailed description. Usually rich-text html. Required. Max length is 64K.
+        /// Detailed description. Usually rich-text html. Max length is 64K.
         /// </summary>
         /// <example>A detailed rich-text html to desribe the hackathon in detail</example>
         [MaxLength(65535)]
