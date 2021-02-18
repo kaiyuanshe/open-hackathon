@@ -1,14 +1,19 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Mime;
 using System.Runtime.Caching;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Auth
@@ -25,16 +30,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
     {
         static readonly string TokenPrefix = "token "; // there is a trailling space
         private IUserManagement userManagement;
+        private Func<HttpResponse, string, CancellationToken, Task> writeToResponse;
 
         public DefaultAuthHandler(IOptionsMonitor<DefaultAuthSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder, ISystemClock clock,
-            IUserManagement userManagement)
+            IUserManagement userManagement,
+            Func<HttpResponse, string, CancellationToken, Task> writeToResponse = null)
             : base(options, logger, encoder, clock)
         {
             this.userManagement = userManagement;
+            this.writeToResponse = writeToResponse ?? HttpResponseWritingExtensions.WriteAsync;
         }
-        
+
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             string failMessage = @"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN";
@@ -63,6 +71,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             var identity = new ClaimsIdentity(claims, AuthConstant.AuthType.Token);
             var claimsPrincipal = new ClaimsPrincipal(identity);
             return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, AuthConstant.AuthType.Token));
+        }
+
+        protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
+        {
+            string failMessage = @"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN";
+            Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            Response.ContentType = MediaTypeNames.Application.Json;
+            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Unauthorized(failMessage)), CancellationToken.None);
         }
     }
 }

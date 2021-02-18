@@ -27,6 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
+        [Authorize]
         public async Task<object> ListHackathon(CancellationToken cancellationToken)
         {
             var entities = await HackathonManager.SearchHackathonAsync(null, cancellationToken);

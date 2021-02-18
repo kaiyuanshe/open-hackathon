@@ -11,8 +11,8 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
@@ -124,6 +124,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             Assert.AreEqual("value", claim.Value);
             Assert.AreEqual("valueType", claim.ValueType);
             Assert.AreEqual("issuer", claim.Issuer);
+        }
+
+        [Test]
+        public async Task HandleChallengeAsyncTest()
+        {
+            AuthenticationProperties authenticationProperties = new AuthenticationProperties();
+            Func<HttpResponse, string, CancellationToken, Task> writeAsync = (resp, text, token) => Task.CompletedTask;
+
+            // mock
+            var userMgmtMock = new Mock<IUserManagement>();
+            var httpContextMock = new Mock<HttpContext>();
+            var httpResponseMock = new Mock<HttpResponse>();
+            httpContextMock.SetupGet(h => h.Response).Returns(httpResponseMock.Object);
+            httpResponseMock.SetupSet(m => m.StatusCode = 401);
+            httpResponseMock.SetupSet(m => m.ContentType = MediaTypeNames.Application.Json);
+
+            // test
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, writeAsync);
+            await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
+            await handler.ChallengeAsync(authenticationProperties);
+
+            // verify
+            Mock.VerifyAll(userMgmtMock, httpContextMock, httpResponseMock);
+            userMgmtMock.VerifyNoOtherCalls();
+            httpContextMock.VerifyNoOtherCalls();
+            httpResponseMock.VerifyNoOtherCalls();
         }
     }
 }
