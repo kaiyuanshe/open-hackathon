@@ -38,7 +38,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// If hackathon with the {name} exists, will retrive update it accordingly.
         /// Else create a new hackathon.
         /// </summary>
-        /// <param name="parameter" example="foo"></param>
+        /// <param name="parameter"></param>
+        /// <param name="name" example="foo">Name of hackathon. Must contain only letters and/or numbers</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>

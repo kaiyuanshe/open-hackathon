@@ -29,7 +29,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # Run test first
+    # Setup .Net Core
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -59,7 +59,7 @@ jobs:
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
       with:
-        images: openhackathon/oph-server-v2  # list of Docker images to use as base name for tags
+        images: openhackathon/oph-server-v2,kysprodacr.azurecr.cn/oph-server-v2  # list of Docker images to use as base name for tags
         tag-sha: true # add git short SHA as Docker tag
     
     - name: Set up QEMU
@@ -73,6 +73,13 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_ACCESSTOKEN }}
+
+    - name: Login to Azure Container Registry	
+      uses: docker/login-action@v1 	
+      with:	
+        registry: kysprodacr.azurecr.cn	
+        username: ${{ secrets.REGISTRY_USERNAME }}	
+        password: ${{ secrets.REGISTRY_PASSWORD }}
       
     - name: Build and Push image
       uses: docker/build-push-action@v2
@@ -92,4 +99,4 @@ jobs:
       with:
         app-name: 'hackathon-api'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        images: 'openhackathon/oph-server-v2:sha-${{ steps.short-sha.outputs.sha }}'
+        images: 'kysprodacr.azurecr.cn/oph-server-v2:sha-${{ steps.short-sha.outputs.sha }}'
