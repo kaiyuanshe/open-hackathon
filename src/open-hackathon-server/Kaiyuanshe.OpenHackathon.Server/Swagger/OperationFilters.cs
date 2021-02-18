@@ -1,17 +1,10 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+using Kaiyuanshe.OpenHackathon.Server.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-using System;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.IO;
 using System.Reflection;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Kaiyuanshe.OpenHackathon.Server.Models;
-using Kaiyuanshe.OpenHackathon.Server.Filters;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 {
@@ -41,7 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
     }
 
     /// <summary>
-    /// Add 401 response to schema for all methods annotated with <seealso cref="TokenRequiredAttribute"/>
+    /// Add 401 response to schema for all methods annotated with <seealso cref="AuthorizeAttribute"/>
     /// </summary>
     public class UnauthorizedResponseOperationFilter : IOperationFilter
     {

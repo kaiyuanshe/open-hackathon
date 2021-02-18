@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Net.Mime;
-using Kaiyuanshe.OpenHackathon.Server.Filters;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
@@ -13,7 +9,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     [Route("v2")]
-    [HackathonClaims]
     public abstract class HackathonControllerBase : ControllerBase
     {
         public IAuthorizationService AuthorizationService { get; set; }
