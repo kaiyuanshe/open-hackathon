@@ -46,18 +46,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            string failMessage = @"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN";
             if (!Request.Headers.ContainsKey(HeaderNames.Authorization))
             {
                 // No "Authorization" header
-                return AuthenticateResult.Fail(failMessage);
+                return AuthenticateResult.Fail(Resources.Auth_Unauthorized);
             }
 
             // malformatted
             var authHeader = Request.Headers[HeaderNames.Authorization].LastOrDefault();
             if (!authHeader.StartsWith(TokenPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return AuthenticateResult.Fail(failMessage);
+                return AuthenticateResult.Fail(Resources.Auth_Unauthorized);
             }
 
             // validate token existence and expiry
@@ -65,7 +64,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             var validationResult = await userManagement.ValidateTokenAsync(token);
             if (validationResult != ValidationResult.Success)
             {
-                return AuthenticateResult.Fail(failMessage);
+                return AuthenticateResult.Fail(Resources.Auth_Unauthorized);
             }
 
             // get Claims
@@ -83,10 +82,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            string failMessage = @"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN";
             Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             Response.ContentType = MediaTypeNames.Application.Json;
-            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Unauthorized(failMessage)), CancellationToken.None);
+            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Unauthorized(Resources.Auth_Unauthorized)), CancellationToken.None);
         }
     }
 }
