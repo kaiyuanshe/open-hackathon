@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
@@ -61,6 +62,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
             // validate token existence and expiry
             string token = authHeader.Substring(TokenPrefix.Length);
+            var validationResult = await userManagement.ValidateTokenAsync(token);
+            if (validationResult != ValidationResult.Success)
+            {
+                return AuthenticateResult.Fail(failMessage);
+            }
+
+            // get Claims
             string cacheKey = $"token-{DigestHelper.SHA512Digest(token)}";
             var claims = await CacheHelper.GetOrAddAsync(cacheKey,
                 () => userManagement.GetCurrentUserClaimsAsync(token),

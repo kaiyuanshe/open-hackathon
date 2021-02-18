@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Mime;
 using System.Security.Claims;
@@ -39,7 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
         }
 
         [Test]
-        public async Task AuthenticateAsyncTestTokenMissing()
+        public async Task AuthenticateAsyncTest_TokenMissing()
         {
             // mock
             var userMgmtMock = new Mock<IUserManagement>();
@@ -65,7 +66,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
         [TestCase("abc")]
         [TestCase("token")]
         [TestCase("")]
-        public async Task AuthenticateAsyncTestTokenMalformatted(string tokenValue)
+        public async Task AuthenticateAsyncTest_TokenMalformatted(string tokenValue)
         {
             // mock
             var userMgmtMock = new Mock<IUserManagement>();
@@ -89,6 +90,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
         }
 
         [Test]
+        public async Task AuthenticateAsyncTest_ValidateFailed()
+        {
+            string token = "TOKENVALUE";
+            ValidationResult validationResult = new ValidationResult("reason");
+
+            // mock
+            var userMgmtMock = new Mock<IUserManagement>();
+            userMgmtMock.Setup(m => m.ValidateTokenAsync(token, It.IsAny<CancellationToken>())).ReturnsAsync(validationResult);
+            var httpContextMock = new Mock<HttpContext>();
+            var httpRequestMock = new Mock<HttpRequest>();
+            var headerMock = new Mock<IHeaderDictionary>();
+            httpContextMock.SetupGet(h => h.Request).Returns(httpRequestMock.Object);
+            httpRequestMock.SetupGet(h => h.Headers).Returns(headerMock.Object);
+            headerMock.Setup(h => h.ContainsKey(HeaderNames.Authorization)).Returns(true);
+            headerMock.SetupGet(p => p[HeaderNames.Authorization]).Returns(new StringValues("token TOKENVALUE"));
+
+            // test
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object);
+            await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
+            var result = await handler.AuthenticateAsync();
+
+            // verify
+            Mock.VerifyAll(userMgmtMock, httpContextMock, httpRequestMock, headerMock);
+            userMgmtMock.VerifyNoOtherCalls();
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Failure.Message.Contains("token is required"));
+        }
+
+        [Test]
         public async Task AuthenticateAsyncTestPassed()
         {
             string token = "TOKENVALUE";
@@ -97,9 +127,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             {
                new Claim("type", "value", "valueType", "issuer"),
             };
+            ValidationResult validationResult = ValidationResult.Success;
 
             // mock
             var userMgmtMock = new Mock<IUserManagement>();
+            userMgmtMock.Setup(m => m.ValidateTokenAsync(token, It.IsAny<CancellationToken>())).ReturnsAsync(validationResult);
             userMgmtMock.Setup(m => m.GetCurrentUserClaimsAsync(token, cancellationToken)).ReturnsAsync(claims);
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();
@@ -116,6 +148,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
 
             // verify
             Mock.VerifyAll(userMgmtMock, httpContextMock, httpRequestMock, headerMock);
+            userMgmtMock.VerifyNoOtherCalls();
             Assert.IsTrue(result.Succeeded);
             Assert.IsNotNull(result.Principal);
             Assert.AreEqual(1, result.Principal.Claims.Count());
