@@ -33,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get Claims of user associated with an AccessToken
+        /// Get Claims of user associated with an Token. Return empty list if token is invalid.
         /// </summary>
         /// <param name="token"></param>
         /// <param name="cancellationToken"></param>
