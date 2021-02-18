@@ -10,7 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class LoginController : HackathonControllerBase
     {
-        public IUserManagement LoginManager { get; set; }
+        public IUserManagement userManagement { get; set; }
 
         public IResponseBuilder ResponseBuilder { get; set; }
 
@@ -28,19 +28,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
+                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
             }
 
-            var tokenStatus = await LoginManager.ValidateTokenRemotelyAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
+            var tokenStatus = await userManagement.ValidateTokenRemotelyAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
             if (!tokenStatus.Status.GetValueOrDefault(false))
             {
                 // token invalid
-                return BadRequest(ErrorResponse.BadArgument($"Invalid accessToken. Code: {tokenStatus.Code.GetValueOrDefault(0)}, Message: {tokenStatus.Message}"));
+                return BadRequest(ErrorResponse.BadArgument(string.Format(
+                    Resources.Auth_Token_ValidateRemoteFailed,
+                    tokenStatus.Code.GetValueOrDefault(0),
+                    tokenStatus.Message)));
             }
 
 
-            await LoginManager.AuthingAsync(parameter, cancellationToken);
-            var tokenEntity = await LoginManager.GetTokenEntityAsync(parameter.Token, cancellationToken);
+            await userManagement.AuthingAsync(parameter, cancellationToken);
             return Ok(parameter);
         }
     }

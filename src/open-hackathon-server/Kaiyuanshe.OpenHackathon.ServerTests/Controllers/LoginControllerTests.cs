@@ -30,7 +30,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             // test
             var controller = new LoginController
             {
-                LoginManager = loginManagerMoq.Object,
+                userManagement = loginManagerMoq.Object,
             };
             var resp = await controller.Authing(parameter, cancellationToken);
 

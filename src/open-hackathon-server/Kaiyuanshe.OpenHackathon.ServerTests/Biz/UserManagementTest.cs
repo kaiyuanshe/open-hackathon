@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+﻿using Kaiyuanshe.OpenHackathon.Server;
+using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
@@ -174,7 +175,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var result = await userMgmt.ValidateTokenAsync(token);
 
             Assert.AreNotEqual(ValidationResult.Success, result);
-            Assert.IsTrue(result.ErrorMessage.Contains("required"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, result.ErrorMessage);
         }
 
         [Test]
@@ -204,7 +205,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             tokenTable.Verify(t => t.RetrieveAsync(hash, string.Empty, cancellationToken), Times.Once);
             tokenTable.VerifyNoOtherCalls();
             Assert.AreNotEqual(ValidationResult.Success, result);
-            Assert.IsTrue(result.ErrorMessage.Contains("doesn't exist"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, result.ErrorMessage);
         }
 
         [Test]
@@ -282,7 +283,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var validationResult = await userMgmt.ValidateTokenAsync(tokenEntity, cancellationToken);
 
             Assert.AreNotEqual(ValidationResult.Success, validationResult);
-            Assert.IsTrue(validationResult.ErrorMessage.Contains("doesn't exist"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, validationResult.ErrorMessage);
         }
 
         [Test]

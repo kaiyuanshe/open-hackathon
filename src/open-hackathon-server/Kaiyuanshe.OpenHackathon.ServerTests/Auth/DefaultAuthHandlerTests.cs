@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+﻿using Kaiyuanshe.OpenHackathon.Server;
+using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -59,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             // verify
             Mock.VerifyAll(userMgmtMock, httpContextMock, httpRequestMock, headerMock);
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Failure.Message.Contains("token is required"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, result.Failure.Message);
         }
 
 
@@ -86,7 +87,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             // verify
             Mock.VerifyAll(userMgmtMock, httpContextMock, httpRequestMock, headerMock);
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Failure.Message.Contains("token is required"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, result.Failure.Message);
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             Mock.VerifyAll(userMgmtMock, httpContextMock, httpRequestMock, headerMock);
             userMgmtMock.VerifyNoOtherCalls();
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Failure.Message.Contains("token is required"));
+            Assert.AreEqual(Resources.Auth_Unauthorized, result.Failure.Message);
         }
 
         [Test]

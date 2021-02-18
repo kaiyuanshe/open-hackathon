@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ErrorResponse.BadArgument("Invalid request", details: GetErrors()));
+                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
             }
 
             parameter.Name = name;
@@ -65,7 +65,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
                 if (!authorizationResult.Succeeded)
                 {
-                    return StatusCode(403, ErrorResponse.Forbidden("access denied. Please contact the administrator of the hackathon."));
+                    return StatusCode(403, ErrorResponse.Forbidden(Resources.Request_Forbidden_HackAdmin));
                 }
 
                 var updated = await HackathonManager.UpdateHackathonAsync(parameter, cancellationToken);

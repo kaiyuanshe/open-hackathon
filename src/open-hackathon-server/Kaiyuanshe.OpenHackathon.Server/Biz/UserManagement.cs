@@ -94,9 +94,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public async Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userPoolId))
-                throw new ArgumentNullException("userPoolId is null or empty");
+                throw new ArgumentNullException(string.Format(Resources.Parameter_Required, nameof(userPoolId)));
             if (string.IsNullOrWhiteSpace(token))
-                throw new ArgumentNullException("accessToken is null or empty");
+                throw new ArgumentNullException(string.Format(Resources.Parameter_Required, nameof(token)));
 
             var authenticationClient = new AuthenticationClient(userPoolId);
             return await authenticationClient.CurrentUser(token, cancellationToken);
@@ -147,7 +147,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             // the token must not be empty
             if (string.IsNullOrWhiteSpace(token))
-                return new ValidationResult(@"token is required. Please add it to Http Headers: Headers[""Authorization""]=token TOKEN");
+                return new ValidationResult(Resources.Auth_Unauthorized);
 
             var tokenEntity = await GetTokenEntityAsync(token, cancellationToken);
             return await ValidateTokenAsync(tokenEntity, cancellationToken);
@@ -157,12 +157,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             // existence
             if (tokenEntity == null)
-                return Task.FromResult(new ValidationResult($"token doesn't exist."));
+                return Task.FromResult(new ValidationResult(Resources.Auth_Unauthorized));
 
             // expiry
             if (tokenEntity.TokenExpiredAt < DateTime.UtcNow)
             {
-                return Task.FromResult(new ValidationResult($"token expired at {tokenEntity.TokenExpiredAt.ToString("o")}, please login: {tokenEntity.Token}."));
+                return Task.FromResult(new ValidationResult(string.Format(Resources.Auth_TokenExpired, tokenEntity.TokenExpiredAt.ToString("o"))));
             }
 
             return Task.FromResult(ValidationResult.Success);
@@ -171,9 +171,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public async Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userPoolId))
-                throw new ArgumentNullException("userPoolId is null or empty");
+                throw new ArgumentNullException(string.Format(Resources.Parameter_Required, nameof(userPoolId)));
             if (string.IsNullOrWhiteSpace(token))
-                throw new ArgumentNullException("accessToken is null or empty");
+                throw new ArgumentNullException(string.Format(Resources.Parameter_Required, nameof(token)));
 
             var authenticationClient = new AuthenticationClient(userPoolId);
             var jwtTokenStatus = await authenticationClient.CheckLoginStatus(token, cancellationToken);
