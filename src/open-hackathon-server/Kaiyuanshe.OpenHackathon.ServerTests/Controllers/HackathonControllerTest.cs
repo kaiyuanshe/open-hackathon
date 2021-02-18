@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         public async Task CreateOrUpdateTest_Create()
         {
             var hack = new Hackathon();
-            var name = "test1";
+            var name = "Test1";
             var inserted = new HackathonEntity {
                 PartitionKey = "test2",
                 AutoApprove = true
@@ -44,7 +44,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackManagerMock);
             hackManagerMock.VerifyNoOtherCalls();
-            Assert.AreEqual(name, hack.Name);
+            Assert.AreEqual(name.ToLower(), hack.Name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Hackathon resp = (Hackathon)objectResult.Value;

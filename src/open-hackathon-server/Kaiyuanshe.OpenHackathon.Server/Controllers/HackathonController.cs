@@ -56,9 +56,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
             }
-
-            parameter.Name = name;
-            var entity = await HackathonManager.GetHackathonEntityByNameAsync(name, cancellationToken);
+            string nameLowercase = name.ToLower();
+            parameter.Name = nameLowercase;
+            var entity = await HackathonManager.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             if (entity != null)
             {
                 // make sure only Admin of this hackathon can update it
@@ -73,6 +73,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
             else
             {
+                parameter.CreatorId = CurrentUserId;
                 var created = await HackathonManager.CreateHackathonAsync(parameter, cancellationToken);
                 return Ok(ResponseBuilder.BuildHackathon(created));
             }

@@ -87,28 +87,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [Test]
         public async Task CreateHackathonAsyncTest()
         {
+            // input
             var request = new Hackathon
             {
                 Name = "test",
                 Location = "loc",
                 EventStartTime = DateTime.UtcNow,
             };
+            CancellationToken cancellationToken = CancellationToken.None;
 
+            // mock
             var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), CancellationToken.None));
+            hackathonTableMock.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken));
+
+            var participantTableMock = new Mock<IParticipantTable>();
+            participantTableMock.Setup(p => p.InsertAsync(It.IsAny<ParticipantEntity>(), cancellationToken));
 
             var storageContextMock = new Mock<IStorageContext>();
             storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+            storageContextMock.SetupGet(p => p.ParticipantTable).Returns(participantTableMock.Object);
 
+            // test
             var hackathonManager = new HackathonManagement();
             hackathonManager.StorageContext = storageContextMock.Object;
             var result = await hackathonManager.CreateHackathonAsync(request, CancellationToken.None);
 
-            Mock.VerifyAll();
-            hackathonTableMock.Verify(p => p.InsertAsync(It.IsAny<HackathonEntity>(), CancellationToken.None), Times.Once);
+            // verify
+            Mock.VerifyAll(hackathonTableMock, participantTableMock, storageContextMock);
             hackathonTableMock.VerifyNoOtherCalls();
-
-            storageContextMock.VerifyGet(p => p.HackathonTable, Times.Once);
+            participantTableMock.VerifyNoOtherCalls();
             storageContextMock.VerifyNoOtherCalls();
 
             Assert.AreEqual("loc", result.Location);
