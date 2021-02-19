@@ -88,6 +88,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hackathon with name {0} not found. Try PUT to create a new one..
+        /// </summary>
+        internal static string Hackathon_NotFound {
+            get {
+                return ResourceManager.GetString("Hackathon_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required parameter {0} is null or empty..
         /// </summary>
         internal static string Parameter_Required {
