@@ -4,6 +4,7 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,12 +19,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
-      
+
         /// <summary>
         /// Get Hackathon By name. Return null if not found.
         /// </summary>
         /// <returns></returns>
         Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
+        /// </summary>
+        /// <param name="name">name of Hackathon</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search hackathon
@@ -32,7 +41,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default);
-      
+
         /// <summary>
         /// Update hackathon from request.
         /// </summary>
@@ -91,6 +100,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             var entity = await StorageContext.HackathonTable.RetrieveAsync(name, string.Empty, cancellationToken);
             return entity;
+        }
+
+        public async Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
+        {
+            string cacheKey = CacheKey.Get(CacheKey.Section.HackathonAdmin, name);
+            return await CacheHelper.GetOrAddAsync(cacheKey,
+                async () =>
+                {
+                    var allParticipants = await StorageContext.ParticipantTable.ListParticipantsByHackathonAsync(name, cancellationToken);
+                    return allParticipants.Where(p => p.Role.HasFlag(ParticipantRole.Administrator));
+                },
+                CacheHelper.ExpireIn10M);
         }
 
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)

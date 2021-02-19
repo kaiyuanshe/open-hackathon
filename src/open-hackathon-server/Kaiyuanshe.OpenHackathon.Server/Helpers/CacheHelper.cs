@@ -7,6 +7,14 @@ namespace Kaiyuanshe.OpenHackathon.Server
 {
     public static class CacheHelper
     {
+        /// <summary>
+        /// Cache entry evicted in 10 minutes.
+        /// </summary>
+        public static CacheItemPolicy ExpireIn10M = new CacheItemPolicy
+        {
+            AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(10)
+        };
+
         static MemoryCache cache = MemoryCache.Default;
 
         public static T GetOrAdd<T>(string key, Func<T> supplyValue, CacheItemPolicy policy)
@@ -63,10 +71,13 @@ namespace Kaiyuanshe.OpenHackathon.Server
         public static class Section
         {
             public static readonly string Token = "token";
+            public static readonly string User = "user";
+            public static readonly string HackathonAdmin = "hackathonAdmin";
         }
 
         public static string Get(string section, string key)
         {
+            key = key ?? string.Empty;
             return string.IsNullOrWhiteSpace(section) ? key : $"{section}-{key}";
         }
     }

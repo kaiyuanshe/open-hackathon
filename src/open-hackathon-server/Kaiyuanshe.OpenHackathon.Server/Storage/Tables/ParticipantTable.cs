@@ -48,12 +48,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
             return await RetrieveAsync(string.Empty, userId, cancellationToken);
         }
 
-        public async Task<IEnumerable<ParticipantEntity>> ListParticipantsByHackathonAsync(string hackathonName, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ParticipantEntity>> ListParticipantsByHackathonAsync(string name, CancellationToken cancellationToken)
         {
             var filter = TableQuery.GenerateFilterCondition(
                 nameof(ParticipantEntity.PartitionKey),
                 QueryComparisons.Equal,
-                hackathonName);
+                name);
             TableQuery<ParticipantEntity> query = new TableQuery<ParticipantEntity>().Where(filter);
             List<ParticipantEntity> results = new List<ParticipantEntity>();
             await ExecuteQuerySegmentedAsync(query, segment =>
