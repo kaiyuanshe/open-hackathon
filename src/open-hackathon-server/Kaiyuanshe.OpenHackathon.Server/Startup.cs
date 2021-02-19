@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -116,18 +117,29 @@ namespace Kaiyuanshe.OpenHackathon.Server
         private void RegisterAuthorizeHandlers(IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationHandler, HackathonAdministratorHandler>();
+            services.AddSingleton<IAuthorizationHandler, NoRequirementHandler>();
 
             services.AddAuthentication(options =>
             {
                 options.AddScheme<DefaultAuthHandler>(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token);
                 options.DefaultScheme = AuthConstant.AuthType.Token;
             });
+
+            Action<AuthorizationPolicyBuilder> noRequirementPolicy = policy =>
+            {
+                policy.Requirements.Add(new NoRequirement());
+            };
+
             services.AddAuthorization(options =>
             {
+                // real policies
                 options.AddPolicy(AuthConstant.Policy.HackathonAdministrator, policy =>
                 {
                     policy.Requirements.Add(new HackathonAdministratorRequirement());
                 });
+
+                // empty policies to make swagger UI happy
+                options.AddPolicy(AuthConstant.PolicyForSwagger.HackathonAdministrator, noRequirementPolicy);
             });
         }
     }

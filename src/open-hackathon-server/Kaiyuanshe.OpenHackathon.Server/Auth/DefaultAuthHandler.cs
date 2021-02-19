@@ -11,7 +11,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
-using System.Runtime.Caching;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading;
@@ -82,6 +81,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             Response.ContentType = MediaTypeNames.Application.Json;
             await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Unauthorized(Resources.Auth_Unauthorized)), CancellationToken.None);
+        }
+
+        protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
+        {
+            Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            Response.ContentType = MediaTypeNames.Application.Json;
+            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Forbidden(Resources.Auth_Forbidden)), CancellationToken.None);
         }
     }
 }
