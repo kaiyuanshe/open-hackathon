@@ -78,7 +78,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
         public async Task AuthingAsync(UserInfo userInfo, CancellationToken cancellationToken = default)
         {
+            userInfo.Id = userInfo.Id?.ToLower();
             await StorageContext.UserTable.SaveUserAsync(userInfo, cancellationToken);
+            CacheHelper.Remove(CacheKey.Get(CacheKey.Section.User, userInfo.Id));
 
             // UserTokenEntity. 
             var userToken = new UserTokenEntity

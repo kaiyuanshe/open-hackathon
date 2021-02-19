@@ -35,7 +35,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         /// <summary>
         /// Create or update hackathon. 
-        /// If hackathon with the {name} exists, will retrive update it accordingly.
+        /// If hackathon with the {name} exists, will retrive update it accordingly(must be admin of the hackathon).
         /// Else create a new hackathon.
         /// </summary>
         /// <param name="parameter"></param>

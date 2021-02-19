@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,73 +18,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
     [TestFixture]
     public class HackathonManagementTest
     {
-        [Test]
-        public async Task GetHackathonEntityByNameAsyncTest()
-        {
-            string name = "test";
-            var entity = new HackathonEntity
-            {
-                Location = "loc"
-            };
-
-            var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
-                .ReturnsAsync(entity);
-
-            var storageContextMock = new Mock<IStorageContext>();
-            storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
-
-            var hackathonManager = new HackathonManagement();
-            hackathonManager.StorageContext = storageContextMock.Object;
-            var result = await hackathonManager.GetHackathonEntityByNameAsync(name, CancellationToken.None);
-
-            Mock.VerifyAll();
-            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
-            hackathonTableMock.VerifyNoOtherCalls();
-
-            storageContextMock.VerifyGet(p => p.HackathonTable, Times.Once);
-            storageContextMock.VerifyNoOtherCalls();
-
-            Assert.AreEqual("loc", result.Location);
-        }
-
-        [Test]
-        public async Task UpdateHackathonAsyncTest()
-        {
-            string name = "test";
-            var entity = new HackathonEntity
-            {
-                Location = "loc"
-            };
-            var request = new Hackathon
-            {
-                Name = name,
-            };
-
-            var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None))
-                .ReturnsAsync(default(TableResult));
-            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
-                .ReturnsAsync(entity);
-
-            var storageContextMock = new Mock<IStorageContext>();
-            storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
-
-            var hackathonManager = new HackathonManagement();
-            hackathonManager.StorageContext = storageContextMock.Object;
-            var result = await hackathonManager.UpdateHackathonAsync(request, CancellationToken.None);
-
-            Mock.VerifyAll();
-            hackathonTableMock.Verify(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None), Times.Once);
-            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
-            hackathonTableMock.VerifyNoOtherCalls();
-
-            storageContextMock.VerifyGet(p => p.HackathonTable, Times.Exactly(2));
-            storageContextMock.VerifyNoOtherCalls();
-
-            Assert.AreEqual("loc", result.Location);
-        }
-
         [Test]
         public async Task CreateHackathonAsyncTest()
         {
@@ -131,6 +65,105 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsFalse(result.EventEndTime.HasValue);
             Assert.AreEqual("loc", hackInserted.Location);
             Assert.AreEqual("test", partInserted.PartitionKey);
+        }
+
+        [Test]
+        public async Task GetHackathonEntityByNameAsyncTest()
+        {
+            string name = "test";
+            var entity = new HackathonEntity
+            {
+                Location = "loc"
+            };
+
+            var hackathonTableMock = new Mock<IHackathonTable>();
+            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var storageContextMock = new Mock<IStorageContext>();
+            storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+
+            var hackathonManager = new HackathonManagement();
+            hackathonManager.StorageContext = storageContextMock.Object;
+            var result = await hackathonManager.GetHackathonEntityByNameAsync(name, CancellationToken.None);
+
+            Mock.VerifyAll();
+            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
+            hackathonTableMock.VerifyNoOtherCalls();
+
+            storageContextMock.VerifyGet(p => p.HackathonTable, Times.Once);
+            storageContextMock.VerifyNoOtherCalls();
+
+            Assert.AreEqual("loc", result.Location);
+        }
+
+        [Test]
+        public async Task ListHackathonAdminAsyncTest()
+        {
+            string name = "hack";
+            CancellationToken cancellationToken = CancellationToken.None;
+            var data = new List<ParticipantEntity>()
+            {
+                new ParticipantEntity{ PartitionKey="pk1", Role = ParticipantRole.None },
+                new ParticipantEntity{ PartitionKey="pk2", Role = ParticipantRole.Administrator },
+                new ParticipantEntity{ PartitionKey="pk3", Role = ParticipantRole.Administrator|ParticipantRole.Judge },
+                new ParticipantEntity{ PartitionKey="pk4", Role = ParticipantRole.Contestant },
+            };
+
+            var storageContext = new Mock<IStorageContext>();
+            var participantTable = new Mock<IParticipantTable>();
+            storageContext.SetupGet(p => p.ParticipantTable).Returns(participantTable.Object);
+            participantTable.Setup(p => p.ListParticipantsByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
+
+            var hackathonManagement = new HackathonManagement
+            {
+                StorageContext = storageContext.Object,
+            };
+            var results = await hackathonManagement.ListHackathonAdminAsync(name, cancellationToken);
+
+            Mock.VerifyAll(storageContext, participantTable);
+            participantTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual(2, results.Count());
+            Assert.AreEqual("pk2", results.First().HackathonName);
+            Assert.AreEqual("pk3", results.Last().HackathonName);
+        }
+
+        [Test]
+        public async Task UpdateHackathonAsyncTest()
+        {
+            string name = "test";
+            var entity = new HackathonEntity
+            {
+                Location = "loc"
+            };
+            var request = new Hackathon
+            {
+                Name = name,
+            };
+
+            var hackathonTableMock = new Mock<IHackathonTable>();
+            hackathonTableMock.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None))
+                .ReturnsAsync(default(TableResult));
+            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var storageContextMock = new Mock<IStorageContext>();
+            storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+
+            var hackathonManager = new HackathonManagement();
+            hackathonManager.StorageContext = storageContextMock.Object;
+            var result = await hackathonManager.UpdateHackathonAsync(request, CancellationToken.None);
+
+            Mock.VerifyAll();
+            hackathonTableMock.Verify(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None), Times.Once);
+            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
+            hackathonTableMock.VerifyNoOtherCalls();
+
+            storageContextMock.VerifyGet(p => p.HackathonTable, Times.Exactly(2));
+            storageContextMock.VerifyNoOtherCalls();
+
+            Assert.AreEqual("loc", result.Location);
         }
     }
 }
