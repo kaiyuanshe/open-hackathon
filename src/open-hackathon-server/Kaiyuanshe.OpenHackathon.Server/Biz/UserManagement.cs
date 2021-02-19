@@ -33,12 +33,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<User> GetCurrentUserRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get Claims of user associated with an Token. Return empty list if token is invalid.
+        /// Get basic Claims of user associated with an Token. Return empty list if token is invalid.
+        /// Resource-based claims are not included for performance reaons.
         /// </summary>
         /// <param name="token"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<Claim>> GetCurrentUserClaimsAsync(string token, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Claim>> GetUserBasicClaimsAsync(string token, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get <seealso cref="UserTokenEntity"/> using AccessToken.
@@ -102,7 +103,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await authenticationClient.CurrentUser(token, cancellationToken);
         }
 
-        public async Task<IEnumerable<Claim>> GetCurrentUserClaimsAsync(string token, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Claim>> GetUserBasicClaimsAsync(string token, CancellationToken cancellationToken = default)
         {
             IList<Claim> claims = new List<Claim>();
 
@@ -118,21 +119,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             claims.Add(ClaimsHelper.UserId(tokenEntity.UserId));
 
             // PlatformAdministrator
-            var pa = await GetPlatformRoleClaim(tokenEntity.UserId, cancellationToken);
+            var pa = await GetPlatformAdminClaim(tokenEntity.UserId, cancellationToken);
             if (pa != null)
             {
                 claims.Add(pa);
             }
-
-            // TODO HackathonAdministrator
-
-            // TODO HackathonJudge
-
-            // TODO HackathonContestant
-
-            // TODO TeamAdministrator
-
-            // TODO TeamMember
 
             return claims;
         }
@@ -180,7 +171,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return jwtTokenStatus;
         }
 
-        internal virtual async Task<Claim> GetPlatformRoleClaim(string userId, CancellationToken cancellationToken)
+        internal virtual async Task<Claim> GetPlatformAdminClaim(string userId, CancellationToken cancellationToken)
         {
             var participant = await StorageContext.ParticipantTable.GetPlatformRole(userId, cancellationToken);
             if (participant != null && participant.IsPlatformAdministrator())

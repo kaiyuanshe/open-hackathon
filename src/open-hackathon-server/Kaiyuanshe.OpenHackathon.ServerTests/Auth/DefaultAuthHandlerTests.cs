@@ -133,7 +133,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             // mock
             var userMgmtMock = new Mock<IUserManagement>();
             userMgmtMock.Setup(m => m.ValidateTokenAsync(token, It.IsAny<CancellationToken>())).ReturnsAsync(validationResult);
-            userMgmtMock.Setup(m => m.GetCurrentUserClaimsAsync(token, cancellationToken)).ReturnsAsync(claims);
+            userMgmtMock.Setup(m => m.GetUserBasicClaimsAsync(token, cancellationToken)).ReturnsAsync(claims);
             var httpContextMock = new Mock<HttpContext>();
             var httpRequestMock = new Mock<HttpRequest>();
             var headerMock = new Mock<IHeaderDictionary>();

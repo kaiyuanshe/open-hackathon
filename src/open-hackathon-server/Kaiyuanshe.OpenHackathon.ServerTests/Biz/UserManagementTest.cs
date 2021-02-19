@@ -74,7 +74,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var userMgmtMock = new Mock<UserManagement> { CallBase = true };
             userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
 
-            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+            var claims = await userMgmtMock.Object.GetUserBasicClaimsAsync(token, cancellationToken);
 
             Mock.VerifyAll(userMgmtMock);
             Assert.AreEqual(0, claims.Count());
@@ -93,7 +93,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var userMgmtMock = new Mock<UserManagement> { CallBase = true };
             userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
 
-            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+            var claims = await userMgmtMock.Object.GetUserBasicClaimsAsync(token, cancellationToken);
 
             Mock.VerifyAll(userMgmtMock);
             Assert.AreEqual(0, claims.Count());
@@ -114,9 +114,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             var userMgmtMock = new Mock<UserManagement> { CallBase = true };
             userMgmtMock.Setup(m => m.GetTokenEntityAsync(token, cancellationToken)).ReturnsAsync(tokenEntity);
-            userMgmtMock.Setup(m => m.GetPlatformRoleClaim(userId, cancellationToken)).ReturnsAsync(claim);
+            userMgmtMock.Setup(m => m.GetPlatformAdminClaim(userId, cancellationToken)).ReturnsAsync(claim);
 
-            var claims = await userMgmtMock.Object.GetCurrentUserClaimsAsync(token, cancellationToken);
+            var claims = await userMgmtMock.Object.GetUserBasicClaimsAsync(token, cancellationToken);
 
             Mock.VerifyAll(userMgmtMock);
             Assert.AreEqual(2, claims.Count());
@@ -340,7 +340,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storage.Object,
             };
-            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+            var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
 
             // verify
             Mock.VerifyAll(storage, participantTable);
@@ -373,7 +373,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storage.Object,
             };
-            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+            var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
 
             // verify
             Mock.VerifyAll(storage, participantTable);
@@ -402,7 +402,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storage.Object,
             };
-            var claim = await userMgmt.GetPlatformRoleClaim(userId, cancellationToken);
+            var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
 
             // verify
             Mock.VerifyAll(storage, participantTable);

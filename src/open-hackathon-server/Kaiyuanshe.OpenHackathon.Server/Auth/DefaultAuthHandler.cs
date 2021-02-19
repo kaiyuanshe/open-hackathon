@@ -68,9 +68,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             }
 
             // get Claims
-            string cacheKey = $"token-{DigestHelper.SHA512Digest(token)}";
+            string cacheKey = CacheKey.Get(CacheKey.Section.Token, DigestHelper.SHA512Digest(token));
             var claims = await CacheHelper.GetOrAddAsync(cacheKey,
-                () => userManagement.GetCurrentUserClaimsAsync(token),
+                () => userManagement.GetUserBasicClaimsAsync(token),
                 new CacheItemPolicy
                 {
                     AbsoluteExpiration = DateTime.UtcNow.AddMinutes(10)

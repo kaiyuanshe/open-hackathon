@@ -65,7 +65,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         /// </summary>
         protected readonly string tableName;
 
-        public AzureTable(CloudStorageAccount storageAccount, string tableName)
+        /// <summary>
+        /// Test-only constructor
+        /// </summary>
+        protected AzureTable()
+        { }
+
+        protected AzureTable(CloudStorageAccount storageAccount, string tableName)
         {
             this.tableName = tableName;
             tableServiceProxy = storageAccount.CreateCloudTableClient();
