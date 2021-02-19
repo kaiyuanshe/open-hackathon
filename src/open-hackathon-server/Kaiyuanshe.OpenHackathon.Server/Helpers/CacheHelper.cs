@@ -57,4 +57,17 @@ namespace Kaiyuanshe.OpenHackathon.Server
             cache.Remove(key);
         }
     }
+
+    public static class CacheKey
+    {
+        public static class Section
+        {
+            public static readonly string Token = "token";
+        }
+
+        public static string Get(string section, string key)
+        {
+            return string.IsNullOrWhiteSpace(section) ? key : $"{section}-{key}";
+        }
+    }
 }

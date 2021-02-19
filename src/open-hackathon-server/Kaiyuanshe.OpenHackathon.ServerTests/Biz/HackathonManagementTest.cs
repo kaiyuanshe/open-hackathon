@@ -96,12 +96,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
+            // capture
+            HackathonEntity hackInserted = null;
+            ParticipantEntity partInserted = null;
+
             // mock
             var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken));
+            hackathonTableMock.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken))
+                .Callback<HackathonEntity, CancellationToken>((h, c) => { hackInserted = h; });
 
             var participantTableMock = new Mock<IParticipantTable>();
-            participantTableMock.Setup(p => p.InsertAsync(It.IsAny<ParticipantEntity>(), cancellationToken));
+            participantTableMock.Setup(p => p.InsertAsync(It.IsAny<ParticipantEntity>(), cancellationToken))
+                .Callback<ParticipantEntity, CancellationToken>((h, c) => { partInserted = h; });
 
             var storageContextMock = new Mock<IStorageContext>();
             storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
@@ -123,6 +129,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(string.Empty, result.RowKey);
             Assert.IsTrue(result.EventStartTime.HasValue);
             Assert.IsFalse(result.EventEndTime.HasValue);
+            Assert.AreEqual("loc", hackInserted.Location);
+            Assert.AreEqual("test", partInserted.PartitionKey);
         }
     }
 }
