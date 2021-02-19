@@ -123,6 +123,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task UpdateTest_NotFound()
+        {
+            string name = "Foo";
+            HackathonEntity entity = null;
+            Hackathon parameter = new Hackathon();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.Update(name, parameter);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is NotFoundObjectResult);
+            ErrorResponse error = ((NotFoundObjectResult)result).Value as ErrorResponse;
+            Assert.IsNotNull(error);
+            Assert.AreEqual("NotFound", error.error.code);
+            Assert.AreEqual(string.Format(Resources.Hackathon_NotFound, name), error.error.message);
+        }
+
+        [Test]
+        public async Task UpdateTest_AccessDenied()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { };
+            Hackathon parameter = new Hackathon();
+            var authResult = AuthorizationResult.Failed();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+            var authorizationServiceMock = new Mock<IAuthorizationService>();
+            authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationServiceMock.Object,
+            };
+            var result = await controller.Update(name, parameter);
+
+            Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is ObjectResult);
+            ObjectResult objectResult = (ObjectResult)result;
+            Assert.AreEqual(403, objectResult.StatusCode);
+            Assert.IsTrue(objectResult.Value is ErrorResponse);
+            Assert.AreEqual("Forbidden", ((ErrorResponse)objectResult.Value).error.code);
+        }
+
+        [Test]
+        public async Task UpdateTest_Updated()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { DisplayName = "displayname" };
+            Hackathon parameter = new Hackathon();
+            var authResult = AuthorizationResult.Success();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(p => p.UpdateHackathonAsync(parameter, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(entity);
+            var authorizationServiceMock = new Mock<IAuthorizationService>();
+            authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationServiceMock.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.Update(name, parameter);
+
+            Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.AreEqual(name.ToLower(), parameter.Name);
+            Assert.IsTrue(result is OkObjectResult);
+            OkObjectResult objectResult = (OkObjectResult)result;
+            Assert.IsTrue(objectResult.Value is Hackathon);
+            Hackathon resp = (Hackathon)objectResult.Value;
+            Assert.AreEqual("displayname", resp.DisplayName);
+        }
+
+        [Test]
         public async Task GetTest_NotFound()
         {
             string name = "Foo";

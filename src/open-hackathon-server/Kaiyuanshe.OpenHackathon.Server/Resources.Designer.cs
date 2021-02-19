@@ -61,6 +61,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Forbidden. The user associated with the token doesn&apos;t have proper permission. Please contact the administrator for access..
+        /// </summary>
+        internal static string Auth_Forbidden {
+            get {
+                return ResourceManager.GetString("Auth_Forbidden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The access token cannot be validated. Code:{0}, Message:{1}.
         /// </summary>
         internal static string Auth_Token_ValidateRemoteFailed {

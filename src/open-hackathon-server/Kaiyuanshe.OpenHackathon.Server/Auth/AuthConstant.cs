@@ -67,6 +67,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
         public static class Policy
         {
             /// <summary>
+            /// Policy to administrate a hackathon. See <seealso cref="HackathonAdministratorHandler"/> for details.
+            /// </summary>
+            public const string HackathonAdministrator = "HackathonAdministratorInternal";
+        }
+
+        /// <summary>
+        /// Only for swagger, which shows the policy name on Swagger UI. 
+        /// <seealso cref="Policy"/> is the one for real access check. Most of the policies are resource based,
+        /// either hackathon-based or team-based, so Authorize(Policy="...") doesn't work.
+        /// </summary>
+        public static class PolicyForSwagger
+        {
+            /// <summary>
             /// Policy to administrate a hackathon.
             /// 
             /// Allowed claims: PlatformAdministrator, HackathonAdministrator

@@ -3,6 +3,7 @@ using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
-        [Authorize]
         public async Task<object> ListHackathon(CancellationToken cancellationToken)
         {
             var entities = await HackathonManagement.SearchHackathonAsync(null, cancellationToken);
@@ -63,15 +63,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
             if (entity != null)
             {
-                // make sure only Admin of this hackathon can update it
-                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
-                if (!authorizationResult.Succeeded)
-                {
-                    return StatusCode(403, ErrorResponse.Forbidden(Resources.Request_Forbidden_HackAdmin));
-                }
-
-                var updated = await HackathonManagement.UpdateHackathonAsync(parameter);
-                return Ok(ResponseBuilder.BuildHackathon(updated));
+                return await UpdateInternal(entity, parameter);
             }
             else
             {
@@ -79,6 +71,52 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 var created = await HackathonManagement.CreateHackathonAsync(parameter);
                 return Ok(ResponseBuilder.BuildHackathon(created));
             }
+        }
+
+        /// <summary>
+        /// Update hackathon. Caller must be adminstrator of the hackathon. 
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns></returns>
+        /// <response code="200">Success. The response describes a hackathon.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
+        /// <response code="404">Not Found. The response indicates the hackathon with specified name doesn't exist.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [Route("hackathon/{name}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> Update(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            [FromBody] Hackathon parameter)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
+            }
+            string nameLowercase = name.ToLower();
+            parameter.Name = nameLowercase;
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
+            if (entity == null)
+            {
+                return NotFound(ErrorResponse.NotFound(string.Format(Resources.Hackathon_NotFound, name)));
+            }
+
+            return await UpdateInternal(entity, parameter);
+        }
+
+        private async Task<object> UpdateInternal(HackathonEntity entity, Hackathon parameter)
+        {
+            // make sure only Admin of this hackathon can update it
+            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
+            if (!authorizationResult.Succeeded)
+            {
+                return StatusCode(403, ErrorResponse.Forbidden(Resources.Request_Forbidden_HackAdmin));
+            }
+            var updated = await HackathonManagement.UpdateHackathonAsync(parameter);
+            return Ok(ResponseBuilder.BuildHackathon(updated));
         }
 
         /// <summary>
