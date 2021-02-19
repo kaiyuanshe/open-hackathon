@@ -126,6 +126,9 @@
   <data name="Auth_Unauthorized" xml:space="preserve">
     <value>Token is either missing or invalid. Please add it to Http request headers: Headers["Authorization"]=token TOKEN. </value>
   </data>
+  <data name="Hackathon_NotFound" xml:space="preserve">
+    <value>Hackathon with name {0} not found. Try PUT to create a new one.</value>
+  </data>
   <data name="Parameter_Required" xml:space="preserve">
     <value>Required parameter {0} is null or empty.</value>
   </data>

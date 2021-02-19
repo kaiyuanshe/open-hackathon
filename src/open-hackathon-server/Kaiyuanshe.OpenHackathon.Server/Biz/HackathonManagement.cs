@@ -18,13 +18,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
+        Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get Hackathon By name. Return null if not found.
         /// </summary>
         /// <returns></returns>
-        Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken);
+        Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
@@ -48,12 +48,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken);
+        Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
     }
 
     public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
-        public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken)
+        public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             #region Insert HackathonEntity
             var entity = new HackathonEntity
@@ -125,7 +125,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return entities;
         }
 
-        public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken)
+        public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.Name, string.Empty, (entity) =>
             {

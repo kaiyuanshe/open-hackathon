@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+﻿using Kaiyuanshe.OpenHackathon.Server;
+using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
@@ -26,7 +27,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             var hack = new Hackathon();
             var name = "Test1";
-            var inserted = new HackathonEntity {
+            var inserted = new HackathonEntity
+            {
                 PartitionKey = "test2",
                 AutoApprove = true
             };
@@ -38,9 +40,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(inserted);
 
             var controller = new HackathonController();
-            controller.HackathonManager = hackManagerMock.Object;
+            controller.HackathonManagement = hackManagerMock.Object;
             controller.ResponseBuilder = new DefaultResponseBuilder();
-            var result = await controller.CreateOrUpdate(name, hack, CancellationToken.None);
+            var result = await controller.CreateOrUpdate(name, hack);
 
             Mock.VerifyAll(hackManagerMock);
             hackManagerMock.VerifyNoOtherCalls();
@@ -68,9 +70,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
 
             var controller = new HackathonController();
-            controller.HackathonManager = hackManagerMock.Object;
+            controller.HackathonManagement = hackManagerMock.Object;
             controller.AuthorizationService = authorizationServiceMock.Object;
-            var result = await controller.CreateOrUpdate(name, hack, CancellationToken.None);
+            var result = await controller.CreateOrUpdate(name, hack);
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
@@ -104,10 +106,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
 
             var controller = new HackathonController();
-            controller.HackathonManager = hackManagerMock.Object;
+            controller.HackathonManagement = hackManagerMock.Object;
             controller.AuthorizationService = authorizationServiceMock.Object;
             controller.ResponseBuilder = new DefaultResponseBuilder();
-            var result = await controller.CreateOrUpdate(name, hack, CancellationToken.None);
+            var result = await controller.CreateOrUpdate(name, hack);
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
@@ -118,6 +120,56 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Hackathon resp = (Hackathon)objectResult.Value;
             Assert.AreEqual("test2", resp.Name);
             Assert.IsTrue(resp.AutoApprove);
+        }
+
+        [Test]
+        public async Task GetTest_NotFound()
+        {
+            string name = "Foo";
+            HackathonEntity entity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.Get(name);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is NotFoundObjectResult);
+            ErrorResponse error = ((NotFoundObjectResult)result).Value as ErrorResponse;
+            Assert.IsNotNull(error);
+            Assert.AreEqual("NotFound", error.error.code);
+            Assert.AreEqual(string.Format(Resources.Hackathon_NotFound, name), error.error.message);
+        }
+
+        [Test]
+        public async Task GetTest_OK()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Detail = "detail" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.Get(name);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is OkObjectResult);
+            Hackathon hackathon = ((OkObjectResult)result).Value as Hackathon;
+            Assert.IsNotNull(hackathon);
+            Assert.AreEqual("detail", hackathon.Detail);
         }
     }
 }

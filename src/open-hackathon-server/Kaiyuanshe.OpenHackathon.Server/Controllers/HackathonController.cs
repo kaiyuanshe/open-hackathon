@@ -2,6 +2,7 @@
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     {
         public IResponseBuilder ResponseBuilder { get; set; }
 
-        public IHackathonManagement HackathonManager { get; set; }
+        public IHackathonManagement HackathonManagement { get; set; }
 
         /// <summary>
         /// List hackathons.
@@ -29,7 +30,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize]
         public async Task<object> ListHackathon(CancellationToken cancellationToken)
         {
-            var entities = await HackathonManager.SearchHackathonAsync(null, cancellationToken);
+            var entities = await HackathonManagement.SearchHackathonAsync(null, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathonList(entities));
         }
 
@@ -39,7 +40,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Else create a new hackathon.
         /// </summary>
         /// <param name="parameter"></param>
-        /// <param name="name" example="foo">Name of hackathon. Must contain only letters and/or numbers</param>
+        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
@@ -49,9 +51,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{name}")]
         [Authorize]
         public async Task<object> CreateOrUpdate(
-            [FromRoute, Required, RegularExpression("^[A-Za-z0-9]{1,100}$")] string name,
-            [FromBody] Hackathon parameter,
-            CancellationToken cancellationToken)
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            [FromBody] Hackathon parameter)
         {
             if (!ModelState.IsValid)
             {
@@ -59,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
             string nameLowercase = name.ToLower();
             parameter.Name = nameLowercase;
-            var entity = await HackathonManager.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
             if (entity != null)
             {
                 // make sure only Admin of this hackathon can update it
@@ -69,15 +70,44 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     return StatusCode(403, ErrorResponse.Forbidden(Resources.Request_Forbidden_HackAdmin));
                 }
 
-                var updated = await HackathonManager.UpdateHackathonAsync(parameter, cancellationToken);
+                var updated = await HackathonManagement.UpdateHackathonAsync(parameter);
                 return Ok(ResponseBuilder.BuildHackathon(updated));
             }
             else
             {
                 parameter.CreatorId = CurrentUserId;
-                var created = await HackathonManager.CreateHackathonAsync(parameter, cancellationToken);
+                var created = await HackathonManagement.CreateHackathonAsync(parameter);
                 return Ok(ResponseBuilder.BuildHackathon(created));
             }
+        }
+
+        /// <summary>
+        /// Query a hackathon by name.
+        /// </summary>
+        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns></returns>
+        /// <response code="200">Success. The response describes a hackathon.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="404">Not Found. The response indicates the hackathon with specified name doesn't exist.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [Route("hackathon/{name}")]
+        public async Task<object> Get(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
+            }
+
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
+            if (entity == null)
+            {
+                return NotFound(ErrorResponse.NotFound(string.Format(Resources.Hackathon_NotFound, name)));
+            }
+
+            return Ok(ResponseBuilder.BuildHackathon(entity));
         }
     }
 }
