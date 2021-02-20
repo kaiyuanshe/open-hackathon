@@ -4,16 +4,12 @@ using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
-using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -262,6 +258,70 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Hackathon hackathon = ((OkObjectResult)result).Value as Hackathon;
             Assert.IsNotNull(hackathon);
             Assert.AreEqual("detail", hackathon.Detail);
+        }
+
+        [Test]
+        public async Task DeleteTest_NotExist()
+        {
+            string name = "Foo";
+            HackathonEntity entity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.Delete(name);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is NoContentResult);
+        }
+
+        [Test]
+        public async Task DeleteTest_AlreadyDeleted()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { IsDeleted = true };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.Delete(name);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is NoContentResult);
+        }
+
+        [Test]
+        public async Task DeleteTest_DeleteLogically()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(m => m.DeleteHackathonLogically("foo", CancellationToken.None));
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.Delete(name);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is NoContentResult);
         }
     }
 }

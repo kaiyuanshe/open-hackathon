@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Change the hackathon to Deleted.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task DeleteHackathonLogically(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get Hackathon By name. Return null if not found.
@@ -75,6 +84,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 EventEndTime = request.EventEndTime,
                 EnrollmentStartTime = request.EnrollmentStartTime,
                 EnrollmentEndTime = request.EnrollmentEndTime,
+                IsDeleted = false,
                 JudgeStartTime = request.JudgeStartTime,
                 JudgeEndTime = request.JudgeEndTime,
                 Location = request.Location,
@@ -94,6 +104,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             #endregion
 
             return entity;
+        }
+
+        public async Task DeleteHackathonLogically(string name, CancellationToken cancellationToken = default)
+        {
+            await StorageContext.HackathonTable.RetrieveAndMergeAsync(name, string.Empty,
+                entity =>
+                {
+                    entity.IsDeleted = true;
+                }, cancellationToken);
         }
 
         public async Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default)
@@ -117,7 +136,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
         {
             var entities = new List<HackathonEntity>();
-            await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(null, (segment) =>
+            var filter = TableQuery.GenerateFilterConditionForBool(nameof(HackathonEntity.IsDeleted), QueryComparisons.NotEqual, true);
+            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>().Where(filter);
+
+            await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, (segment) =>
             {
                 entities.AddRange(segment);
             }, cancellationToken);

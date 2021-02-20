@@ -65,6 +65,37 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsFalse(result.EventEndTime.HasValue);
             Assert.AreEqual("loc", hackInserted.Location);
             Assert.AreEqual("test", partInserted.PartitionKey);
+            Assert.IsFalse(hackInserted.IsDeleted);
+        }
+
+        [Test]
+        public async Task DeleteHackathonLogicallyTest()
+        {
+            string name = "foo";
+            CancellationToken cancellationToken = CancellationToken.None;
+            Action<HackathonEntity> capturedAction = null;
+
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), cancellationToken))
+                .Callback<string, string, Action<HackathonEntity>, CancellationToken>((pk, rk, action, ct) =>
+                {
+                    capturedAction = action;
+                });
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+
+            var hackathonManagement = new HackathonManagement
+            {
+                StorageContext = storageContext.Object
+            };
+            await hackathonManagement.DeleteHackathonLogically(name, cancellationToken);
+
+            Mock.VerifyAll(storageContext, hackathonTable);
+            hackathonTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            var entity = new HackathonEntity { IsDeleted = false };
+            capturedAction(entity);
+            Assert.IsTrue(entity.IsDeleted);
         }
 
         [Test]
