@@ -9,7 +9,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<Weather>().As<IWeather>().PropertiesAutowired();
             // Storage
             builder.RegisterType<DefaultStorageAccountProvider>().As<IStorageAccountProvider>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<StorageContext>().As<IStorageContext>().PropertiesAutowired().SingleInstance();
