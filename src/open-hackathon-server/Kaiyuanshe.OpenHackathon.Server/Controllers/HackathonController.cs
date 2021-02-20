@@ -147,5 +147,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return Ok(ResponseBuilder.BuildHackathon(entity));
         }
+
+        /// <summary>
+        /// Delete a hackathon by name. The hackathon is marked as Deleted, the record becomes invisible.
+        /// </summary>
+        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns></returns>
+        /// <response code="204">Success. The response indicates the hackathon is deleted.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
+        [HttpDelete]
+        [Route("hackathon/{name}")]
+        [Authorize(AuthConstant.Policy.PlatformAdministrator)]
+        public async Task<object> Delete(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
+            }
+
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
+            if (entity == null || entity.IsDeleted)
+            {
+                return NoContent();
+            }
+
+            await HackathonManagement.DeleteHackathonLogically(name.ToLower());
+            return NoContent();
+        }
     }
 }

@@ -69,11 +69,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// <summary>
             /// Policy to administrate a hackathon. See <seealso cref="HackathonAdministratorHandler"/> for details.
             /// </summary>
-            public const string HackathonAdministrator = "HackathonAdministratorInternal";
+            public const string HackathonAdministrator = "HackathonAdministratorReal";
+
+            /// <summary>
+            /// Administrator of the OPH platform.
+            /// </summary>
+            public const string PlatformAdministrator = "PlatformAdministrator";
         }
 
         /// <summary>
-        /// Only for swagger, which shows the policy name on Swagger UI. 
+        /// Only for swagger, which shows the policy name on Swagger UI but no requirement needs to meet.
         /// <seealso cref="Policy"/> is the one for real access check. Most of the policies are resource based,
         /// either hackathon-based or team-based, so Authorize(Policy="...") doesn't work.
         /// </summary>
@@ -81,8 +86,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
         {
             /// <summary>
             /// Policy to administrate a hackathon.
-            /// 
-            /// Allowed claims: PlatformAdministrator, HackathonAdministrator
             /// </summary>
             public const string HackathonAdministrator = "HackathonAdministrator";
         }

@@ -116,6 +116,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
         private void RegisterAuthorizeHandlers(IServiceCollection services)
         {
+            services.AddSingleton<IAuthorizationHandler, PlatformAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, HackathonAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, NoRequirementHandler>();
 
@@ -133,6 +134,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
             services.AddAuthorization(options =>
             {
                 // real policies
+                options.AddPolicy(AuthConstant.Policy.PlatformAdministrator, policy =>
+                {
+                    policy.Requirements.Add(new PlatformAdministratorRequirement());
+                });
                 options.AddPolicy(AuthConstant.Policy.HackathonAdministrator, policy =>
                 {
                     policy.Requirements.Add(new HackathonAdministratorRequirement());
