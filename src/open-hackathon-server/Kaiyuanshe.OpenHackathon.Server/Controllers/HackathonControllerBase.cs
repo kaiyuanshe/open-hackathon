@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Mime;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
@@ -27,18 +28,46 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
         }
 
-        protected IList<string> GetErrors()
+        #region ObjectResult with ProblemDetails
+        protected ObjectResult BadRequest(string detail, string instance = null)
         {
-            var modelErrors = new List<string>();
-            foreach (var modelState in ModelState.Values)
-            {
-                foreach (var modelError in modelState.Errors)
-                {
-                    modelErrors.Add(modelError.ErrorMessage);
-                }
-            }
-
-            return modelErrors;
+            return Problem(
+                statusCode: 400,
+                detail: detail,
+                instance: instance);
         }
+
+        protected ObjectResult Unauthorized(string detail, string instance = null)
+        {
+            return Problem(
+                statusCode: 401,
+                detail: detail,
+                instance: instance);
+        }
+
+        protected ObjectResult Forbidden(string detail, string instance = null)
+        {
+            return Problem(
+                statusCode: 403,
+                detail: detail,
+                instance: instance);
+        }
+
+        protected ObjectResult NotFound(string detail, string instance = null)
+        {
+            return Problem(
+                statusCode: 404,
+                detail: detail,
+                instance: instance);
+        }
+
+        protected ObjectResult Conflict(string detail, string instance = null)
+        {
+            return Problem(
+                statusCode: 409,
+                detail: detail,
+                instance: instance);
+        }
+        #endregion
     }
 }

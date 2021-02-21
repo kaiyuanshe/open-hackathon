@@ -7,6 +7,7 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,15 +50,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [Route("hackathon/{name}")]
-        [Authorize]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
             [FromBody] Hackathon parameter)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
-            }
             string nameLowercase = name.ToLower();
             parameter.Name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
@@ -92,16 +89,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
             [FromBody] Hackathon parameter)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
-            }
             string nameLowercase = name.ToLower();
             parameter.Name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
             if (entity == null)
             {
-                return NotFound(ErrorResponse.NotFound(string.Format(Resources.Hackathon_NotFound, name)));
+                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
             }
 
             return await UpdateInternal(entity, parameter);
@@ -113,7 +106,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
             if (!authorizationResult.Succeeded)
             {
-                return StatusCode(403, ErrorResponse.Forbidden(Resources.Request_Forbidden_HackAdmin));
+                return Forbidden(Resources.Request_Forbidden_HackAdmin);
             }
             var updated = await HackathonManagement.UpdateHackathonAsync(parameter);
             return Ok(ResponseBuilder.BuildHackathon(updated));
@@ -134,15 +127,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> Get(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
-            }
-
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
             if (entity == null)
             {
-                return NotFound(ErrorResponse.NotFound(string.Format(Resources.Hackathon_NotFound, name)));
+                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
             }
 
             return Ok(ResponseBuilder.BuildHackathon(entity));
@@ -163,11 +151,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> Delete(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
-            }
-
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
             if (entity == null || entity.IsDeleted)
             {

@@ -132,13 +132,13 @@
   <data name="Hackathon_NotFound" xml:space="preserve">
     <value>Hackathon with name {0} not found. Try PUT to create a new one.</value>
   </data>
+  <data name="Hackathon_UnhandledException" xml:space="preserve">
+    <value>An unexpected exception occurs. Please try again later or report an issue at https://github.com/kaiyuanshe/open-hackathon/issues</value>
+  </data>
   <data name="Parameter_Required" xml:space="preserve">
     <value>Required parameter {0} is null or empty.</value>
   </data>
   <data name="Request_Forbidden_HackAdmin" xml:space="preserve">
     <value>Access denied. Only the admins of the event are allowed. Please contact the admin to request access.</value>
-  </data>
-  <data name="Request_Invalid" xml:space="preserve">
-    <value>One or more properties are invalid. See details in response for more information.</value>
   </data>
 </root>

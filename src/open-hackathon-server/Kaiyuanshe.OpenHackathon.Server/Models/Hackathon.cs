@@ -88,7 +88,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Maximum uses allowed to enroll this hackathon. 0 means unlimited. default value: 0.
         /// </summary>
         /// <example>1000</example>
-        [Range(1, int.MaxValue)]
+        [Range(1, 100_000)]
         [JsonProperty("maxEnrollment")]
         public int? MaxEnrollment { get; set; }
 

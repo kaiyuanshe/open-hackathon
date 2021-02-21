@@ -2,6 +2,7 @@
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -30,16 +31,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
     {
         static readonly string TokenPrefix = "token "; // there is a trailling space
         private IUserManagement userManagement;
+        private ProblemDetailsFactory problemDetailsFactory;
         private Func<HttpResponse, string, CancellationToken, Task> writeToResponse;
 
         public DefaultAuthHandler(IOptionsMonitor<DefaultAuthSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder, ISystemClock clock,
             IUserManagement userManagement,
+            ProblemDetailsFactory problemDetailsFactory,
             Func<HttpResponse, string, CancellationToken, Task> writeToResponse = null)
             : base(options, logger, encoder, clock)
         {
             this.userManagement = userManagement;
+            this.problemDetailsFactory = problemDetailsFactory;
             this.writeToResponse = writeToResponse ?? HttpResponseWritingExtensions.WriteAsync;
         }
 
@@ -80,14 +84,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
         {
             Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             Response.ContentType = MediaTypeNames.Application.Json;
-            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Unauthorized(Resources.Auth_Unauthorized)), CancellationToken.None);
+            var problemDetail = problemDetailsFactory.CreateProblemDetails(Context, 401, detail: Resources.Auth_Unauthorized);
+            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail), CancellationToken.None);
         }
 
         protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
         {
             Response.StatusCode = (int)HttpStatusCode.Forbidden;
             Response.ContentType = MediaTypeNames.Application.Json;
-            await writeToResponse(Response, JsonConvert.SerializeObject(ErrorResponse.Forbidden(Resources.Auth_Forbidden)), CancellationToken.None);
+
+            var problemDetail = problemDetailsFactory.CreateProblemDetails(Context, 403, detail: Resources.Auth_Forbidden);
+            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail), CancellationToken.None);
         }
     }
 }

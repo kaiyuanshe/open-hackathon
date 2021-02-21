@@ -65,19 +65,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
                 .ReturnsAsync(authResult);
 
-            var controller = new HackathonController();
-            controller.HackathonManagement = hackManagerMock.Object;
-            controller.AuthorizationService = authorizationServiceMock.Object;
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackManagerMock.Object,
+                AuthorizationService = authorizationServiceMock.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
             var result = await controller.CreateOrUpdate(name, hack);
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
-            Assert.AreEqual(name, hack.Name);
-            Assert.IsTrue(result is ObjectResult);
-            ObjectResult objectResult = (ObjectResult)result;
-            Assert.AreEqual(403, objectResult.StatusCode);
-            Assert.IsTrue(objectResult.Value is ErrorResponse);
-            Assert.AreEqual("Forbidden", ((ErrorResponse)objectResult.Value).error.code);
+            AssertHelper.AssertObjectResult(result, 403, Resources.Request_Forbidden_HackAdmin);
         }
 
         [Test]
@@ -131,17 +129,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var controller = new HackathonController
             {
-                HackathonManagement = hackathonManagement.Object
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Update(name, parameter);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is NotFoundObjectResult);
-            ErrorResponse error = ((NotFoundObjectResult)result).Value as ErrorResponse;
-            Assert.IsNotNull(error);
-            Assert.AreEqual("NotFound", error.error.code);
-            Assert.AreEqual(string.Format(Resources.Hackathon_NotFound, name), error.error.message);
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, name));
         }
 
         [Test]
@@ -163,16 +158,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 HackathonManagement = hackathonManagement.Object,
                 AuthorizationService = authorizationServiceMock.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Update(name, parameter);
 
             Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is ObjectResult);
-            ObjectResult objectResult = (ObjectResult)result;
-            Assert.AreEqual(403, objectResult.StatusCode);
-            Assert.IsTrue(objectResult.Value is ErrorResponse);
-            Assert.AreEqual("Forbidden", ((ErrorResponse)objectResult.Value).error.code);
+            AssertHelper.AssertObjectResult(result, 403, Resources.Request_Forbidden_HackAdmin);
         }
 
         [Test]
@@ -222,17 +214,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var controller = new HackathonController
             {
-                HackathonManagement = hackathonManagement.Object
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Get(name);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is NotFoundObjectResult);
-            ErrorResponse error = ((NotFoundObjectResult)result).Value as ErrorResponse;
-            Assert.IsNotNull(error);
-            Assert.AreEqual("NotFound", error.error.code);
-            Assert.AreEqual(string.Format(Resources.Hackathon_NotFound, name), error.error.message);
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, name));
         }
 
         [Test]
