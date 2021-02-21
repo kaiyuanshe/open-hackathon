@@ -26,19 +26,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> Authing([FromBody] UserInfo parameter,
             CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ErrorResponse.BadArgument(Resources.Request_Invalid, details: GetErrors()));
-            }
-
             var tokenStatus = await userManagement.ValidateTokenRemotelyAsync(parameter.UserPoolId, parameter.Token, cancellationToken);
             if (!tokenStatus.Status.GetValueOrDefault(false))
             {
                 // token invalid
-                return BadRequest(ErrorResponse.BadArgument(string.Format(
+                return BadRequest(string.Format(
                     Resources.Auth_Token_ValidateRemoteFailed,
                     tokenStatus.Code.GetValueOrDefault(0),
-                    tokenStatus.Message)));
+                    tokenStatus.Message));
             }
 
 

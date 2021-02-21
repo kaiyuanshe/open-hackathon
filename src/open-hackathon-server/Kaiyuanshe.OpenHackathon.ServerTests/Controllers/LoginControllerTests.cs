@@ -3,8 +3,6 @@ using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
-using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 using System.Threading;
@@ -31,20 +29,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var controller = new LoginController
             {
                 userManagement = loginManagerMoq.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var resp = await controller.Authing(parameter, cancellationToken);
 
             // Verify
-            Mock.VerifyAll();
-            loginManagerMoq.Verify(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken), Times.Once);
+            Mock.VerifyAll(loginManagerMoq);
             loginManagerMoq.VerifyNoOtherCalls();
 
-            Assert.IsTrue(resp is BadRequestObjectResult);
-            Assert.IsTrue(((BadRequestObjectResult)resp).Value is ErrorResponse);
-            var errorResponse = ((BadRequestObjectResult)resp).Value as ErrorResponse;
-            Assert.AreEqual("BadArgument", errorResponse.error.code);
-            Assert.IsTrue(errorResponse.error.message.Contains("400"));
-            Assert.IsTrue(errorResponse.error.message.Contains("Some Message"));
+            AssertHelper.AssertObjectResult(resp, 400, p =>
+            {
+                Assert.IsTrue(p.Detail.Contains("Some Message"));
+            });
         }
     }
 }

@@ -1,5 +1,5 @@
-using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
@@ -9,23 +9,25 @@ using System.Reflection;
 namespace Kaiyuanshe.OpenHackathon.Server.Swagger
 {
     /// <summary>
-    /// Add <seealso cref="ErrorResponse"/> to Http responses whose statusCode is >=400. 
+    /// Add <seealso cref="ProblemDetails"/> to Http responses whose statusCode is >=400. 
     /// The statusCode must be explicitly added to the method like: &lt;response code="400"&gt;Bad Request&lt;/response&gt;. 
     /// </summary>
     public class ErrorResponseOperationFilter : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository);
+            var problemDetailsSchema = context.SchemaGenerator.GenerateSchema(typeof(ProblemDetails), context.SchemaRepository);
+            var validationProblemDetailsSchema = context.SchemaGenerator.GenerateSchema(typeof(ValidationProblemDetails), context.SchemaRepository);
             foreach (var resp in operation.Responses)
             {
                 if (int.TryParse(resp.Key, out int httpStatusCode) && httpStatusCode >= 400)
                 {
+                    var schema = httpStatusCode == 400 ? validationProblemDetailsSchema : problemDetailsSchema;
                     resp.Value.Content = new Dictionary<string, OpenApiMediaType>
                     {
                         ["application/json"] = new OpenApiMediaType
                         {
-                            Schema = errorRespSchema
+                            Schema = schema
                         }
                     };
                 }
@@ -46,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                 return;
             }
 
-            var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository);
+            var errorRespSchema = context.SchemaGenerator.GenerateSchema(typeof(ProblemDetails), context.SchemaRepository);
             var authorizeAttrs = context.MethodInfo.GetCustomAttributes<AuthorizeAttribute>();
             if (authorizeAttrs.SingleOrDefault() != null)
             {

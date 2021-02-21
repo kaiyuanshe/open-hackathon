@@ -4,10 +4,12 @@ using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Middlewares;
+using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,6 +46,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 });
+            services.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 
             // Razor pages
             services.AddRazorPages(options =>
@@ -83,6 +86,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/error");
             }
 
             // app.UseHttpsRedirection();

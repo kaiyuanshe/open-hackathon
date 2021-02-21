@@ -4,13 +4,67 @@
     Layout = "_Layout";
 }
 
-<h2>Open Hackathon Rest API V2</h2>
+<h3>Open Hackathon Rest API V2</h3>
 
 <h3>Rest API Overview</h3>
-<div>Rest API Overview</div>
+<div>A swagger 2.0 compliant Rest API server for open hackathon.</div>
 
-<h3>Guides</h3>
-<div>Guides</div>
+<h3>Authorization</h3>
+<div>
+    Some APIs allow anonymous access, some others require a valid <code>token</code>. Open hackathon
+    platform has integrated with <a href="https://authing.cn/" target="_blank">Authing</a>. Any web app which onboarded to Authing
+    is able to get a valid token. A typical flow:
+    <ul>
+        <li>
+            In you web apa, follow Authing documents to login user. Can use any Authing-supported login method including social login.
+            All login-related configs are configured in Authing or social login provider like github.
+        </li>
+        <li>After a successful login, post the response data(token is included) returend by Authing to api <code>/v2/login</code>. This step MIGHT be skipped in future.</li>
+        <li>
+            Afterwards, you can all other APIs with the access token before it expires:
+            <code>Headers["Authorization"]="token TOKENVALUE"</code>. User has to login again if token expires.
+        </li>
+    </ul>
+</div>
+
+<h3>Authentication</h3>
+<div>
+    User is identified using the access <code>token</code>. Access is determined by user. Quick
+    tips to learn the access:
+    <ul>
+        <li>
+            View the <a href="/swagger" target="_blank">API Spec</a>, if the summary of
+            an API contains <b>(Auth)</b> or <b>(Auth Policies:xxx)</b>, <code>Authorization</code> header is required.
+            Otherwise, the API can be called anonymously.
+        </li>
+        <li>If <b>Policies</b> is empty, it means any login user is allowed to access the API.</li>
+        <li>
+            If <b>Policies</b> is NOT empty, it means only users who have proper access can access the API.
+            The policy name is quite descriptive. e.g. <b>PlatformAdministrator</b> means only admins of the hackathon platform are allowed, so only several selected accounts are allowd.
+            Another typical example, <b>HackathonAdminitrator</b>, only admins of a hackathon are allowed.
+        </li>
+    </ul>
+</div>
+
+<h3>Error Response</h3>
+<div>
+    Http response with a code >= 400 is Error. A <a href="https://tools.ietf.org/html/rfc7807" target="_blank">RFC7807</a>-compliant standard
+    response body is retured. The response is of type <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails?view=aspnetcore-5.0" target="_blank">ProblemDetails</a>
+    or <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails?view=aspnetcore-5.0" target="_blank">ValidationProblemDetails</a> for 400 Bad Request. Example:
+    <pre>
+        {
+            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            "title": "One or more validation errors occurred.",
+            "status": 400,
+            "traceId": "|790eea2d-4a0d4972a27712a5.",
+            "errors": {
+                "MaxEnrollment": [
+                    "The field MaxEnrollment must be between 1 and 2147483647."
+                ]
+            }
+        }
+</pre>
+</div>
 
 <h3>Legacy API</h3>
 <div>View legacy API at <a href="https://github.com/kaiyuanshe/open-hackathon/wiki/Open-hackathon-Restful-API" target="_blank">Open Hackthon Rest API V1 spec</a></div>

@@ -3,6 +3,7 @@ using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -51,9 +52,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             httpContextMock.SetupGet(h => h.Request).Returns(httpRequestMock.Object);
             httpRequestMock.SetupGet(h => h.Headers).Returns(headerMock.Object);
             headerMock.Setup(h => h.ContainsKey(HeaderNames.Authorization)).Returns(false);
+            var factory = new Mock<ProblemDetailsFactory>();
 
             // test
-            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object);
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, factory.Object);
             await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
             var result = await handler.AuthenticateAsync();
 
@@ -78,9 +80,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             httpRequestMock.SetupGet(h => h.Headers).Returns(headerMock.Object);
             headerMock.Setup(h => h.ContainsKey(HeaderNames.Authorization)).Returns(true);
             headerMock.SetupGet(p => p[HeaderNames.Authorization]).Returns(new StringValues(tokenValue));
+            var factory = new Mock<ProblemDetailsFactory>();
 
             // test
-            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object);
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, factory.Object);
             await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
             var result = await handler.AuthenticateAsync();
 
@@ -106,9 +109,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             httpRequestMock.SetupGet(h => h.Headers).Returns(headerMock.Object);
             headerMock.Setup(h => h.ContainsKey(HeaderNames.Authorization)).Returns(true);
             headerMock.SetupGet(p => p[HeaderNames.Authorization]).Returns(new StringValues("token TOKENVALUE"));
+            var factory = new Mock<ProblemDetailsFactory>();
 
             // test
-            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object);
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, factory.Object);
             await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
             var result = await handler.AuthenticateAsync();
 
@@ -141,9 +145,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             httpRequestMock.SetupGet(h => h.Headers).Returns(headerMock.Object);
             headerMock.Setup(h => h.ContainsKey(HeaderNames.Authorization)).Returns(true);
             headerMock.SetupGet(p => p[HeaderNames.Authorization]).Returns(new StringValues("token TOKENVALUE"));
+            var factory = new Mock<ProblemDetailsFactory>();
 
             // test
-            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object);
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, factory.Object);
             await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
             var result = await handler.AuthenticateAsync();
 
@@ -173,9 +178,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             httpContextMock.SetupGet(h => h.Response).Returns(httpResponseMock.Object);
             httpResponseMock.SetupSet(m => m.StatusCode = 401);
             httpResponseMock.SetupSet(m => m.ContentType = MediaTypeNames.Application.Json);
+            var factory = new Mock<ProblemDetailsFactory>();
 
             // test
-            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, writeAsync);
+            var handler = new DefaultAuthHandler(_options.Object, _loggerFactory.Object, _encoder.Object, _clock.Object, userMgmtMock.Object, factory.Object, writeAsync);
             await handler.InitializeAsync(new AuthenticationScheme(AuthConstant.AuthType.Token, AuthConstant.AuthType.Token, typeof(DefaultAuthHandler)), httpContextMock.Object);
             await handler.ChallengeAsync(authenticationProperties);
 

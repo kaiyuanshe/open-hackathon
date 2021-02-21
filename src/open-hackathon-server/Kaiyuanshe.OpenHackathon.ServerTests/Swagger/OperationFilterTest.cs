@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
 {
@@ -42,6 +43,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
                             {
                                 ApiResponseFormats = new [] { new ApiResponseFormat { MediaType = "application/json" } },
                                 StatusCode = 400
+                            },
+                            new ApiResponseType
+                            {
+                                ApiResponseFormats = new [] { new ApiResponseFormat { MediaType = "application/json" } },
+                                StatusCode = 401
                             }
                         }),
                    },
@@ -58,12 +64,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
             Assert.IsTrue(get.Responses.ContainsKey("200"));
 
             var post = document.Paths["/resource"].Operations[OperationType.Post];
-            Assert.AreEqual(2, post.Responses.Count);
+            Assert.AreEqual(3, post.Responses.Count);
             Assert.IsTrue(post.Responses.ContainsKey("400"));
             Assert.AreEqual(1, post.Responses["400"].Content.Count);
             var schema = post.Responses["400"].Content.Values.Single().Schema;
             Assert.IsNotNull(schema.Reference);
-            Assert.AreEqual(nameof(ErrorResponse), schema.Reference.Id);
+            Assert.AreEqual(nameof(ValidationProblemDetails), schema.Reference.Id);
+            Assert.IsTrue(post.Responses.ContainsKey("401"));
+            Assert.AreEqual(1, post.Responses["401"].Content.Count);
+            schema = post.Responses["401"].Content.Values.Single().Schema;
+            Assert.IsNotNull(schema.Reference);
+            Assert.AreEqual(nameof(ProblemDetails), schema.Reference.Id);
         }
 
         [Test]

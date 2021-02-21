@@ -106,6 +106,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An unexpected exception occurs. Please try again later or report an issue at https://github.com/kaiyuanshe/open-hackathon/issues.
+        /// </summary>
+        internal static string Hackathon_UnhandledException {
+            get {
+                return ResourceManager.GetString("Hackathon_UnhandledException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required parameter {0} is null or empty..
         /// </summary>
         internal static string Parameter_Required {
@@ -120,15 +129,6 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         internal static string Request_Forbidden_HackAdmin {
             get {
                 return ResourceManager.GetString("Request_Forbidden_HackAdmin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to One or more properties are invalid. See details in response for more information..
-        /// </summary>
-        internal static string Request_Invalid {
-            get {
-                return ResourceManager.GetString("Request_Invalid", resourceCulture);
             }
         }
     }
