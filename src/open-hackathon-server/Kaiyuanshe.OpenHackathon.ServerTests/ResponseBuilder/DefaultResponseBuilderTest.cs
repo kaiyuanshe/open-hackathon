@@ -26,11 +26,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             var builder = new DefaultResponseBuilder();
             var hack = builder.BuildHackathon(entity);
 
-            Assert.IsNull(hack.Tags);
-            Assert.AreEqual("pk", hack.Name);
-            Assert.IsTrue(hack.AutoApprove.Value);
-            Assert.AreEqual("loc", hack.Location);
-            Assert.AreEqual("abc", hack.CreatorId);
+            Assert.IsNull(hack.tags);
+            Assert.AreEqual("pk", hack.name);
+            Assert.IsTrue(hack.autoApprove.Value);
+            Assert.AreEqual("loc", hack.location);
+            Assert.AreEqual("abc", hack.creatorId);
             Assert.IsTrue(hack.JudgeStartTime.HasValue);
             Assert.IsFalse(hack.JudgeEndTime.HasValue);
         }
@@ -52,7 +52,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(count, hacklist.values.Length);
             for (int i = 0; i < count; i++)
             {
-                Assert.AreEqual(i.ToString(), hacklist.values[i].Name);
+                Assert.AreEqual(i.ToString(), hacklist.values[i].name);
             }
         }
     }

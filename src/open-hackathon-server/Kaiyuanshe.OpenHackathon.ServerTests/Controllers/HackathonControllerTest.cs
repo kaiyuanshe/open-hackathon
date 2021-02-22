@@ -42,12 +42,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackManagerMock);
             hackManagerMock.VerifyNoOtherCalls();
-            Assert.AreEqual(name.ToLower(), hack.Name);
+            Assert.AreEqual(name.ToLower(), hack.name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Hackathon resp = (Hackathon)objectResult.Value;
-            Assert.AreEqual("test2", resp.Name);
-            Assert.IsTrue(resp.AutoApprove);
+            Assert.AreEqual("test2", resp.name);
+            Assert.IsTrue(resp.autoApprove);
         }
 
         [Test]
@@ -107,13 +107,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
-            Assert.AreEqual(name, hack.Name);
+            Assert.AreEqual(name, hack.name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Assert.IsTrue(objectResult.Value is Hackathon);
             Hackathon resp = (Hackathon)objectResult.Value;
-            Assert.AreEqual("test2", resp.Name);
-            Assert.IsTrue(resp.AutoApprove);
+            Assert.AreEqual("test2", resp.name);
+            Assert.IsTrue(resp.autoApprove);
         }
 
         [Test]
@@ -194,12 +194,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.AreEqual(name.ToLower(), parameter.Name);
+            Assert.AreEqual(name.ToLower(), parameter.name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Assert.IsTrue(objectResult.Value is Hackathon);
             Hackathon resp = (Hackathon)objectResult.Value;
-            Assert.AreEqual("displayname", resp.DisplayName);
+            Assert.AreEqual("displayname", resp.displayName);
         }
 
         [Test]
@@ -246,7 +246,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(result is OkObjectResult);
             Hackathon hackathon = ((OkObjectResult)result).Value as Hackathon;
             Assert.IsNotNull(hackathon);
-            Assert.AreEqual("detail", hackathon.Detail);
+            Assert.AreEqual("detail", hackathon.detail);
         }
 
         [Test]

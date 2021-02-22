@@ -56,7 +56,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromBody] Hackathon parameter)
         {
             string nameLowercase = name.ToLower();
-            parameter.Name = nameLowercase;
+            parameter.name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
             if (entity != null)
             {
@@ -64,7 +64,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
             else
             {
-                parameter.CreatorId = CurrentUserId;
+                parameter.creatorId = CurrentUserId;
                 var created = await HackathonManagement.CreateHackathonAsync(parameter);
                 return Ok(ResponseBuilder.BuildHackathon(created));
             }
@@ -90,7 +90,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromBody] Hackathon parameter)
         {
             string nameLowercase = name.ToLower();
-            parameter.Name = nameLowercase;
+            parameter.name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
             if (entity == null)
             {

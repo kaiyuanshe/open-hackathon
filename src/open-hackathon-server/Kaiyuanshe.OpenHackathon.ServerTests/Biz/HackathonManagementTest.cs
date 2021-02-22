@@ -24,8 +24,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // input
             var request = new Hackathon
             {
-                Name = "test",
-                Location = "loc",
+                name = "test",
+                location = "loc",
                 EventStartTime = DateTime.UtcNow,
             };
             CancellationToken cancellationToken = CancellationToken.None;
@@ -170,7 +170,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
             var request = new Hackathon
             {
-                Name = name,
+                name = name,
             };
 
             var hackathonTableMock = new Mock<IHackathonTable>();

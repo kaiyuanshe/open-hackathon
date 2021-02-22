@@ -67,19 +67,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             #region Insert HackathonEntity
             var entity = new HackathonEntity
             {
-                PartitionKey = request.Name,
+                PartitionKey = request.name,
                 RowKey = string.Empty,
-                AutoApprove = request.AutoApprove.HasValue ? request.AutoApprove.Value : false,
-                Ribbon = request.Ribbon,
+                AutoApprove = request.autoApprove.HasValue ? request.autoApprove.Value : false,
+                Ribbon = request.ribbon,
                 Status = Models.Enums.HackathonStatus.Planning,
-                Summary = request.Summary,
-                Tags = request.Tags,
-                MaxEnrollment = request.MaxEnrollment.HasValue ? request.MaxEnrollment.Value : 0,
-                Banners = request.Banners,
+                Summary = request.summary,
+                Tags = request.tags,
+                MaxEnrollment = request.maxEnrollment.HasValue ? request.maxEnrollment.Value : 0,
+                Banners = request.banners,
                 CreateTime = DateTime.UtcNow,
-                CreatorId = request.CreatorId,
-                Detail = request.Detail,
-                DisplayName = request.DisplayName,
+                CreatorId = request.creatorId,
+                Detail = request.detail,
+                DisplayName = request.displayName,
                 EventStartTime = request.EventStartTime,
                 EventEndTime = request.EventEndTime,
                 EnrollmentStartTime = request.EnrollmentStartTime,
@@ -87,7 +87,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 IsDeleted = false,
                 JudgeStartTime = request.JudgeStartTime,
                 JudgeEndTime = request.JudgeEndTime,
-                Location = request.Location,
+                Location = request.location,
             };
             await StorageContext.HackathonTable.InsertAsync(entity, cancellationToken);
             #endregion
@@ -95,8 +95,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             #region Add creator as Admin
             ParticipantEntity participant = new ParticipantEntity
             {
-                PartitionKey = request.Name,
-                RowKey = request.CreatorId,
+                PartitionKey = request.name,
+                RowKey = request.creatorId,
                 CreateTime = DateTime.UtcNow,
                 Role = ParticipantRole.Administrator,
             };
@@ -149,19 +149,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
-            await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.Name, string.Empty, (entity) =>
+            await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.name, string.Empty, (entity) =>
             {
-                entity.Ribbon = request.Ribbon ?? entity.Ribbon;
-                entity.Summary = request.Summary ?? entity.Summary;
-                entity.Detail = request.Detail ?? entity.Detail;
-                entity.Location = request.Location ?? entity.Location;
-                entity.Banners = request.Banners ?? entity.Banners;
-                entity.DisplayName = request.DisplayName ?? entity.DisplayName;
-                if (request.MaxEnrollment.HasValue)
-                    entity.MaxEnrollment = request.MaxEnrollment.Value;
-                if (request.AutoApprove.HasValue)
-                    entity.AutoApprove = request.AutoApprove.Value;
-                entity.Tags = request.Tags ?? entity.Tags;
+                entity.Ribbon = request.ribbon ?? entity.Ribbon;
+                entity.Summary = request.summary ?? entity.Summary;
+                entity.Detail = request.detail ?? entity.Detail;
+                entity.Location = request.location ?? entity.Location;
+                entity.Banners = request.banners ?? entity.Banners;
+                entity.DisplayName = request.displayName ?? entity.DisplayName;
+                if (request.maxEnrollment.HasValue)
+                    entity.MaxEnrollment = request.maxEnrollment.Value;
+                if (request.autoApprove.HasValue)
+                    entity.AutoApprove = request.autoApprove.Value;
+                entity.Tags = request.tags ?? entity.Tags;
                 if (request.EventStartTime.HasValue)
                     entity.EventStartTime = request.EventStartTime.Value;
                 if (request.EventStartTime.HasValue)
@@ -175,7 +175,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 if (request.EventStartTime.HasValue)
                     entity.JudgeEndTime = request.JudgeEndTime.Value;
             }, cancellationToken);
-            return await StorageContext.HackathonTable.RetrieveAsync(request.Name, string.Empty, cancellationToken);
+            return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
         }
     }
 

@@ -8,12 +8,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
     public class EnvHelperTests
     {
         [Test]
-        public void IsDevelopmentTestFalse()
-        {
-            Assert.IsFalse(EnvHelper.IsDevelopment());
-        }
-
-        [Test]
         public void IsDevelopmentTestTrue()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development", EnvironmentVariableTarget.Process);
