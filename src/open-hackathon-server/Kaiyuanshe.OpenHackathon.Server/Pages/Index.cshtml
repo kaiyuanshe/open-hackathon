@@ -9,14 +9,14 @@
 <h3>Rest API Overview</h3>
 <div>A swagger 2.0 compliant Rest API server for open hackathon.</div>
 
-<h3>Authorization</h3>
+<h3>Authentication</h3>
 <div>
     Some APIs allow anonymous access, some others require a valid <code>token</code>. Open hackathon
     platform has integrated with <a href="https://authing.cn/" target="_blank">Authing</a>. Any web app which onboarded to Authing
     is able to get a valid token. A typical flow:
     <ul>
         <li>
-            In you web apa, follow Authing documents to login user. Can use any Authing-supported login method including social login.
+            In you web app, follow Authing documents to login user. Can use any Authing-supported login method including password-based and social login(github, WeChat and so on).
             All login-related configs are configured in Authing or social login provider like github.
         </li>
         <li>After a successful login, post the response data(token is included) returend by Authing to api <code>/v2/login</code>. This step MIGHT be skipped in future.</li>
@@ -27,10 +27,10 @@
     </ul>
 </div>
 
-<h3>Authentication</h3>
+<h3>Authorization</h3>
 <div>
-    User is identified using the access <code>token</code>. Access is determined by user. Quick
-    tips to learn the access:
+    User is identified using the access <code>token</code>. Access is determined based on the user/token. Quick
+    tips about access:
     <ul>
         <li>
             View the <a href="/swagger" target="_blank">API Spec</a>, if the summary of
@@ -48,21 +48,21 @@
 
 <h3>Error Response</h3>
 <div>
-    Http response with a code >= 400 is Error. A <a href="https://tools.ietf.org/html/rfc7807" target="_blank">RFC7807</a>-compliant standard
-    response body is retured. The response is of type <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails?view=aspnetcore-5.0" target="_blank">ProblemDetails</a>
-    or <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails?view=aspnetcore-5.0" target="_blank">ValidationProblemDetails</a> for 400 Bad Request. Example:
-    <pre>
-        {
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-            "title": "One or more validation errors occurred.",
-            "status": 400,
-            "traceId": "|790eea2d-4a0d4972a27712a5.",
-            "errors": {
-                "MaxEnrollment": [
-                    "The field MaxEnrollment must be between 1 and 2147483647."
-                ]
-            }
-        }
+    Http response with a code >= 400 is considered Error. A <a href="https://tools.ietf.org/html/rfc7807" target="_blank">RFC7807</a>-compliant standard
+    response body is retured. The response is of type <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails?view=aspnetcore-5.0" target="_blank">ProblemDetails</a>(code other than 400)
+    or <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails?view=aspnetcore-5.0" target="_blank">ValidationProblemDetails</a>(http code 400). Example:
+       <pre>
+{
+    "type": "https://httpstatuses.com/400",
+    "title": "One or more validation errors occurred.",
+    "status": 400,
+    "traceId": "|790eea2d-4a0d4972a27712a5.",
+    "errors": {
+        "maxEnrollment": [
+            "The field maxEnrollment must be between 1 and 100_000."
+        ]
+    }
+}
 </pre>
 </div>
 
