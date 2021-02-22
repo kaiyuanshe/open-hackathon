@@ -4,15 +4,12 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 {
     /// <summary>
-    /// Almost the same as <see cref="https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs"/>
+    /// Almost the same as <see href="https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs"/>
     /// Hence no unit test.
     /// </summary>
     public class CustomProblemDetailsFactory : ProblemDetailsFactory

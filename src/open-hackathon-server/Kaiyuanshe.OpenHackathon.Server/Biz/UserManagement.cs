@@ -74,6 +74,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
     }
 
+    /// <inheritdoc cref="IUserManagement"/>
     public class UserManagement : ManagementClientBase, IUserManagement
     {
         public async Task AuthingAsync(UserInfo userInfo, CancellationToken cancellationToken = default)

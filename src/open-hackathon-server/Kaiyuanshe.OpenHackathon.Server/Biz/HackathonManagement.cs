@@ -60,6 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
     }
 
+    /// <inheritdoc cref="IHackathonManagement"/>
     public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
         public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
