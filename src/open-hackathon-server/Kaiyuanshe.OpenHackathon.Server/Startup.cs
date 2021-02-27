@@ -40,7 +40,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
             // for Autofac here, and don't call builder.Populate() - that
             // happens in the AutofacServiceProviderFactory for you.
             services
-                .AddMvc()
+                .AddMvc(mvcOptions =>
+                {
+                    mvcOptions.EnableEndpointRouting = false;
+                })
                 .AddControllersAsServices()
                 .AddJsonOptions(options =>
                 {
@@ -92,6 +95,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 app.UseExceptionHandler("/error");
             }
 
+            // middleware
+            // In asp.net core 3.0, middlewares must be registered before MapControllers
+            RegisterMiddlewares(app);
+
             // app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
@@ -105,14 +112,13 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // Configure Swagger
             SwaggerStartup.Configure(app, env);
-
-            // middleware
-            RegisterMiddlewares(app);
         }
 
         private void RegisterMiddlewares(IApplicationBuilder app)
         {
-            app.UseMiddleware<LogRequestResponseMiddleware>();
+            app.UseMiddleware<HttpHeadersMiddleware>();
+            app.UseMiddleware<LoggingMiddleware>();
+            app.UseMvc();
         }
 
         private void RegisterControllers(ContainerBuilder builder)

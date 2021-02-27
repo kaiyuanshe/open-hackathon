@@ -1,27 +1,30 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Middlewares
 {
-    public class LogRequestResponseMiddleware
+    public class LoggingMiddleware
     {
         private readonly RequestDelegate _next;
+        private ILogger<LoggingMiddleware> logger;
         static readonly int MaxBlockSize = 10 * 1024;
 
-        public LogRequestResponseMiddleware(RequestDelegate next)
+        public LoggingMiddleware(RequestDelegate next, ILogger<LoggingMiddleware> logger)
         {
             _next = next;
+            this.logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
         {
             var start = Stopwatch.GetTimestamp();
-
             var responseStream = new HttpResponseStream(context.Response.Body);
             context.Response.Body = responseStream;
 
@@ -40,9 +43,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Middlewares
 
             // 172.21.13.45 - GET "/scripts/iisadmin/ism.dll?http/serv" 200
             string message = $"[{elapsedMs}]{clientIp} - {method} '{path}{query}' {statusCode}";
-            Console.WriteLine(message);
-            Console.WriteLine(requestBody);
-            Console.WriteLine(responseBody);
+            logger.LogInformation(message);
+            if (!string.IsNullOrEmpty(requestBody))
+            {
+                logger.LogInformation(requestBody);
+            }
+            if (!string.IsNullOrWhiteSpace(responseBody))
+            {
+                logger.LogInformation(responseBody);
+            }
         }
 
         private static async Task<string> RequestBody(HttpContext context)
@@ -120,9 +129,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Middlewares
                 kestrel.SetLength(value);
             }
 
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                if (logStream.Length < MaxBlockSize)
+                {
+                    logStream.Write(buffer, offset, Math.Min(count, MaxBlockSize - (int)logStream.Length));
+                }
+                return kestrel.WriteAsync(buffer, offset, count);
+            }
+
             public override void Write(byte[] buffer, int offset, int count)
             {
-                kestrel.Write(buffer, offset, count);
                 if (logStream.Length < MaxBlockSize)
                 {
                     logStream.Write(buffer, offset, Math.Min(count, MaxBlockSize - (int)logStream.Length));
