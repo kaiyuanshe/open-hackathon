@@ -24,6 +24,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
+            if (!context.Request.Path.StartsWithSegments("/v2", StringComparison.OrdinalIgnoreCase))
+            {
+                // only logging APIs
+                await _next(context);
+                return;
+            }
+
             var start = Stopwatch.GetTimestamp();
             var responseStream = new HttpResponseStream(context.Response.Body);
             context.Response.Body = responseStream;
@@ -43,14 +50,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Middlewares
 
             // 172.21.13.45 - GET "/scripts/iisadmin/ism.dll?http/serv" 200
             string message = $"[{elapsedMs}]{clientIp} - {method} '{path}{query}' {statusCode}";
-            logger.LogInformation(message);
+            logger.TraceInformation(message);
             if (!string.IsNullOrEmpty(requestBody))
             {
-                logger.LogInformation(requestBody);
+                logger.TraceInformation(requestBody);
             }
             if (!string.IsNullOrWhiteSpace(responseBody))
             {
-                logger.LogInformation(responseBody);
+                logger.TraceInformation(responseBody);
             }
         }
 
