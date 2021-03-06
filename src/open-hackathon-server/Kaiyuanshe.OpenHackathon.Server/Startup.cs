@@ -59,7 +59,8 @@ namespace Kaiyuanshe.OpenHackathon.Server
             // Razor pages
             services.AddRazorPages(options =>
             {
-                //options.
+                options.Conventions.AllowAnonymousToPage("/Index");
+                options.Conventions.AllowAnonymousToFolder("/Authing");
             });
 
             // AuthN & AuthZ
