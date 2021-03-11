@@ -13,6 +13,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IHackathonManagement
     {
+        #region Hackathon
         /// <summary>
         /// Create a new hackathon
         /// </summary>
@@ -20,6 +21,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Update hackathon from request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Change the hackathon to Deleted.
@@ -36,14 +45,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
-        /// </summary>
-        /// <param name="name">name of Hackathon</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Search hackathon
         /// </summary>
         /// <param name="options"></param>
@@ -51,13 +52,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default);
 
+        #endregion
+
+        #region Admin
         /// <summary>
-        /// Update hackathon from request.
+        /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
         /// </summary>
-        /// <param name="request"></param>
+        /// <param name="name">name of Hackathon</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
+        #endregion
+
+        #region Contestant
+        /// <summary>
+        /// Register a hackathon event as contestant
+        /// </summary>
+        Task<ParticipantEntity> Register(string hackathonName, string userId, CancellationToken cancellationToken);
+        #endregion
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>
@@ -132,6 +144,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     return allParticipants.Where(p => p.Role.HasFlag(ParticipantRole.Administrator));
                 },
                 CacheHelper.ExpireIn10M);
+        }
+
+        public async Task<ParticipantEntity> Register(string hackathonName, string userId, CancellationToken cancellationToken)
+        {
+            var entity = await StorageContext.ParticipantTable.RetrieveAsync(hackathonName, userId, cancellationToken);
+            if (entity != null)
+            {
+                entity.Role = entity.Role | ParticipantRole.Contestant;
+                await StorageContext.ParticipantTable.MergeAsync(entity, cancellationToken);
+            }
+            else
+            {
+                entity = new ParticipantEntity
+                {
+                    PartitionKey = hackathonName,
+                    RowKey = userId,
+                    Role = ParticipantRole.Contestant,
+                };
+                await StorageContext.ParticipantTable.InsertAsync(entity, cancellationToken);
+            }
+
+            return entity;
         }
 
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
