@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         }
 
         public ParticipantRole Role { get; set; }
+
+        public EnrollmentStatus EnrollmentStatus { get; set; }
 
         public DateTime CreateTime { get; set; }
 
