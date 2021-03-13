@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
@@ -68,13 +70,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
-        Task<ParticipantEntity> Register(string hackathonName, string userId, CancellationToken cancellationToken);
+        Task<ParticipantEntity> Enroll(HackathonEntity hackathon, string userId, CancellationToken cancellationToken);
         #endregion
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>
     public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
+        private readonly ILogger Logger;
+
+        public HackathonManagement(ILogger<HackathonManagement> logger)
+        {
+            Logger = logger;
+        }
+
         public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             #region Insert HackathonEntity
@@ -146,12 +155,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 CacheHelper.ExpireIn10M);
         }
 
-        public async Task<ParticipantEntity> Register(string hackathonName, string userId, CancellationToken cancellationToken)
+        public async Task<ParticipantEntity> Enroll(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
         {
+            string hackathonName = hackathon.Name;
             var entity = await StorageContext.ParticipantTable.RetrieveAsync(hackathonName, userId, cancellationToken);
+
+            if (entity != null && entity.Role.HasFlag(ParticipantRole.Contestant))
+            {
+                Logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
+                return entity;
+            }
+
             if (entity != null)
             {
                 entity.Role = entity.Role | ParticipantRole.Contestant;
+                entity.EnrollmentStatus = EnrollmentStatus.Pending;
+                if (hackathon.AutoApprove)
+                {
+                    entity.EnrollmentStatus = EnrollmentStatus.Approved;
+                }
                 await StorageContext.ParticipantTable.MergeAsync(entity, cancellationToken);
             }
             else
@@ -161,9 +183,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     PartitionKey = hackathonName,
                     RowKey = userId,
                     Role = ParticipantRole.Contestant,
+                    EnrollmentStatus = EnrollmentStatus.Pending,
                 };
+                if (hackathon.AutoApprove)
+                {
+                    entity.EnrollmentStatus = EnrollmentStatus.Approved;
+                }
                 await StorageContext.ParticipantTable.InsertAsync(entity, cancellationToken);
             }
+            Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.EnrollmentStatus.ToString()}");
 
             return entity;
         }

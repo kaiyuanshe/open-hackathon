@@ -48,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContextMock.SetupGet(p => p.ParticipantTable).Returns(participantTableMock.Object);
 
             // test
-            var hackathonManager = new HackathonManagement();
+            var hackathonManager = new HackathonManagement(null);
             hackathonManager.StorageContext = storageContextMock.Object;
             var result = await hackathonManager.CreateHackathonAsync(request, CancellationToken.None);
 
@@ -84,7 +84,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
 
-            var hackathonManagement = new HackathonManagement
+            var hackathonManagement = new HackathonManagement(null)
             {
                 StorageContext = storageContext.Object
             };
@@ -114,7 +114,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContextMock = new Mock<IStorageContext>();
             storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
 
-            var hackathonManager = new HackathonManagement();
+            var hackathonManager = new HackathonManagement(null);
             hackathonManager.StorageContext = storageContextMock.Object;
             var result = await hackathonManager.GetHackathonEntityByNameAsync(name, CancellationToken.None);
 
@@ -146,7 +146,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.SetupGet(p => p.ParticipantTable).Returns(participantTable.Object);
             participantTable.Setup(p => p.ListParticipantsByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
 
-            var hackathonManagement = new HackathonManagement
+            var hackathonManagement = new HackathonManagement(null)
             {
                 StorageContext = storageContext.Object,
             };
@@ -182,7 +182,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContextMock = new Mock<IStorageContext>();
             storageContextMock.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
 
-            var hackathonManager = new HackathonManagement();
+            var hackathonManager = new HackathonManagement(null);
             hackathonManager.StorageContext = storageContextMock.Object;
             var result = await hackathonManager.UpdateHackathonAsync(request, CancellationToken.None);
 
