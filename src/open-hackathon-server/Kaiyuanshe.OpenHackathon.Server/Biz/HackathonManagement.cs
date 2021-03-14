@@ -70,7 +70,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
-        Task<ParticipantEntity> Enroll(HackathonEntity hackathon, string userId, CancellationToken cancellationToken);
+        Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken);
         #endregion
     }
 
@@ -155,7 +155,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 CacheHelper.ExpireIn10M);
         }
 
-        public async Task<ParticipantEntity> Enroll(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
+        public async Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
         {
             string hackathonName = hackathon.Name;
             var entity = await StorageContext.ParticipantTable.RetrieveAsync(hackathonName, userId, cancellationToken);
