@@ -68,6 +68,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 detail: detail,
                 instance: instance);
         }
+
+        protected ObjectResult PreconditionFailed(string detail, string instance = null)
+        {
+            return Problem(
+                statusCode: 412,
+                detail: detail,
+                instance: instance
+            );
+        }
         #endregion
     }
 }

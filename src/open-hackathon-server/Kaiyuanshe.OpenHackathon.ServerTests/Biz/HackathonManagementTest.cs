@@ -27,7 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 name = "test",
                 location = "loc",
-                EventStartTime = DateTime.UtcNow,
+                eventStartedAt = DateTime.UtcNow,
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -62,8 +62,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("loc", result.Location);
             Assert.AreEqual("test", result.PartitionKey);
             Assert.AreEqual(string.Empty, result.RowKey);
-            Assert.IsTrue(result.EventStartTime.HasValue);
-            Assert.IsFalse(result.EventEndTime.HasValue);
+            Assert.IsTrue(result.EventStartedAt.HasValue);
+            Assert.IsFalse(result.EventEndedAt.HasValue);
             Assert.AreEqual("loc", hackInserted.Location);
             Assert.AreEqual("test", partInserted.PartitionKey);
             Assert.IsFalse(hackInserted.IsDeleted);
@@ -256,7 +256,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             Mock.VerifyAll(storageContext, participantTable);
             participantTable.VerifyNoOtherCalls();
-            Assert.AreEqual(targetStatus, participant.EnrollmentStatus);
+            Assert.AreEqual(targetStatus, participant.Status);
             Assert.IsTrue(participant.Role.HasFlag(ParticipantRole.Contestant));
         }
 
@@ -292,7 +292,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             Mock.VerifyAll(storageContext, participantTable);
             participantTable.VerifyNoOtherCalls();
-            Assert.AreEqual(targetStatus, participant.EnrollmentStatus);
+            Assert.AreEqual(targetStatus, participant.Status);
             Assert.IsTrue(participant.Role.HasFlag(ParticipantRole.Contestant));
         }
     }
