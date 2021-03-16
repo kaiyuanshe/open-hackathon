@@ -37,9 +37,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 
         public ParticipantRole Role { get; set; }
 
-        public EnrollmentStatus EnrollmentStatus { get; set; }
+        public EnrollmentStatus Status { get; set; }
 
-        public DateTime CreateTime { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public bool IsPlatformAdministrator()
         {

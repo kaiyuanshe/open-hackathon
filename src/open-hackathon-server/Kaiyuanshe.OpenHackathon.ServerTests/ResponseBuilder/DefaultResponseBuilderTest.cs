@@ -19,7 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 AutoApprove = true,
                 CreatorId = "abc",
                 Location = "loc",
-                JudgeStartTime = DateTime.UtcNow,
+                JudgeStartedAt = DateTime.UtcNow,
                 Status = Server.Models.Enums.HackathonStatus.Online,
             };
 
@@ -31,8 +31,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.IsTrue(hack.autoApprove.Value);
             Assert.AreEqual("loc", hack.location);
             Assert.AreEqual("abc", hack.creatorId);
-            Assert.IsTrue(hack.JudgeStartTime.HasValue);
-            Assert.IsFalse(hack.JudgeEndTime.HasValue);
+            Assert.IsTrue(hack.judgeStartedAt.HasValue);
+            Assert.IsFalse(hack.judgeEndedAt.HasValue);
         }
 
         [Test]

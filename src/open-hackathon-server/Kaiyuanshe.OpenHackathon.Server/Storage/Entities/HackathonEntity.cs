@@ -54,12 +54,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// </summary>
         public bool AutoApprove { get; set; }
         public string[] Tags { get; set; }
-        public DateTime CreateTime { get; set; }
-        public DateTime? EventStartTime { get; set; }
-        public DateTime? EventEndTime { get; set; }
-        public DateTime? EnrollmentStartTime { get; set; }
-        public DateTime? EnrollmentEndTime { get; set; }
-        public DateTime? JudgeStartTime { get; set; }
-        public DateTime? JudgeEndTime { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? EventStartedAt { get; set; }
+        public DateTime? EventEndedAt { get; set; }
+        public DateTime? EnrollmentStartedAt { get; set; }
+        public DateTime? EnrollmentEndedAt { get; set; }
+        public DateTime? JudgeStartedAt { get; set; }
+        public DateTime? JudgeEndedAt { get; set; }
     }
 }

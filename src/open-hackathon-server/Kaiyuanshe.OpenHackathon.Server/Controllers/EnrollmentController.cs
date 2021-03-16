@@ -16,6 +16,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class EnrollmentController : HackathonControllerBase
     {
+        public IResponseBuilder ResponseBuilder { get; set; }
+
         public IHackathonManagement HackathonManagement { get; set; }
 
         /// <summary>
@@ -24,18 +26,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="userId" example="1">unique id of the login user</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a enrollment.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
         /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
-        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Route("hackathon/{hackathonName}/enrollment")]
         [Authorize]
         public async Task<object> Enroll(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required] string userId,
             [FromBody] Enrollment parameter)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
@@ -44,7 +44,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
             }
 
-            return null;
+            if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
+            {
+                // enrollment not started
+                return PreconditionFailed("not started");
+            }
+
+            if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
+            {
+                // enrollment not started
+                return PreconditionFailed("already ended");
+            }
+
+            var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
+            return Ok(ResponseBuilder.BuildEnrollment(participant));
         }
     }
 }

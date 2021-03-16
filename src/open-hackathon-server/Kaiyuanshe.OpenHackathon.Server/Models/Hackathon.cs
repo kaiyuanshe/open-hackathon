@@ -99,56 +99,48 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// The timestamp when the hackathon is created
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("createdAt")]
-        public DateTime CreateTime { get; internal set; }
+        public DateTime createdAt { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon is created
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("updatedAt")]
-        public DateTime LastUpdateTime { get; internal set; }
+        public DateTime updatedAt { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon starts.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("eventStartedAt")]
-        public DateTime? EventStartTime { get; set; }
+        public DateTime? eventStartedAt { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon ends
         /// </summary>
-        [JsonProperty("eventEndedAt")]
-        public DateTime? EventEndTime { get; set; }
+        public DateTime? eventEndedAt { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon begins to accept user enrollement.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("enrollmentStartedAt")]
-        public DateTime? EnrollmentStartTime { get; set; }
+        public DateTime? enrollmentStartedAt { get; set; }
 
         /// <summary>
         /// The timestamp when the hackathon stops accepting user enrollement
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("enrollmentEndedAt")]
-        public DateTime? EnrollmentEndTime { get; set; }
+        public DateTime? enrollmentEndedAt { get; set; }
 
         /// <summary>
         /// The timestamp when the judges begin to review and rate the output showed/uploaded by enrolled users
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("judgeStartedAt")]
-        public DateTime? JudgeStartTime { get; set; }
+        public DateTime? judgeStartedAt { get; set; }
 
         /// <summary>
         /// The timestamp when the reviews/ratings should be completed.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
-        [JsonProperty("judgeEndedAt")]
-        public DateTime? JudgeEndTime { get; set; }
+        public DateTime? judgeEndedAt { get; set; }
     }
 
     /// <summary>

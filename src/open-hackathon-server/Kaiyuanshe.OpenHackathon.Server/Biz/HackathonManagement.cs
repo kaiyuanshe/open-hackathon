@@ -70,7 +70,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
-        Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken);
+        Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -98,17 +98,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Tags = request.tags,
                 MaxEnrollment = request.maxEnrollment.HasValue ? request.maxEnrollment.Value : 0,
                 Banners = request.banners,
-                CreateTime = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
                 CreatorId = request.creatorId,
                 Detail = request.detail,
                 DisplayName = request.displayName,
-                EventStartTime = request.EventStartTime,
-                EventEndTime = request.EventEndTime,
-                EnrollmentStartTime = request.EnrollmentStartTime,
-                EnrollmentEndTime = request.EnrollmentEndTime,
+                EventStartedAt = request.eventStartedAt,
+                EventEndedAt = request.eventEndedAt,
+                EnrollmentStartedAt = request.enrollmentStartedAt,
+                EnrollmentEndedAt = request.enrollmentEndedAt,
                 IsDeleted = false,
-                JudgeStartTime = request.JudgeStartTime,
-                JudgeEndTime = request.JudgeEndTime,
+                JudgeStartedAt = request.judgeStartedAt,
+                JudgeEndedAt = request.judgeEndedAt,
                 Location = request.location,
             };
             await StorageContext.HackathonTable.InsertAsync(entity, cancellationToken);
@@ -119,7 +119,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             {
                 PartitionKey = request.name,
                 RowKey = request.creatorId,
-                CreateTime = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
                 Role = ParticipantRole.Administrator,
             };
             await StorageContext.ParticipantTable.InsertAsync(participant, cancellationToken);
@@ -169,10 +169,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (entity != null)
             {
                 entity.Role = entity.Role | ParticipantRole.Contestant;
-                entity.EnrollmentStatus = EnrollmentStatus.Pending;
+                entity.Status = EnrollmentStatus.Pending;
                 if (hackathon.AutoApprove)
                 {
-                    entity.EnrollmentStatus = EnrollmentStatus.Approved;
+                    entity.Status = EnrollmentStatus.Approved;
                 }
                 await StorageContext.ParticipantTable.MergeAsync(entity, cancellationToken);
             }
@@ -183,15 +183,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     PartitionKey = hackathonName,
                     RowKey = userId,
                     Role = ParticipantRole.Contestant,
-                    EnrollmentStatus = EnrollmentStatus.Pending,
+                    Status = EnrollmentStatus.Pending,
+                    CreatedAt = DateTime.UtcNow,
                 };
                 if (hackathon.AutoApprove)
                 {
-                    entity.EnrollmentStatus = EnrollmentStatus.Approved;
+                    entity.Status = EnrollmentStatus.Approved;
                 }
                 await StorageContext.ParticipantTable.InsertAsync(entity, cancellationToken);
             }
-            Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.EnrollmentStatus.ToString()}");
+            Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
 
             return entity;
         }
@@ -225,18 +226,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 if (request.autoApprove.HasValue)
                     entity.AutoApprove = request.autoApprove.Value;
                 entity.Tags = request.tags ?? entity.Tags;
-                if (request.EventStartTime.HasValue)
-                    entity.EventStartTime = request.EventStartTime.Value;
-                if (request.EventStartTime.HasValue)
-                    entity.EventEndTime = request.EventEndTime.Value;
-                if (request.EventStartTime.HasValue)
-                    entity.EnrollmentStartTime = request.EnrollmentStartTime.Value;
-                if (request.EventStartTime.HasValue)
-                    entity.EnrollmentEndTime = request.EnrollmentEndTime.Value;
-                if (request.EventStartTime.HasValue)
-                    entity.JudgeStartTime = request.JudgeStartTime.Value;
-                if (request.EventStartTime.HasValue)
-                    entity.JudgeEndTime = request.JudgeEndTime.Value;
+                if (request.eventStartedAt.HasValue)
+                    entity.EventStartedAt = request.eventStartedAt.Value;
+                if (request.eventEndedAt.HasValue)
+                    entity.EventEndedAt = request.eventEndedAt.Value;
+                if (request.enrollmentStartedAt.HasValue)
+                    entity.EnrollmentStartedAt = request.enrollmentStartedAt.Value;
+                if (request.enrollmentEndedAt.HasValue)
+                    entity.EnrollmentEndedAt = request.enrollmentEndedAt.Value;
+                if (request.judgeStartedAt.HasValue)
+                    entity.JudgeStartedAt = request.judgeStartedAt.Value;
+                if (request.judgeEndedAt.HasValue)
+                    entity.JudgeEndedAt = request.judgeEndedAt.Value;
             }, cancellationToken);
             return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
         }
