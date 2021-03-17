@@ -129,6 +129,12 @@
   <data name="Auth_Unauthorized" xml:space="preserve">
     <value>Token is either missing or invalid. Please add it to Http request headers: Headers["Authorization"]=token TOKEN. </value>
   </data>
+  <data name="Hackathon_Enrollment_Ended" xml:space="preserve">
+    <value>Enrollment already ended at {0}</value>
+  </data>
+  <data name="Hackathon_Enrollment_NotStarted" xml:space="preserve">
+    <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
+  </data>
   <data name="Hackathon_NotFound" xml:space="preserve">
     <value>Hackathon with name {0} not found. Try PUT to create a new one.</value>
   </data>

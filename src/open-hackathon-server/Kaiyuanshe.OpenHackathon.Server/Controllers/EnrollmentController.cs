@@ -47,13 +47,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
             {
                 // enrollment not started
-                return PreconditionFailed("not started");
+                return PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_NotStarted, hackathon.EnrollmentStartedAt.Value));
             }
 
             if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
             {
                 // enrollment not started
-                return PreconditionFailed("already ended");
+                return PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
             }
 
             var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
