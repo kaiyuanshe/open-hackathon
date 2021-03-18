@@ -33,15 +33,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
         [Route("hackathon/{hackathonName}/enrollment")]
-        [Authorize]
+        [Authorize()]
         public async Task<object> Enroll(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromBody] Enrollment parameter)
         {
-            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
             if (hackathon == null)
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName.ToLower()));
             }
 
             if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
