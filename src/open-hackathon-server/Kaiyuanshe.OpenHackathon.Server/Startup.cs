@@ -101,14 +101,14 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 app.UseExceptionHandler("/error");
             }
 
-            // middleware
-            // In asp.net core 3.0, middlewares must be registered before MapControllers
-            RegisterMiddlewares(app);
-
             // app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // middleware
+            // In asp.net core 3.0, middlewares must be registered before MapControllers
+            RegisterMiddlewares(app);
 
             app.UseEndpoints(endpoints =>
             {
