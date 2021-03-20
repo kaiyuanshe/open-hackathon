@@ -30,6 +30,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success. The response describes a enrollment.</response>
         /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
         /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
+        /// <response code="412">Precondition Failed. The response indicates enrollment is not started or ended.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
         [Route("hackathon/{hackathonName}/enrollment")]

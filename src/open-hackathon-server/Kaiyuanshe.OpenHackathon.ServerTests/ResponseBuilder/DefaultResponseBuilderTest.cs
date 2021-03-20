@@ -55,5 +55,27 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Assert.AreEqual(i.ToString(), hacklist.values[i].name);
             }
         }
+
+        [Test]
+        public void BuildEnrollmentTest()
+        {
+            ParticipantEntity participant = new ParticipantEntity
+            {
+                PartitionKey = "hack",
+                RowKey = "uid",
+                Status = Server.Models.EnrollmentStatus.Approved,
+                CreatedAt = DateTime.Now,
+                Timestamp = DateTime.Now,
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var enrollment = respBuilder.BuildEnrollment(participant);
+
+            Assert.AreEqual("hack", enrollment.hackathonName);
+            Assert.AreEqual("uid", enrollment.userId);
+            Assert.AreEqual(Server.Models.EnrollmentStatus.Approved, enrollment.status);
+            Assert.AreEqual(participant.CreatedAt, enrollment.createdAt);
+            Assert.AreEqual(participant.Timestamp.DateTime, enrollment.updatedAt);
+        }
     }
 }
