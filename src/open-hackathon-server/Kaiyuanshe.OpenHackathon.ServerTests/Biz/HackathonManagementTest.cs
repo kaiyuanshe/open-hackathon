@@ -295,5 +295,53 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(targetStatus, participant.Status);
             Assert.IsTrue(participant.Role.HasFlag(ParticipantRole.Contestant));
         }
+
+        [Test]
+        public async Task EnrollUpdateStatusAsyncTest_Null()
+        {
+            ParticipantEntity participant = null;
+            CancellationToken cancellation = CancellationToken.None;
+            var logger = new Mock<ILogger<HackathonManagement>>();
+
+            var hackathonManagement = new HackathonManagement(logger.Object);
+            await hackathonManagement.EnrollmentUpdateStatusAsync(participant, EnrollmentStatus.Approved, cancellation);
+
+            Mock.VerifyAll(logger);
+            logger.VerifyNoOtherCalls();
+            Assert.IsNull(participant);
+        }
+
+        [TestCase(EnrollmentStatus.Approved)]
+        [TestCase(EnrollmentStatus.Rejected)]
+        public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus parameter)
+        {
+            ParticipantEntity participant = new ParticipantEntity();
+            CancellationToken cancellation = CancellationToken.None;
+            var logger = new Mock<ILogger<HackathonManagement>>();
+
+            ParticipantEntity captured = null;
+            var participantTable = new Mock<IParticipantTable>();
+            participantTable.Setup(p => p.MergeAsync(It.IsAny<ParticipantEntity>(), cancellation))
+                .Callback<ParticipantEntity, CancellationToken>((p, c) =>
+                {
+                    captured = p;
+                });
+
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.ParticipantTable).Returns(participantTable.Object);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await hackathonManagement.EnrollmentUpdateStatusAsync(participant, parameter, cancellation);
+
+            Mock.VerifyAll(storageContext, participantTable, logger);
+            participantTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.IsNotNull(captured);
+            Assert.AreEqual(parameter, captured.Status);
+            Assert.AreEqual(parameter, participant.Status);
+        }
     }
 }
