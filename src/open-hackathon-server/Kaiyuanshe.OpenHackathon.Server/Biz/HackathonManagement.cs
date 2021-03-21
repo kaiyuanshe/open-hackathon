@@ -71,6 +71,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// Register a hackathon event as contestant
         /// </summary>
         Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
+
+        Task<ParticipantEntity> EnrollmentUpdateStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -195,6 +197,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
 
             return entity;
+        }
+
+        public async Task<ParticipantEntity> EnrollmentUpdateStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default)
+        {
+            if (participant == null)
+                return participant;
+
+            participant.Status = status;
+            await StorageContext.ParticipantTable.MergeAsync(participant, cancellationToken);
+            Logger.TraceInformation($"Pariticipant {participant.HackathonName}/{participant.UserId} stastus updated to: {status} ");
+            return participant;
         }
 
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
