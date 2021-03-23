@@ -72,7 +72,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// </summary>
         Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
 
-        Task<ParticipantEntity> EnrollmentUpdateStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Update status of enrollment.
+        /// </summary>
+        Task<ParticipantEntity> UpdateEnrollmentStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get an enrollment.
+        /// </summary>
+        Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -139,6 +147,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 }, cancellationToken);
         }
 
+        public async Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
+        {
+            if (hackathonName == null || userId == null)
+                return null;
+            return await StorageContext.ParticipantTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
+        }
+
         public async Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default)
         {
             var entity = await StorageContext.HackathonTable.RetrieveAsync(name, string.Empty, cancellationToken);
@@ -199,7 +214,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return entity;
         }
 
-        public async Task<ParticipantEntity> EnrollmentUpdateStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default)
+        public async Task<ParticipantEntity> UpdateEnrollmentStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default)
         {
             if (participant == null)
                 return participant;

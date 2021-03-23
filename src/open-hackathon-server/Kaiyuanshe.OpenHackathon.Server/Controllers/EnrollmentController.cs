@@ -60,5 +60,53 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
             return Ok(ResponseBuilder.BuildEnrollment(participant));
         }
+
+        /// <summary>
+        /// Approve a hackathon enrollement.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns></returns>
+        /// <response code="200">Success. The enrollment is approved.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
+        /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
+        [HttpPost]
+        [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> Approve(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            [FromBody] Enrollment parameter)
+        {
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower());
+        }
+
+        private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId)
+        {
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
+            if (hackathon == null)
+            {
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
+            }
+
+            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+            }
+
+            ParticipantEntity participant = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
+            if (participant == null)
+            {
+                return NotFound($"User {userId} not enrolled in hackathon {hackathonName}");
+            }
+
+            participant = await HackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.Approved);
+            return Ok(ResponseBuilder.BuildEnrollment(participant));
+        }
     }
 }

@@ -304,7 +304,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var logger = new Mock<ILogger<HackathonManagement>>();
 
             var hackathonManagement = new HackathonManagement(logger.Object);
-            await hackathonManagement.EnrollmentUpdateStatusAsync(participant, EnrollmentStatus.Approved, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.Approved, cancellation);
 
             Mock.VerifyAll(logger);
             logger.VerifyNoOtherCalls();
@@ -334,7 +334,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object,
             };
-            await hackathonManagement.EnrollmentUpdateStatusAsync(participant, parameter, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, parameter, cancellation);
 
             Mock.VerifyAll(storageContext, participantTable, logger);
             participantTable.VerifyNoOtherCalls();
