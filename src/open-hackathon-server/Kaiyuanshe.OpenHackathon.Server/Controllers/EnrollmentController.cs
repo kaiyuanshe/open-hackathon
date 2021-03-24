@@ -102,7 +102,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             ParticipantEntity participant = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
             if (participant == null)
             {
-                return NotFound($"User {userId} not enrolled in hackathon {hackathonName}");
+                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
             }
 
             participant = await HackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.Approved);

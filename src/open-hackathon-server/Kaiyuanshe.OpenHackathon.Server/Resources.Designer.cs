@@ -106,6 +106,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User {0} not enrolled in hackathon {1}.
+        /// </summary>
+        internal static string Hackathon_Enrollment_NotFound {
+            get {
+                return ResourceManager.GetString("Hackathon_Enrollment_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enrollment not started. The enrollment will be accepted starting from {0}.
         /// </summary>
         internal static string Hackathon_Enrollment_NotStarted {
