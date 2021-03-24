@@ -343,5 +343,37 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(parameter, captured.Status);
             Assert.AreEqual(parameter, participant.Status);
         }
+
+        [TestCase(null, null)]
+        [TestCase(null, "uid")]
+        [TestCase("hack", null)]
+        public async Task GetEnrollmentAsyncTest_NotFound(string hackathon, string userId)
+        {
+            var hackathonManagement = new HackathonManagement(null);
+            var enrollment = await hackathonManagement.GetEnrollmentAsync(hackathon, userId);
+            Assert.IsNull(enrollment);
+        }
+
+        [Test]
+        public async Task GetEnrollmentAsyncTest_Succeeded()
+        {
+            ParticipantEntity participant = new ParticipantEntity { Status = EnrollmentStatus.Rejected };
+            CancellationToken cancellation = CancellationToken.None;
+            var logger = new Mock<ILogger<HackathonManagement>>();
+
+            var participantTable = new Mock<IParticipantTable>();
+            participantTable.Setup(p => p.RetrieveAsync("hack", "uid", cancellation)).ReturnsAsync(participant);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.ParticipantTable).Returns(participantTable.Object);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+
+            var enrollment = await hackathonManagement.GetEnrollmentAsync("Hack", "UID", cancellation);
+            Assert.IsNotNull(enrollment);
+            Assert.AreEqual(EnrollmentStatus.Rejected, enrollment.Status);
+        }
     }
 }

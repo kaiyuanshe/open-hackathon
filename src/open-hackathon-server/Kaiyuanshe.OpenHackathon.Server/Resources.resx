@@ -132,6 +132,9 @@
   <data name="Hackathon_Enrollment_Ended" xml:space="preserve">
     <value>Enrollment already ended at {0}</value>
   </data>
+  <data name="Hackathon_Enrollment_NotFound" xml:space="preserve">
+    <value>User {0} not enrolled in hackathon {1}</value>
+  </data>
   <data name="Hackathon_Enrollment_NotStarted" xml:space="preserve">
     <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
   </data>
