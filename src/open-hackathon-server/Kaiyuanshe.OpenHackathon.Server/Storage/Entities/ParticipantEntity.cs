@@ -45,6 +45,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         {
             return string.IsNullOrEmpty(HackathonName) && Role.HasFlag(ParticipantRole.Administrator);
         }
+
+        public bool IsContestant()
+        {
+            return Role.HasFlag(ParticipantRole.Contestant);
+        }
     }
 
     [Flags]
