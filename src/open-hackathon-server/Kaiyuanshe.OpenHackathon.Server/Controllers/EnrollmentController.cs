@@ -75,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
-        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}/approve")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Approve(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
@@ -99,7 +99,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
-        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}/reject")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Reject(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
