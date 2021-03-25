@@ -75,17 +75,41 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
-        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}/approve")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Approve(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required] string userId,
             [FromBody] Enrollment parameter)
         {
-            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower());
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.Approved);
         }
 
-        private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId)
+        /// <summary>
+        /// Reject a hackathon enrollement.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns></returns>
+        /// <response code="200">Success. The enrollment is approved.</response>
+        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
+        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
+        /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
+        [HttpPost]
+        [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}/reject")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> Reject(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            [FromBody] Enrollment parameter)
+        {
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.Rejected);
+        }
+
+        private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
             if (hackathon == null)
@@ -105,7 +129,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
             }
 
-            participant = await HackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.Approved);
+            participant = await HackathonManagement.UpdateEnrollmentStatusAsync(participant, status);
             return Ok(ResponseBuilder.BuildEnrollment(participant));
         }
     }

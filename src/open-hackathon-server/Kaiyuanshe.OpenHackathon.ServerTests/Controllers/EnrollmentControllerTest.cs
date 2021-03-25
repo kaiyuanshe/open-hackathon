@@ -11,6 +11,7 @@ using Moq;
 using NUnit.Framework;
 using System.Security.Claims;
 using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -129,8 +130,25 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("pk", enrollment.hackathonName);
         }
 
-        [Test]
-        public async Task ApproveTest_HackNotFound()
+        private static IEnumerable ListStatus()
+        {
+            yield return EnrollmentStatus.Approved;
+            yield return EnrollmentStatus.Rejected;
+        }
+
+        private static Func<string, string, Enrollment, Task<object>> GetTargetMethod(EnrollmentController controller, EnrollmentStatus status)
+        {
+            if (status == EnrollmentStatus.Approved)
+                return controller.Approve;
+
+            if (status == EnrollmentStatus.Rejected)
+                return controller.Reject;
+
+            return null;
+        }
+
+        [Test, TestCaseSource(nameof(ListStatus))]
+        public async Task ApproveRejectTest_HackNotFound(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
@@ -146,15 +164,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Approve(hack, userId, null);
+            var func = GetTargetMethod(controller, status);
+            var result = await func(hack, userId, null);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
             AssertHelper.AssertObjectResult(result, 404);
         }
 
-        [Test]
-        public async Task ApproveTest_Forbidden()
+        [Test, TestCaseSource(nameof(ListStatus))]
+        public async Task ApproveRejectTest_Forbidden(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
@@ -176,15 +195,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.Approve(hack, userId, null);
+            var func = GetTargetMethod(controller, status);
+            var result = await func(hack, userId, null);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
             AssertHelper.AssertObjectResult(result, 403);
         }
 
-        [Test]
-        public async Task ApproveTest_EnrollmentNotFound()
+        [Test, TestCaseSource(nameof(ListStatus))]
+        public async Task ApproveRejectTest_EnrollmentNotFound(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
@@ -216,8 +236,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             AssertHelper.AssertObjectResult(result, 404);
         }
 
-        [Test]
-        public async Task ApproveTest_EnrollmentNotFound2()
+        [Test, TestCaseSource(nameof(ListStatus))]
+        public async Task ApproveRejectTest_EnrollmentNotFound2(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
@@ -242,15 +262,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.Approve(hack, userId, null);
+            var func = GetTargetMethod(controller, status);
+            var result = await func(hack, userId, null);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
             AssertHelper.AssertObjectResult(result, 404);
         }
 
-        [Test]
-        public async Task ApproveTest_Succeeded()
+        [Test, TestCaseSource(nameof(ListStatus))]
+        public async Task ApproveRejectTest_Succeeded(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
@@ -285,7 +306,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.Approve(hack, userId, null);
+            var func = GetTargetMethod(controller, status);
+            var result = await func(hack, userId, null);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -293,7 +315,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             OkObjectResult objectResult = (OkObjectResult)result;
             Enrollment enrollment = (Enrollment)objectResult.Value;
             Assert.IsNotNull(enrollment);
-            Assert.AreEqual(EnrollmentStatus.Approved, enrollment.status);
+            Assert.AreEqual(status, enrollment.status);
         }
     }
 }
