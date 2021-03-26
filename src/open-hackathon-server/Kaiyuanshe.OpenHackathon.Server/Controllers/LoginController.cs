@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
@@ -22,6 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost]
+        [SwaggerErrorResponse(400)]
         [Route("login")]
         public async Task<object> Authing([FromBody] UserInfo parameter,
             CancellationToken cancellationToken)

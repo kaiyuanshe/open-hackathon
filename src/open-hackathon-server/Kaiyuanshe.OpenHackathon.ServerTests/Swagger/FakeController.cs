@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Kaiyuanshe.OpenHackathon.Server.Swagger;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -26,6 +27,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
 
         [Authorize]
         public void ActionWithTokenRequired()
+        { }
+
+        [SwaggerErrorResponse(400, 401)]
+        [SwaggerErrorResponse(400, 403, 412)]
+        [SwaggerErrorResponse(403, 404, 429)]
+        public void ActionWithErrorResponseCodes()
         { }
 
         public void ActionWithParameterWithRequiredAttribute([Required] string param)

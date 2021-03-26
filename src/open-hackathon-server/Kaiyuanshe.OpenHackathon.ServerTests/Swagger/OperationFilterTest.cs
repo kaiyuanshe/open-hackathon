@@ -15,7 +15,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
     [TestFixture]
     public class OperationFilterTest : SwaggerTest
     {
-        //[Test]
+        [Test]
         public void ErrorResonseOperationFilterTest()
         {
             var generator = Generate(
@@ -28,28 +28,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
                         relativePath: "resource"),
 
                        ApiDescriptionFactory.Create<FakeController>(
-                        c => nameof(c.ActionWithNoParameters),
+                        c => nameof(c.ActionWithErrorResponseCodes),
                         groupName: "v1",
                         httpMethod: "POST",
-                        relativePath: "resource",
-                        supportedResponseTypes: new []
-                        {
-                            new ApiResponseType
-                            {
-                                ApiResponseFormats = new [] { new ApiResponseFormat { MediaType = "application/json" } },
-                                StatusCode = 200,
-                            },
-                            new ApiResponseType
-                            {
-                                ApiResponseFormats = new [] { new ApiResponseFormat { MediaType = "application/json" } },
-                                StatusCode = 400
-                            },
-                            new ApiResponseType
-                            {
-                                ApiResponseFormats = new [] { new ApiResponseFormat { MediaType = "application/json" } },
-                                StatusCode = 401
-                            }
-                        }),
+                        relativePath: "resource"
+                        ),
                    },
                    configure: (options) =>
                    {
@@ -64,17 +47,28 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Swagger
             Assert.IsTrue(get.Responses.ContainsKey("200"));
 
             var post = document.Paths["/resource"].Operations[OperationType.Post];
-            Assert.AreEqual(3, post.Responses.Count);
+            Assert.AreEqual(7, post.Responses.Count); // default 200 + codes defined in attribute
+            Assert.IsTrue(post.Responses.ContainsKey("200"));
+
+            // 400
             Assert.IsTrue(post.Responses.ContainsKey("400"));
             Assert.AreEqual(1, post.Responses["400"].Content.Count);
             var schema = post.Responses["400"].Content.Values.Single().Schema;
             Assert.IsNotNull(schema.Reference);
             Assert.AreEqual(nameof(ValidationProblemDetails), schema.Reference.Id);
-            Assert.IsTrue(post.Responses.ContainsKey("401"));
-            Assert.AreEqual(1, post.Responses["401"].Content.Count);
-            schema = post.Responses["401"].Content.Values.Single().Schema;
-            Assert.IsNotNull(schema.Reference);
-            Assert.AreEqual(nameof(ProblemDetails), schema.Reference.Id);
+            Assert.IsNotNull(post.Responses["400"].Description);
+
+            // other
+            string[] codes = new string[] { "401", "403", "404", "412", "429" };
+            foreach (var code in codes)
+            {
+                Assert.IsTrue(post.Responses.ContainsKey(code));
+                Assert.AreEqual(1, post.Responses[code].Content.Count);
+                schema = post.Responses[code].Content.Values.Single().Schema;
+                Assert.IsNotNull(schema.Reference);
+                Assert.AreEqual(nameof(ProblemDetails), schema.Reference.Id);
+                Assert.IsNotNull(post.Responses[code].Description);
+            }
         }
 
         [Test]

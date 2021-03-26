@@ -4,6 +4,7 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,10 +46,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403)]
         [Route("hackathon/{name}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateOrUpdate(
@@ -78,11 +78,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
-        /// <response code="404">Not Found. The response indicates the hackathon with specified name doesn't exist.</response>
         [HttpPatch]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
         [Route("hackathon/{name}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Update(
@@ -119,10 +117,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="404">Not Found. The response indicates the hackathon with specified name doesn't exist.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{name}")]
         public async Task<object> Get(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
@@ -143,10 +140,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="204">Success. The response indicates the hackathon is deleted.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
         [HttpDelete]
         [Route("hackathon/{name}")]
+        [SwaggerErrorResponse(400, 403)]
         [Authorize(AuthConstant.Policy.PlatformAdministrator)]
         public async Task<object> Delete(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
