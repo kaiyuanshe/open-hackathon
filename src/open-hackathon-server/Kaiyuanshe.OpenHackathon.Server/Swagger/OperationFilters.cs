@@ -14,9 +14,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
     /// </summary>
     public class ErrorResponseOperationFilter : IOperationFilter
     {
-        static Dictionary<int, string> statusCodeDescriptions = new Dictionary<int, string>
+        internal static Dictionary<int, string> statusCodeDescriptions = new Dictionary<int, string>
         {
             { 400, "Bad Reqeuest. The server cannot or will not process the request due to something that is perceived to be a client error. e.g., malformed request syntax"},
+            { 401, "Unauthorized. The client doesn't have valid authentication credentials."},
             { 403, "Forbidden. Access to the requested resource is forbidden. The server understood the request but refuse to fulfill it."},
             { 404, "Not Found. The server cannot find the requested resource."},
             { 409, "Conflict. The request could not be processed because of conflict in the current state of the resource, such as an edit conflict between multiple simultaneous updates."},
@@ -31,7 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
             var validationProblemDetailsSchema = context.SchemaGenerator.GenerateSchema(typeof(ValidationProblemDetails), context.SchemaRepository);
 
             var swaggerErrorRespAttrs = context.MethodInfo.GetCustomAttributes<SwaggerErrorResponseAttribute>();
-            var statusCodes = swaggerErrorRespAttrs.SelectMany(e => e.StatusCodes);
+            var statusCodes = swaggerErrorRespAttrs.SelectMany(e => e.StatusCodes).ToHashSet();
             foreach (var statusCode in statusCodes)
             {
                 var errorRespSchema = statusCode == 400 ? validationProblemDetailsSchema : problemDetailsSchema;
@@ -94,7 +95,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Swagger
                             Schema = errorRespSchema
                         }
                     },
-                    Description = "Unauthorized. Token is missing or invalid.",
+                    Description = ErrorResponseOperationFilter.statusCodeDescriptions[401],
                 });
 
                 // Add Required header

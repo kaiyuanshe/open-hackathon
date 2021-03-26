@@ -4,6 +4,7 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,13 +29,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a enrollment.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
-        /// <response code="412">Precondition Failed. The response indicates enrollment is not started or ended.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404, 412)]
         [Route("hackathon/{hackathonName}/enrollment")]
-        [Authorize()]
+        [Authorize]
         public async Task<object> Enroll(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromBody] Enrollment parameter)
@@ -70,11 +69,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="userId" example="1">Id of user</param>
         /// <returns></returns>
         /// <response code="200">Success. The enrollment is approved.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
-        /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
         [Route("hackathon/{hackathonName}/enrollment/{userId}/approve")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Approve(
@@ -94,11 +91,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="userId" example="1">Id of user</param>
         /// <returns></returns>
         /// <response code="200">Success. The enrollment is approved.</response>
-        /// <response code="400">Bad Reqeuest. The response indicates the client request is not valid.</response>
-        /// <response code="403">Forbidden. The response indicates the user doesn't have proper access.</response>
-        /// <response code="404">Not Found. The response indicates the hackathon or user is not found.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
         [Route("hackathon/{hackathonName}/enrollment/{userId}/reject")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Reject(
