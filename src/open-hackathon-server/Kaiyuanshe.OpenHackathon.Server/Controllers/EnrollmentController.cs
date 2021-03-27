@@ -79,7 +79,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromRoute, Required] string userId,
             [FromBody] Enrollment parameter)
         {
-            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.Approved);
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.approved);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromRoute, Required] string userId,
             [FromBody] Enrollment parameter)
         {
-            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.Rejected);
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.rejected);
         }
 
         private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status)

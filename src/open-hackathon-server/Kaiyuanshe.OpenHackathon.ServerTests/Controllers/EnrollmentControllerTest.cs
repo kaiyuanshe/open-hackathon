@@ -132,16 +132,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
         private static IEnumerable ListStatus()
         {
-            yield return EnrollmentStatus.Approved;
-            yield return EnrollmentStatus.Rejected;
+            yield return EnrollmentStatus.approved;
+            yield return EnrollmentStatus.rejected;
         }
 
         private static Func<string, string, Enrollment, Task<object>> GetTargetMethod(EnrollmentController controller, EnrollmentStatus status)
         {
-            if (status == EnrollmentStatus.Approved)
+            if (status == EnrollmentStatus.approved)
                 return controller.Approve;
 
-            if (status == EnrollmentStatus.Rejected)
+            if (status == EnrollmentStatus.rejected)
                 return controller.Reject;
 
             return null;
@@ -279,7 +279,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var authResult = AuthorizationResult.Success();
             ParticipantEntity participant = new ParticipantEntity
             {
-                Status = EnrollmentStatus.Pending,
+                Status = EnrollmentStatus.pending,
                 Role = ParticipantRole.Contestant | ParticipantRole.Administrator
             };
 

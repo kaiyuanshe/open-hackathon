@@ -66,7 +66,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Status of Hackathon. Readonly. Can be updated though other API
         /// </summary>
-        /// <example>Online</example>
+        /// <example>online</example>
         public HackathonStatus status { get; internal set; }
 
         /// <summary>
