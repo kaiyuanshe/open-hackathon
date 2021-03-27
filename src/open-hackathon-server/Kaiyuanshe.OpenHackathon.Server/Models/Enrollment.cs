@@ -23,7 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Status of enrollment.
         /// </summary>
-        /// <example>Approved</example>
+        /// <example>approved</example>
         public EnrollmentStatus status { get; internal set; }
 
         /// <summary>
@@ -47,21 +47,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Not enrolled
         /// </summary>
-        None,
+        none,
 
         /// <summary>
         /// Pending approval
         /// </summary>
-        Pending,
+        pending,
 
         /// <summary>
         /// Approved by admin
         /// </summary>
-        Approved,
+        approved,
 
         /// <summary>
         /// Rejected by admin
         /// </summary>
-        Rejected,
+        rejected,
     }
 }

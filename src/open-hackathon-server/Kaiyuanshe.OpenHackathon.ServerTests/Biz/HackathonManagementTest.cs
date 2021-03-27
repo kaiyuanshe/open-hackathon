@@ -228,8 +228,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             participantTable.VerifyNoOtherCalls();
         }
 
-        [TestCase(false, EnrollmentStatus.Pending)]
-        [TestCase(true, EnrollmentStatus.Approved)]
+        [TestCase(false, EnrollmentStatus.pending)]
+        [TestCase(true, EnrollmentStatus.approved)]
         public async Task EnrollAsyncTest_Merge(bool autoApprove, EnrollmentStatus targetStatus)
         {
             HackathonEntity hackathon = new HackathonEntity
@@ -260,8 +260,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsTrue(participant.Role.HasFlag(ParticipantRole.Contestant));
         }
 
-        [TestCase(false, EnrollmentStatus.Pending)]
-        [TestCase(true, EnrollmentStatus.Approved)]
+        [TestCase(false, EnrollmentStatus.pending)]
+        [TestCase(true, EnrollmentStatus.approved)]
         public async Task EnrollAsyncTest_Insert(bool autoApprove, EnrollmentStatus targetStatus)
         {
             HackathonEntity hackathon = new HackathonEntity
@@ -304,15 +304,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var logger = new Mock<ILogger<HackathonManagement>>();
 
             var hackathonManagement = new HackathonManagement(logger.Object);
-            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.Approved, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.approved, cancellation);
 
             Mock.VerifyAll(logger);
             logger.VerifyNoOtherCalls();
             Assert.IsNull(participant);
         }
 
-        [TestCase(EnrollmentStatus.Approved)]
-        [TestCase(EnrollmentStatus.Rejected)]
+        [TestCase(EnrollmentStatus.approved)]
+        [TestCase(EnrollmentStatus.rejected)]
         public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus parameter)
         {
             ParticipantEntity participant = new ParticipantEntity();
@@ -357,7 +357,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [Test]
         public async Task GetEnrollmentAsyncTest_Succeeded()
         {
-            ParticipantEntity participant = new ParticipantEntity { Status = EnrollmentStatus.Rejected };
+            ParticipantEntity participant = new ParticipantEntity { Status = EnrollmentStatus.rejected };
             CancellationToken cancellation = CancellationToken.None;
             var logger = new Mock<ILogger<HackathonManagement>>();
 
@@ -373,7 +373,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             var enrollment = await hackathonManagement.GetEnrollmentAsync("Hack", "UID", cancellation);
             Assert.IsNotNull(enrollment);
-            Assert.AreEqual(EnrollmentStatus.Rejected, enrollment.Status);
+            Assert.AreEqual(EnrollmentStatus.rejected, enrollment.Status);
         }
     }
 }

@@ -103,7 +103,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = string.Empty,
                 AutoApprove = request.autoApprove.HasValue ? request.autoApprove.Value : false,
                 Ribbon = request.ribbon,
-                Status = Models.Enums.HackathonStatus.Planning,
+                Status = Models.Enums.HackathonStatus.planning,
                 Summary = request.summary,
                 Tags = request.tags,
                 MaxEnrollment = request.maxEnrollment.HasValue ? request.maxEnrollment.Value : 0,
@@ -186,10 +186,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (entity != null)
             {
                 entity.Role = entity.Role | ParticipantRole.Contestant;
-                entity.Status = EnrollmentStatus.Pending;
+                entity.Status = EnrollmentStatus.pending;
                 if (hackathon.AutoApprove)
                 {
-                    entity.Status = EnrollmentStatus.Approved;
+                    entity.Status = EnrollmentStatus.approved;
                 }
                 await StorageContext.ParticipantTable.MergeAsync(entity, cancellationToken);
             }
@@ -200,12 +200,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     PartitionKey = hackathonName,
                     RowKey = userId,
                     Role = ParticipantRole.Contestant,
-                    Status = EnrollmentStatus.Pending,
+                    Status = EnrollmentStatus.pending,
                     CreatedAt = DateTime.UtcNow,
                 };
                 if (hackathon.AutoApprove)
                 {
-                    entity.Status = EnrollmentStatus.Approved;
+                    entity.Status = EnrollmentStatus.approved;
                 }
                 await StorageContext.ParticipantTable.InsertAsync(entity, cancellationToken);
             }

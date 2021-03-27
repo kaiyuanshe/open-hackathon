@@ -20,7 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatorId = "abc",
                 Location = "loc",
                 JudgeStartedAt = DateTime.UtcNow,
-                Status = Server.Models.Enums.HackathonStatus.Online,
+                Status = Server.Models.Enums.HackathonStatus.online,
             };
 
             var builder = new DefaultResponseBuilder();
@@ -63,7 +63,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             {
                 PartitionKey = "hack",
                 RowKey = "uid",
-                Status = Server.Models.EnrollmentStatus.Approved,
+                Status = Server.Models.EnrollmentStatus.approved,
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now,
             };
@@ -73,7 +73,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 
             Assert.AreEqual("hack", enrollment.hackathonName);
             Assert.AreEqual("uid", enrollment.userId);
-            Assert.AreEqual(Server.Models.EnrollmentStatus.Approved, enrollment.status);
+            Assert.AreEqual(Server.Models.EnrollmentStatus.approved, enrollment.status);
             Assert.AreEqual(participant.CreatedAt, enrollment.createdAt);
             Assert.AreEqual(participant.Timestamp.DateTime, enrollment.updatedAt);
         }
