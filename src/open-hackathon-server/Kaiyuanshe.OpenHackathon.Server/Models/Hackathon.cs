@@ -1,10 +1,6 @@
-using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
@@ -157,5 +153,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         {
             values = new Hackathon[0];
         }
+    }
+
+    /// <summary>
+    /// Status of Hackathon
+    /// </summary>
+    public enum HackathonStatus
+    {
+        planning,
+        pendingApproval,
+        online,
+        offline
     }
 }

@@ -1,12 +1,10 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Models;
-using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -103,7 +101,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = string.Empty,
                 AutoApprove = request.autoApprove.HasValue ? request.autoApprove.Value : false,
                 Ribbon = request.ribbon,
-                Status = Models.Enums.HackathonStatus.planning,
+                Status = HackathonStatus.planning,
                 Summary = request.summary,
                 Tags = request.tags,
                 MaxEnrollment = request.maxEnrollment.HasValue ? request.maxEnrollment.Value : 0,

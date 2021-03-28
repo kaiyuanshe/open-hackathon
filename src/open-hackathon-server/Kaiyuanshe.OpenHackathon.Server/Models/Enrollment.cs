@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
@@ -63,5 +62,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Rejected by admin
         /// </summary>
         rejected,
+    }
+
+    /// <summary>
+    /// a list of enrollment
+    /// </summary>
+    public class EnrollmentList : IResourceList<Enrollment>
+    {
+        /// <summary>
+        /// a list of enrollment
+        /// </summary>
+        public Enrollment[] value { get; set; }
+
+        /// <summary>
+        ///  The URL the client should use to fetch the next page (per server side paging).
+        ///  No more results if it's null or empty.
+        /// </summary>
+        public string nextLink { get; set; }
     }
 }

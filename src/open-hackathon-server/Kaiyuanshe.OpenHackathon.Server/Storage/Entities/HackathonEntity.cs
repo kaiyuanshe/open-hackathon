@@ -1,8 +1,6 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models.Enums;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
