@@ -1,9 +1,9 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 {
@@ -20,7 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatorId = "abc",
                 Location = "loc",
                 JudgeStartedAt = DateTime.UtcNow,
-                Status = Server.Models.Enums.HackathonStatus.online,
+                Status = HackathonStatus.online,
             };
 
             var builder = new DefaultResponseBuilder();
