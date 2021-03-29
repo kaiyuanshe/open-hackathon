@@ -78,10 +78,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             {
                 ClaimsHelper.UserId(userid),
             };
-            var admins = new List<ParticipantEntity>
+            var admins = new List<HackathonAdminEntity>
             {
-                new ParticipantEntity{ RowKey=userid },
-                new ParticipantEntity{ RowKey="anotherId" },
+                new HackathonAdminEntity{ RowKey=userid },
+                new HackathonAdminEntity{ RowKey="anotherId" },
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             HackathonEntity hackathonEntity = new HackathonEntity { PartitionKey = "hack" };
@@ -112,9 +112,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             {
                 ClaimsHelper.UserId(userid),
             };
-            var admins = new List<ParticipantEntity>
+            var admins = new List<HackathonAdminEntity>
             {
-                new ParticipantEntity{ RowKey="anotherId" },
+                new HackathonAdminEntity{ RowKey="anotherId" },
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             HackathonEntity hackathonEntity = new HackathonEntity { PartitionKey = "hack" };

@@ -327,13 +327,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // input
             CancellationToken cancellationToken = CancellationToken.None;
             string userId = "userid";
-            ParticipantEntity entity = null;
+            HackathonAdminEntity entity = null;
 
             // moq
             var storage = new Mock<IStorageContext>();
-            var participantTable = new Mock<IParticipantTable>();
-            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
-            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
+            var hackAdminTable = new Mock<IHackathonAdminTable>();
+            storage.SetupGet(s => s.HackathonAdminTable).Returns(hackAdminTable.Object);
+            hackAdminTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
 
             // test
             var userMgmt = new UserManagement
@@ -343,40 +343,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
 
             // verify
-            Mock.VerifyAll(storage, participantTable);
-            Assert.IsNull(claim);
-        }
-
-        [TestCase("pk", ParticipantRole.Administrator)]
-        [TestCase("", ParticipantRole.Contestant)]
-        [TestCase("", ParticipantRole.Judge)]
-        [TestCase("", ParticipantRole.None)]
-        public async Task GetPlatformRoleClaimTestNotAdmin(string pk, ParticipantRole role)
-        {
-            // input
-            CancellationToken cancellationToken = CancellationToken.None;
-            string userId = "userid";
-            ParticipantEntity entity = new ParticipantEntity
-            {
-                PartitionKey = pk,
-                Role = role
-            };
-
-            // moq
-            var storage = new Mock<IStorageContext>();
-            var participantTable = new Mock<IParticipantTable>();
-            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
-            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
-
-            // test
-            var userMgmt = new UserManagement
-            {
-                StorageContext = storage.Object,
-            };
-            var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
-
-            // verify
-            Mock.VerifyAll(storage, participantTable);
+            Mock.VerifyAll(storage, hackAdminTable);
             Assert.IsNull(claim);
         }
 
@@ -386,16 +353,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // input
             CancellationToken cancellationToken = CancellationToken.None;
             string userId = "userid";
-            ParticipantEntity entity = new ParticipantEntity
+            HackathonAdminEntity entity = new HackathonAdminEntity
             {
-                Role = ParticipantRole.Administrator
+                PartitionKey = "",
             };
 
             // moq
             var storage = new Mock<IStorageContext>();
-            var participantTable = new Mock<IParticipantTable>();
-            storage.SetupGet(s => s.ParticipantTable).Returns(participantTable.Object);
-            participantTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
+            var hackAdminTable = new Mock<IHackathonAdminTable>();
+            storage.SetupGet(s => s.HackathonAdminTable).Returns(hackAdminTable.Object);
+            hackAdminTable.Setup(t => t.GetPlatformRole(userId, cancellationToken)).ReturnsAsync(entity);
 
             // test
             var userMgmt = new UserManagement
@@ -405,7 +372,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var claim = await userMgmt.GetPlatformAdminClaim(userId, cancellationToken);
 
             // verify
-            Mock.VerifyAll(storage, participantTable);
+            Mock.VerifyAll(storage, hackAdminTable);
             Assert.IsNotNull(claim);
             Assert.AreEqual(AuthConstant.ClaimType.PlatformAdministrator, claim.Type);
             Assert.AreEqual(userId, claim.Value);

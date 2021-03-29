@@ -61,10 +61,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="name">name of Hackathon</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
+        Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
         #endregion
 
-        #region Contestant
+        #region Enrollment
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
@@ -79,6 +79,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// Get an enrollment.
         /// </summary>
         Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
+
+        Task<ParticipantEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -92,6 +94,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Logger = logger;
         }
 
+        #region Hackahton
         public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             #region Insert HackathonEntity
@@ -145,29 +148,64 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 }, cancellationToken);
         }
 
-        public async Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
-        {
-            if (hackathonName == null || userId == null)
-                return null;
-            return await StorageContext.ParticipantTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
-        }
-
         public async Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default)
         {
             var entity = await StorageContext.HackathonTable.RetrieveAsync(name, string.Empty, cancellationToken);
             return entity;
         }
 
-        public async Task<IEnumerable<ParticipantEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
-            string cacheKey = CacheKey.Get(CacheKey.Section.HackathonAdmin, name);
-            return await CacheHelper.GetOrAddAsync(cacheKey,
-                async () =>
-                {
-                    var allParticipants = await StorageContext.ParticipantTable.ListParticipantsByHackathonAsync(name, cancellationToken);
-                    return allParticipants.Where(p => p.Role.HasFlag(ParticipantRole.Administrator));
-                },
-                CacheHelper.ExpireIn10M);
+            await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.name, string.Empty, (entity) =>
+            {
+                entity.Ribbon = request.ribbon ?? entity.Ribbon;
+                entity.Summary = request.summary ?? entity.Summary;
+                entity.Detail = request.detail ?? entity.Detail;
+                entity.Location = request.location ?? entity.Location;
+                entity.Banners = request.banners ?? entity.Banners;
+                entity.DisplayName = request.displayName ?? entity.DisplayName;
+                if (request.maxEnrollment.HasValue)
+                    entity.MaxEnrollment = request.maxEnrollment.Value;
+                if (request.autoApprove.HasValue)
+                    entity.AutoApprove = request.autoApprove.Value;
+                entity.Tags = request.tags ?? entity.Tags;
+                if (request.eventStartedAt.HasValue)
+                    entity.EventStartedAt = request.eventStartedAt.Value;
+                if (request.eventEndedAt.HasValue)
+                    entity.EventEndedAt = request.eventEndedAt.Value;
+                if (request.enrollmentStartedAt.HasValue)
+                    entity.EnrollmentStartedAt = request.enrollmentStartedAt.Value;
+                if (request.enrollmentEndedAt.HasValue)
+                    entity.EnrollmentEndedAt = request.enrollmentEndedAt.Value;
+                if (request.judgeStartedAt.HasValue)
+                    entity.JudgeStartedAt = request.judgeStartedAt.Value;
+                if (request.judgeEndedAt.HasValue)
+                    entity.JudgeEndedAt = request.judgeEndedAt.Value;
+            }, cancellationToken);
+            return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
+        }
+
+        public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
+        {
+            var entities = new List<HackathonEntity>();
+            var filter = TableQuery.GenerateFilterConditionForBool(nameof(HackathonEntity.IsDeleted), QueryComparisons.NotEqual, true);
+            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>().Where(filter);
+
+            await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, (segment) =>
+            {
+                entities.AddRange(segment);
+            }, cancellationToken);
+
+            return entities;
+        }
+        #endregion
+
+        #region Enrollment
+        public async Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
+        {
+            if (hackathonName == null || userId == null)
+                return null;
+            return await StorageContext.ParticipantTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
         }
 
         public async Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
@@ -223,54 +261,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return participant;
         }
 
-        public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
+        public async Task<ParticipantEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default)
         {
-            var entities = new List<HackathonEntity>();
-            var filter = TableQuery.GenerateFilterConditionForBool(nameof(HackathonEntity.IsDeleted), QueryComparisons.NotEqual, true);
-            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>().Where(filter);
-
-            await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, (segment) =>
-            {
-                entities.AddRange(segment);
-            }, cancellationToken);
-
-            return entities;
+            throw new NotImplementedException();
         }
+        #endregion
 
-        public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
+        #region Admin
+
+        public async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
         {
-            await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.name, string.Empty, (entity) =>
-            {
-                entity.Ribbon = request.ribbon ?? entity.Ribbon;
-                entity.Summary = request.summary ?? entity.Summary;
-                entity.Detail = request.detail ?? entity.Detail;
-                entity.Location = request.location ?? entity.Location;
-                entity.Banners = request.banners ?? entity.Banners;
-                entity.DisplayName = request.displayName ?? entity.DisplayName;
-                if (request.maxEnrollment.HasValue)
-                    entity.MaxEnrollment = request.maxEnrollment.Value;
-                if (request.autoApprove.HasValue)
-                    entity.AutoApprove = request.autoApprove.Value;
-                entity.Tags = request.tags ?? entity.Tags;
-                if (request.eventStartedAt.HasValue)
-                    entity.EventStartedAt = request.eventStartedAt.Value;
-                if (request.eventEndedAt.HasValue)
-                    entity.EventEndedAt = request.eventEndedAt.Value;
-                if (request.enrollmentStartedAt.HasValue)
-                    entity.EnrollmentStartedAt = request.enrollmentStartedAt.Value;
-                if (request.enrollmentEndedAt.HasValue)
-                    entity.EnrollmentEndedAt = request.enrollmentEndedAt.Value;
-                if (request.judgeStartedAt.HasValue)
-                    entity.JudgeStartedAt = request.judgeStartedAt.Value;
-                if (request.judgeEndedAt.HasValue)
-                    entity.JudgeEndedAt = request.judgeEndedAt.Value;
-            }, cancellationToken);
-            return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
+            string cacheKey = CacheKey.Get(CacheKey.Section.HackathonAdmin, name);
+            return await CacheHelper.GetOrAddAsync(cacheKey,
+                async () =>
+                {
+                    return await StorageContext.HackathonAdminTable.ListByHackathonAsync(name, cancellationToken);
+                },
+                CacheHelper.ExpireIn10M);
         }
+        #endregion
     }
 
     public class HackathonSearchOptions
     {
 
+    }
+
+    public class EnrollmentSearchOptions
+    {
+        public TableContinuationToken TableContinuationToken { get; set; }
+        public EnrollmentStatus? Status { get; set; }
     }
 }

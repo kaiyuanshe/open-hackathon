@@ -134,18 +134,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         {
             string name = "hack";
             CancellationToken cancellationToken = CancellationToken.None;
-            var data = new List<ParticipantEntity>()
+            var data = new List<HackathonAdminEntity>()
             {
-                new ParticipantEntity{ PartitionKey="pk1", Role = ParticipantRole.None },
-                new ParticipantEntity{ PartitionKey="pk2", Role = ParticipantRole.Administrator },
-                new ParticipantEntity{ PartitionKey="pk3", Role = ParticipantRole.Administrator|ParticipantRole.Judge },
-                new ParticipantEntity{ PartitionKey="pk4", Role = ParticipantRole.Contestant },
+                new HackathonAdminEntity{ PartitionKey="pk1", },
+                new HackathonAdminEntity{ PartitionKey="pk2", },
             };
 
             var storageContext = new Mock<IStorageContext>();
-            var participantTable = new Mock<IParticipantTable>();
-            storageContext.SetupGet(p => p.ParticipantTable).Returns(participantTable.Object);
-            participantTable.Setup(p => p.ListParticipantsByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
+            var hackAdminTable = new Mock<IHackathonAdminTable>();
+            storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackAdminTable.Object);
+            hackAdminTable.Setup(p => p.ListByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
 
             var hackathonManagement = new HackathonManagement(null)
             {
@@ -153,12 +151,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
             var results = await hackathonManagement.ListHackathonAdminAsync(name, cancellationToken);
 
-            Mock.VerifyAll(storageContext, participantTable);
-            participantTable.VerifyNoOtherCalls();
+            Mock.VerifyAll(storageContext, hackAdminTable);
+            hackAdminTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             Assert.AreEqual(2, results.Count());
-            Assert.AreEqual("pk2", results.First().HackathonName);
-            Assert.AreEqual("pk3", results.Last().HackathonName);
+            Assert.AreEqual("pk1", results.First().HackathonName);
+            Assert.AreEqual("pk2", results.Last().HackathonName);
         }
 
         [Test]
