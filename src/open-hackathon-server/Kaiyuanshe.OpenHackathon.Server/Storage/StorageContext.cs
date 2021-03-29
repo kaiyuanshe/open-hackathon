@@ -9,6 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
     public interface IStorageContext
     {
         IHackathonTable HackathonTable { get; }
+        IHackathonAdminTable HackathonAdminTable { get; }
         IParticipantTable ParticipantTable { get; }
         IUserTable UserTable { get; }
         IUserTokenTable UserTokenTable { get; }
@@ -20,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IStorageAccountProvider StorageAccountProvider { get; }
 
         public IHackathonTable HackathonTable { get; }
+        public IHackathonAdminTable HackathonAdminTable { get; }
         public IParticipantTable ParticipantTable { get; }
         public IUserTable UserTable { get; }
         public IUserTokenTable UserTokenTable { get; }
@@ -31,6 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             // tables
             var storageAccount = storageAccountProvider.HackathonServerStorage;
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
+            HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             ParticipantTable = new ParticipantTable(storageAccount, TableNames.Participant);
             UserTable = new UserTable(storageAccount, TableNames.User);
             UserTokenTable = new UserTokenTable(storageAccount, TableNames.UserToken);

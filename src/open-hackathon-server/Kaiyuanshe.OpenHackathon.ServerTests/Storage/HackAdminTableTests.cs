@@ -14,25 +14,25 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Storage
 {
     [TestFixture]
-    public class ParticipantTableTests
+    public class HackAdminTableTests
     {
         [Test]
         public async Task ListParticipantsByHackathonAsyncTest()
         {
-            var table = new Mock<ParticipantTable> { CallBase = true };
+            var table = new Mock<HackathonAdminTable> { CallBase = true };
 
             CancellationToken cancellationToken = CancellationToken.None;
-            List<ParticipantEntity> participants = new List<ParticipantEntity>
+            List<HackathonAdminEntity> participants = new List<HackathonAdminEntity>
             {
-                new ParticipantEntity{ PartitionKey="pk1" },
-                new ParticipantEntity{}
+                new HackathonAdminEntity{ PartitionKey="pk1" },
+                new HackathonAdminEntity{}
             };
             var querySegment = MockHelper.CreateTableQuerySegment(participants, null);
-            table.Setup(t => t.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<ParticipantEntity>>(), It.IsAny<Action<TableQuerySegment<ParticipantEntity>>>(), cancellationToken))
-                .Callback<TableQuery<ParticipantEntity>, Action<TableQuerySegment<ParticipantEntity>>, CancellationToken>((query, action, token) => { action(querySegment); })
+            table.Setup(t => t.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<HackathonAdminEntity>>(), It.IsAny<Action<TableQuerySegment<HackathonAdminEntity>>>(), cancellationToken))
+                .Callback<TableQuery<HackathonAdminEntity>, Action<TableQuerySegment<HackathonAdminEntity>>, CancellationToken>((query, action, token) => { action(querySegment); })
                 .Returns(Task.CompletedTask);
 
-            var results = await table.Object.ListParticipantsByHackathonAsync("", cancellationToken);
+            var results = await table.Object.ListByHackathonAsync("", cancellationToken);
             Assert.AreEqual(2, results.Count());
             Assert.AreEqual("pk1", results.First().HackathonName);
         }

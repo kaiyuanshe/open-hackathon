@@ -12,14 +12,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
     public interface IParticipantTable : IAzureTable<ParticipantEntity>
     {
         /// <summary>
-        /// Get platform-wide role of current user
-        /// </summary>
-        /// <param name="userId">user Id</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns><seealso cref="ParticipantEntity"/> or null.</returns>
-        Task<ParticipantEntity> GetPlatformRole(string userId, CancellationToken cancellationToken);
-
-        /// <summary>
         /// List all individual participants of a hackathon including admins, judges and contestents.
         /// </summary>
         /// <param name="hackathonName">name of hackathon</param>
@@ -41,11 +33,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         public ParticipantTable(CloudStorageAccount storageAccount, string tableName)
             : base(storageAccount, tableName)
         {
-        }
-
-        public async Task<ParticipantEntity> GetPlatformRole(string userId, CancellationToken cancellationToken)
-        {
-            return await RetrieveAsync(string.Empty, userId, cancellationToken);
         }
 
         public async Task<IEnumerable<ParticipantEntity>> ListParticipantsByHackathonAsync(string name, CancellationToken cancellationToken)

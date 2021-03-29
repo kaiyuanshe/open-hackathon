@@ -176,8 +176,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         internal virtual async Task<Claim> GetPlatformAdminClaim(string userId, CancellationToken cancellationToken)
         {
-            var participant = await StorageContext.ParticipantTable.GetPlatformRole(userId, cancellationToken);
-            if (participant != null && participant.IsPlatformAdministrator())
+            var admin = await StorageContext.HackathonAdminTable.GetPlatformRole(userId, cancellationToken);
+            if (admin != null && admin.IsPlatformAdministrator())
             {
                 return ClaimsHelper.PlatformAdministrator(userId);
             }
