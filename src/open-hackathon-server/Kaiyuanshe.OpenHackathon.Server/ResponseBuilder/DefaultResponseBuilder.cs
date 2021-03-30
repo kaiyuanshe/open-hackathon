@@ -12,7 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
 
-        Enrollment BuildEnrollment(ParticipantEntity participant);
+        Enrollment BuildEnrollment(EnrollmentEntity participant);
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -33,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             };
         }
 
-        public Enrollment BuildEnrollment(ParticipantEntity participant)
+        public Enrollment BuildEnrollment(EnrollmentEntity participant)
         {
             return participant.As<Enrollment>(p =>
             {

@@ -68,19 +68,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
-        Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
+        Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update status of enrollment.
         /// </summary>
-        Task<ParticipantEntity> UpdateEnrollmentStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
+        Task<EnrollmentEntity> UpdateEnrollmentStatusAsync(EnrollmentEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get an enrollment.
         /// </summary>
-        Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
+        Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
 
-        Task<ParticipantEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default);
+        Task<EnrollmentEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -126,12 +126,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             #endregion
 
             #region Add creator as Admin
-            ParticipantEntity participant = new ParticipantEntity
+            EnrollmentEntity participant = new EnrollmentEntity
             {
                 PartitionKey = request.name,
                 RowKey = request.creatorId,
                 CreatedAt = DateTime.UtcNow,
-                Role = ParticipantRole.Administrator,
             };
             await StorageContext.ParticipantTable.InsertAsync(participant, cancellationToken);
             #endregion
@@ -201,42 +200,30 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region Enrollment
-        public async Task<ParticipantEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
+        public async Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
         {
             if (hackathonName == null || userId == null)
                 return null;
             return await StorageContext.ParticipantTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
         }
 
-        public async Task<ParticipantEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
+        public async Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
         {
             string hackathonName = hackathon.Name;
             var entity = await StorageContext.ParticipantTable.RetrieveAsync(hackathonName, userId, cancellationToken);
 
-            if (entity != null && entity.Role.HasFlag(ParticipantRole.Contestant))
+            if (entity != null)
             {
                 Logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
                 return entity;
             }
-
-            if (entity != null)
-            {
-                entity.Role = entity.Role | ParticipantRole.Contestant;
-                entity.Status = EnrollmentStatus.pending;
-                if (hackathon.AutoApprove)
-                {
-                    entity.Status = EnrollmentStatus.approved;
-                }
-                await StorageContext.ParticipantTable.MergeAsync(entity, cancellationToken);
-            }
             else
             {
-                entity = new ParticipantEntity
+                entity = new EnrollmentEntity
                 {
                     PartitionKey = hackathonName,
                     RowKey = userId,
-                    Role = ParticipantRole.Contestant,
-                    Status = EnrollmentStatus.pending,
+                    Status = EnrollmentStatus.pendingApproval,
                     CreatedAt = DateTime.UtcNow,
                 };
                 if (hackathon.AutoApprove)
@@ -250,7 +237,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return entity;
         }
 
-        public async Task<ParticipantEntity> UpdateEnrollmentStatusAsync(ParticipantEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default)
+        public async Task<EnrollmentEntity> UpdateEnrollmentStatusAsync(EnrollmentEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default)
         {
             if (participant == null)
                 return participant;
@@ -261,7 +248,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return participant;
         }
 
-        public async Task<ParticipantEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default)
+        public async Task<EnrollmentEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -16,7 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         /// </summary>
         /// <param name="userId">user Id</param>
         /// <param name="cancellationToken"></param>
-        /// <returns><seealso cref="ParticipantEntity"/> or null.</returns>
+        /// <returns><seealso cref="EnrollmentEntity"/> or null.</returns>
         Task<HackathonAdminEntity> GetPlatformRole(string userId, CancellationToken cancellationToken);
 
         /// <summary>

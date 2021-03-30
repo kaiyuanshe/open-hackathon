@@ -105,7 +105,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
             };
-            ParticipantEntity participant = new ParticipantEntity { PartitionKey = "pk" };
+            EnrollmentEntity participant = new EnrollmentEntity { PartitionKey = "pk" };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -210,7 +210,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string userId = "Uid";
             HackathonEntity hackathonEntity = new HackathonEntity();
             var authResult = AuthorizationResult.Success();
-            ParticipantEntity participant = null;
+            EnrollmentEntity participant = null;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -237,50 +237,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test, TestCaseSource(nameof(ListStatus))]
-        public async Task ApproveRejectTest_EnrollmentNotFound2(EnrollmentStatus status)
-        {
-            string hack = "Hack";
-            string userId = "Uid";
-            HackathonEntity hackathonEntity = new HackathonEntity();
-            var authResult = AuthorizationResult.Success();
-            ParticipantEntity participant = new ParticipantEntity { Role = ParticipantRole.Administrator };
-
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(participant);
-
-            var authorizationService = new Mock<IAuthorizationService>();
-            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
-                .ReturnsAsync(authResult);
-
-            var controller = new EnrollmentController
-            {
-                HackathonManagement = hackathonManagement.Object,
-                ResponseBuilder = new DefaultResponseBuilder(),
-                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
-                AuthorizationService = authorizationService.Object,
-            };
-            var func = GetTargetMethod(controller, status);
-            var result = await func(hack, userId, null);
-
-            Mock.VerifyAll(hackathonManagement, authorizationService);
-            hackathonManagement.VerifyNoOtherCalls();
-            AssertHelper.AssertObjectResult(result, 404);
-        }
-
-        [Test, TestCaseSource(nameof(ListStatus))]
         public async Task ApproveRejectTest_Succeeded(EnrollmentStatus status)
         {
             string hack = "Hack";
             string userId = "Uid";
             HackathonEntity hackathonEntity = new HackathonEntity();
             var authResult = AuthorizationResult.Success();
-            ParticipantEntity participant = new ParticipantEntity
+            EnrollmentEntity participant = new EnrollmentEntity
             {
-                Status = EnrollmentStatus.pending,
-                Role = ParticipantRole.Contestant | ParticipantRole.Administrator
+                Status = EnrollmentStatus.pendingApproval,
             };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
@@ -288,8 +253,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(hackathonEntity);
             hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(participant);
-            hackathonManagement.Setup(p => p.UpdateEnrollmentStatusAsync(It.IsAny<ParticipantEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
-                            .Callback<ParticipantEntity, EnrollmentStatus, CancellationToken>((p, e, c) =>
+            hackathonManagement.Setup(p => p.UpdateEnrollmentStatusAsync(It.IsAny<EnrollmentEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
+                            .Callback<EnrollmentEntity, EnrollmentStatus, CancellationToken>((p, e, c) =>
                             {
                                 p.Status = e;
                             })

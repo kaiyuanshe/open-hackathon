@@ -51,7 +51,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Pending approval
         /// </summary>
-        pending,
+        pendingApproval,
 
         /// <summary>
         /// Approved by admin

@@ -118,8 +118,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return Forbidden(Resources.Request_Forbidden_HackAdmin);
             }
 
-            ParticipantEntity participant = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
-            if (participant == null || !participant.IsContestant())
+            EnrollmentEntity participant = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
+            if (participant == null)
             {
                 return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
             }

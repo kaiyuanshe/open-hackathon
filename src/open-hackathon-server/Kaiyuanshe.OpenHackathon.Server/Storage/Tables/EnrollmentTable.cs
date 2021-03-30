@@ -9,40 +9,40 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
-    public interface IParticipantTable : IAzureTable<ParticipantEntity>
+    public interface IEnrollmentTable : IAzureTable<EnrollmentEntity>
     {
         /// <summary>
-        /// List all individual participants of a hackathon including admins, judges and contestents.
+        /// List all enrollments by hackathon
         /// </summary>
         /// <param name="hackathonName">name of hackathon</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<ParticipantEntity>> ListParticipantsByHackathonAsync(string hackathonName, CancellationToken cancellationToken);
+        Task<IEnumerable<EnrollmentEntity>> ListEnrollmentsAsync(string hackathonName, CancellationToken cancellationToken);
     }
 
-    public class ParticipantTable : AzureTable<ParticipantEntity>, IParticipantTable
+    public class EnrollmentTable : AzureTable<EnrollmentEntity>, IEnrollmentTable
     {
         /// <summary>
         /// Test only constructor
         /// </summary>
-        internal ParticipantTable()
+        internal EnrollmentTable()
         {
 
         }
 
-        public ParticipantTable(CloudStorageAccount storageAccount, string tableName)
+        public EnrollmentTable(CloudStorageAccount storageAccount, string tableName)
             : base(storageAccount, tableName)
         {
         }
 
-        public async Task<IEnumerable<ParticipantEntity>> ListParticipantsByHackathonAsync(string name, CancellationToken cancellationToken)
+        public async Task<IEnumerable<EnrollmentEntity>> ListEnrollmentsAsync(string name, CancellationToken cancellationToken)
         {
             var filter = TableQuery.GenerateFilterCondition(
-                nameof(ParticipantEntity.PartitionKey),
+                nameof(EnrollmentEntity.PartitionKey),
                 QueryComparisons.Equal,
                 name);
-            TableQuery<ParticipantEntity> query = new TableQuery<ParticipantEntity>().Where(filter);
-            List<ParticipantEntity> results = new List<ParticipantEntity>();
+            TableQuery<EnrollmentEntity> query = new TableQuery<EnrollmentEntity>().Where(filter);
+            List<EnrollmentEntity> results = new List<EnrollmentEntity>();
             await ExecuteQuerySegmentedAsync(query, segment =>
             {
                 results.AddRange(segment);

@@ -12,7 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// 
     /// PK might be string.Empty for PlatformAdministrator.
     /// </summary>
-    public class ParticipantEntity : AdvancedTableEntity
+    public class EnrollmentEntity : AdvancedTableEntity
     {
         [IgnoreProperty]
         public string HackathonName
@@ -32,29 +32,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
-        public ParticipantRole Role { get; set; }
-
         public EnrollmentStatus Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
-
-        public bool IsPlatformAdministrator()
-        {
-            return string.IsNullOrEmpty(HackathonName) && Role.HasFlag(ParticipantRole.Administrator);
-        }
-
-        public bool IsContestant()
-        {
-            return Role.HasFlag(ParticipantRole.Contestant);
-        }
-    }
-
-    [Flags]
-    public enum ParticipantRole
-    {
-        None = 0,
-        Administrator = 1,
-        Judge = 2,
-        Contestant = 4,
     }
 }

@@ -59,7 +59,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         [Test]
         public void BuildEnrollmentTest()
         {
-            ParticipantEntity participant = new ParticipantEntity
+            EnrollmentEntity participant = new EnrollmentEntity
             {
                 PartitionKey = "hack",
                 RowKey = "uid",
