@@ -33,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404, 412)]
         [Route("hackathon/{hackathonName}/enrollment")]
-        [Authorize]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
         public async Task<object> Enroll(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromBody] Enrollment parameter)
@@ -58,6 +58,30 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
             return Ok(ResponseBuilder.BuildEnrollment(participant));
+        }
+
+
+        /// <summary>
+        /// Get a hackathon enrollement for current user.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns></returns>
+        /// <response code="200">Success. The enrollment is approved.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/enrollment")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> Get([FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName)
+        {
+            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId);
+            if (enrollment == null)
+            {
+                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, CurrentUserId, hackathonName));
+            }
+
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
         }
 
         /// <summary>
@@ -118,14 +142,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return Forbidden(Resources.Request_Forbidden_HackAdmin);
             }
 
-            EnrollmentEntity participant = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
-            if (participant == null)
+            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
+            if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
             }
 
-            participant = await HackathonManagement.UpdateEnrollmentStatusAsync(participant, status);
-            return Ok(ResponseBuilder.BuildEnrollment(participant));
+            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(enrollment, status);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
         }
+
     }
 }
