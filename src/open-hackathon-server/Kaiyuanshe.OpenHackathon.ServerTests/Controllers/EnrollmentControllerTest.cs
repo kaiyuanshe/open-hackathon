@@ -1,4 +1,3 @@
-using Kaiyuanshe.OpenHackathon.Server;
 using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
@@ -9,9 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
 using System;
 using System.Collections;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -105,13 +104,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
             };
-            EnrollmentEntity participant = new EnrollmentEntity { PartitionKey = "pk" };
+            EnrollmentEntity enrollment = new EnrollmentEntity { PartitionKey = "pk" };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
             hackathonManagement.Setup(p => p.EnrollAsync(hackathonEntity, string.Empty, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(participant);
+                .ReturnsAsync(enrollment);
 
             var controller = new EnrollmentController
             {
@@ -125,9 +124,59 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             hackathonManagement.VerifyNoOtherCalls();
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
-            Enrollment enrollment = (Enrollment)objectResult.Value;
-            Assert.IsNotNull(enrollment);
-            Assert.AreEqual("pk", enrollment.hackathonName);
+            Enrollment en = (Enrollment)objectResult.Value;
+            Assert.IsNotNull(en);
+            Assert.AreEqual("pk", enrollment.HackathonName);
+        }
+
+        [Test]
+        public async Task GetTest_NotFound()
+        {
+            string hackathonName = "hack";
+            EnrollmentEntity enrollment = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(enrollment);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Get(hackathonName);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404);
+        }
+
+        [Test]
+        public async Task GetTest_Ok()
+        {
+            string hackathonName = "hack";
+            EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.pendingApproval };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(enrollment);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Get(hackathonName);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is OkObjectResult);
+            OkObjectResult objectResult = (OkObjectResult)result;
+            Enrollment en = (Enrollment)objectResult.Value;
+            Assert.IsNotNull(en);
+            Assert.AreEqual(EnrollmentStatus.pendingApproval, enrollment.Status);
         }
 
         private static IEnumerable ListStatus()

@@ -164,6 +164,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
                 // empty policies to make swagger UI happy
                 options.AddPolicy(AuthConstant.PolicyForSwagger.HackathonAdministrator, noRequirementPolicy);
+                options.AddPolicy(AuthConstant.PolicyForSwagger.LoginUser, noRequirementPolicy);
             });
         }
     }

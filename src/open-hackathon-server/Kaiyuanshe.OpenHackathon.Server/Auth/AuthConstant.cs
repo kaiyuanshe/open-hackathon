@@ -88,6 +88,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Policy to administrate a hackathon.
             /// </summary>
             public const string HackathonAdministrator = "HackathonAdministrator";
+
+            /// <summary>
+            /// Policy to allow login user.
+            /// </summary>
+            public const string LoginUser = "LoginUser";
         }
     }
 }
