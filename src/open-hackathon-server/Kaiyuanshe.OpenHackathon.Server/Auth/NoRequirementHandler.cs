@@ -14,7 +14,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, NoRequirement requirement)
         {
-            context.Succeed(requirement);
+            if ((context.User?.Identity?.IsAuthenticated).GetValueOrDefault(false))
+            {
+                context.Succeed(requirement);
+            }
+
             return Task.CompletedTask;
         }
     }

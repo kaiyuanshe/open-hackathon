@@ -278,7 +278,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.Approve(hack, userId, null);
+            var func = GetTargetMethod(controller, status);
+            var result = await func(hack, userId, null);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -330,6 +331,133 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Enrollment enrollment = (Enrollment)objectResult.Value;
             Assert.IsNotNull(enrollment);
             Assert.AreEqual(status, enrollment.status);
+        }
+
+        [Test]
+        public async Task GetByAdmin_HackNotFound()
+        {
+            string hack = "Hack";
+            string userId = "Uid";
+            HackathonEntity hackathonEntity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetByAdmin(hack, userId);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404);
+        }
+
+        [Test]
+        public async Task GetByAdmin_Forbidden()
+        {
+            string hack = "Hack";
+            string userId = "Uid";
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var authResult = AuthorizationResult.Failed();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.GetByAdmin(hack, userId);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 403);
+        }
+
+        [Test]
+        public async Task GetByAdmin_EnrollmentNotFound()
+        {
+            string hack = "Hack";
+            string userId = "Uid";
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            EnrollmentEntity enrollment = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(enrollment);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.GetByAdmin(hack, userId);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404);
+        }
+
+        [Test]
+        public async Task GetByAdmin_Succeeded()
+        {
+            string hack = "Hack";
+            string userId = "Uid";
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            EnrollmentEntity participant = new EnrollmentEntity
+            {
+                Status = EnrollmentStatus.pendingApproval,
+            };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(participant);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.GetByAdmin(hack, userId);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is OkObjectResult);
+            OkObjectResult objectResult = (OkObjectResult)result;
+            Enrollment enrollment = (Enrollment)objectResult.Value;
+            Assert.IsNotNull(enrollment);
+            Assert.AreEqual(EnrollmentStatus.pendingApproval, enrollment.status);
         }
     }
 }
