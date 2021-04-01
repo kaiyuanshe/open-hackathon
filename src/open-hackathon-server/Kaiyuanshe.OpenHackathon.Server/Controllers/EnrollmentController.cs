@@ -67,7 +67,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
-        /// <response code="200">Success. The enrollment is approved.</response>
+        /// <response code="200">Success.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404)]
@@ -149,6 +149,44 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(enrollment, status);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
+        }
+
+        /// <summary>
+        /// Get a hackathon enrollement of any enrolled user. Hackthon admin only.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns></returns>
+        /// <response code="200">Success.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> GetByAdmin(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId)
+        {
+            var hackName = hackathonName.ToLower();
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            if (hackathon == null)
+            {
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
+            }
+
+            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+            }
+
+            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackName, userId.ToLower());
+            if (enrollment == null)
+            {
+                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
+            }
             return Ok(ResponseBuilder.BuildEnrollment(enrollment));
         }
 
