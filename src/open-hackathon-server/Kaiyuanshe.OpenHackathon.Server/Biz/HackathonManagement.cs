@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.Helpers;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -80,7 +81,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// </summary>
         Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
 
-        Task<EnrollmentEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// List paged enrollments of hackathon
+        /// </summary>
+        /// <param name="hackathonName">name of hackathon</param>
+        /// <param name="options">options for query</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TableQuerySegment<EnrollmentEntity>> ListPaginatedEnrollmentsAsync(string hackathonName, EnrollmentQueryOptions options, CancellationToken cancellationToken = default);
         #endregion
     }
 
@@ -132,7 +140,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = request.creatorId,
                 CreatedAt = DateTime.UtcNow,
             };
-            await StorageContext.ParticipantTable.InsertAsync(participant, cancellationToken);
+            await StorageContext.EnrollmentTable.InsertAsync(participant, cancellationToken);
             #endregion
 
             return entity;
@@ -204,13 +212,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             if (hackathonName == null || userId == null)
                 return null;
-            return await StorageContext.ParticipantTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
+            return await StorageContext.EnrollmentTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
         }
 
         public async Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
         {
             string hackathonName = hackathon.Name;
-            var entity = await StorageContext.ParticipantTable.RetrieveAsync(hackathonName, userId, cancellationToken);
+            var entity = await StorageContext.EnrollmentTable.RetrieveAsync(hackathonName, userId, cancellationToken);
 
             if (entity != null)
             {
@@ -230,7 +238,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     entity.Status = EnrollmentStatus.approved;
                 }
-                await StorageContext.ParticipantTable.InsertAsync(entity, cancellationToken);
+                await StorageContext.EnrollmentTable.InsertAsync(entity, cancellationToken);
             }
             Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
 
@@ -243,14 +251,38 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return participant;
 
             participant.Status = status;
-            await StorageContext.ParticipantTable.MergeAsync(participant, cancellationToken);
+            await StorageContext.EnrollmentTable.MergeAsync(participant, cancellationToken);
             Logger.TraceInformation($"Pariticipant {participant.HackathonName}/{participant.UserId} stastus updated to: {status} ");
             return participant;
         }
 
-        public async Task<EnrollmentEntity> ListEnrollmentsAsync(string hackathonName, EnrollmentSearchOptions options, CancellationToken cancellationToken = default)
+        public async Task<TableQuerySegment<EnrollmentEntity>> ListPaginatedEnrollmentsAsync(string hackathonName, EnrollmentQueryOptions options, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = TableQuery.GenerateFilterCondition(
+                           nameof(EnrollmentEntity.PartitionKey),
+                           QueryComparisons.Equal,
+                           hackathonName);
+
+            if (options != null && options.Status.HasValue)
+            {
+                var statusFilter = TableQuery.GenerateFilterConditionForInt(
+                    nameof(EnrollmentEntity.Status),
+                    QueryComparisons.Equal,
+                    (int)options.Status.Value);
+                filter = TableQueryHelper.And(filter, statusFilter);
+            }
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<EnrollmentEntity> query = new TableQuery<EnrollmentEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.EnrollmentTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
         #endregion
 
@@ -274,9 +306,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
     }
 
-    public class EnrollmentSearchOptions
-    {
-        public TableContinuationToken TableContinuationToken { get; set; }
-        public EnrollmentStatus? Status { get; set; }
-    }
+
 }

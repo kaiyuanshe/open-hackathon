@@ -24,8 +24,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 
         Task<TEntity> RetrieveAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
 
-        TableQuerySegment<TEntity> ExecuteQuerySegmented(TableQuery<TEntity> query, TableContinuationToken continuationToken = null);
-
         Task<TableQuerySegment<TEntity>> ExecuteQuerySegmentedAsync(
             TableQuery<TEntity> query, TableContinuationToken continuationToken, CancellationToken cancellationToken = default);
 
@@ -169,22 +167,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
             TableOperation retrieveOperation = TableOperation.Retrieve<TEntity>(partitionKey, rowKey);
             TableResult retrieveResult = await ExecuteAsync(retrieveOperation, cancellationToken);
             return (TEntity)retrieveResult.Result;
-        }
-
-        /// <summary>
-        /// Initiates an operation to query a table in segmented mode.
-        /// </summary>
-        /// <param name="query">
-        ///     A Microsoft.WindowsAzure.Storage.Table.TableQuery instance specifying the table
-        ///     to query and the query parameters to use, specialized for a type TElement.</param>
-        /// <param name="continuationToken">
-        ///     A Microsoft.WindowsAzure.Storage.Table.TableContinuationToken object representing
-        ///     a continuation token from the server when the operation returns a partial result.</param>
-        /// <returns></returns>
-        public virtual TableQuerySegment<TEntity> ExecuteQuerySegmented(
-            TableQuery<TEntity> query, TableContinuationToken continuationToken)
-        {
-            return ExecuteQuerySegmented(query, continuationToken);
         }
 
         /// <summary>
