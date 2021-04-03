@@ -27,7 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <returns></returns>
+        /// <returns>The enrollment</returns>
         /// <response code="200">Success. The response describes a enrollment.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
@@ -66,7 +66,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <returns></returns>
+        /// <returns>The enrollment</returns>
         /// <response code="200">Success.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
@@ -91,7 +91,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <param name="userId" example="1">Id of user</param>
-        /// <returns></returns>
+        /// <returns>The enrollment</returns>
         /// <response code="200">Success. The enrollment is approved.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
@@ -113,7 +113,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <param name="userId" example="1">Id of user</param>
-        /// <returns></returns>
+        /// <returns>The enrollment</returns>
         /// <response code="200">Success. The enrollment is approved.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
@@ -158,7 +158,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <param name="userId" example="1">Id of user</param>
-        /// <returns></returns>
+        /// <returns>The enrollment</returns>
         /// <response code="200">Success.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
@@ -188,6 +188,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
             }
             return Ok(ResponseBuilder.BuildEnrollment(enrollment));
+        }
+
+        /// <summary>
+        /// List paginated enrollements of a hackathon.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>the response contains a list of enrollments and a nextLink if there are more results.</returns>
+        /// <response code="200">Success.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(EnrollmentList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403)]
+        [Route("hackathon/{hackathonName}/enrollments")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> ListEnrollments(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery] Pagination pagination,
+            [FromQuery] EnrollmentStatus? status)
+        {
+            throw new NotImplementedException();
         }
 
     }
