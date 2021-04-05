@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -26,6 +27,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 var userIdClaim = User?.Claims?.FirstOrDefault(c => c.Type == AuthConstant.ClaimType.UserId);
                 return userIdClaim?.Value ?? string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Get nextLink url for paginated results
+        /// </summary>
+        /// <param name="action">name for action method in controller</param>
+        /// <param name="controller">name of the controller. No "Controller" suffix. e.g. Enrollment.</param>
+        /// <param name="routeValues">values to generate url. Values of current url are implicitly used. 
+        /// Add extra key/value pairs or modifications to routeValues. Values not used in route will be appended as QueryString.</param>
+        /// <returns></returns>
+        protected string BuildNextLinkUrl(string action, string controller, RouteValueDictionary routeValues)
+        {
+            if (Request == null)
+            {
+                // Unit Test
+                return $"{controller}/{action}";
+            }
+
+            return Url.Action(action, controller, routeValues, Request.Scheme, Request.Host.Value);
         }
 
         #region ObjectResult with ProblemDetails
