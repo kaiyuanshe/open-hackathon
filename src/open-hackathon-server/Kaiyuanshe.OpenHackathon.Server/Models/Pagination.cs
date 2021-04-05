@@ -16,13 +16,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     public class Pagination
     {
         /// <summary>
-        /// conbined with "nr" to query more results. Used by server-side paging only. Don't set it manually.
+        /// conbined with "nr" to query more results. Used by server-side paging only. Don't set it manually. You should request the "nextLink" in result to request more.
         /// </summary>
         [MaxLength(200)]
         public string np { get; set; }
 
         /// <summary>
-        /// conbined with "np"t o query more results. Used by server-side paging only. Don't set it manually.
+        /// conbined with "np"t o query more results. Used by server-side paging only. Don't set it manually. You should request the "nextLink" in result to request more.
         /// </summary>
         [MaxLength(128)]
         public string nr { get; set; }
@@ -34,11 +34,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [Range(1, 1000)]
         public int? top { get; set; }
 
-        public TableContinuationToken ToContinuationToken(string tableName, string partitionKey = null)
+        public TableContinuationToken ToContinuationToken()
         {
-            // nr in nextLink shouldn't be null or empty.
-            // But pk might be empty if it's implicitly set on server side via "partitionKey" parameter.
-            if (string.IsNullOrWhiteSpace(nr))
+            // np/nr in nextLink shouldn't be null or empty.
+            if (string.IsNullOrWhiteSpace(np) || string.IsNullOrWhiteSpace(nr))
             {
                 return null;
             }
@@ -46,9 +45,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
             return new TableContinuationToken
             {
                 // partitionKey takes precedence over np from parameter.
-                NextPartitionKey = partitionKey ?? np ?? string.Empty,
+                NextPartitionKey = np,
                 NextRowKey = nr,
-                NextTableName = tableName,
             };
         }
     }

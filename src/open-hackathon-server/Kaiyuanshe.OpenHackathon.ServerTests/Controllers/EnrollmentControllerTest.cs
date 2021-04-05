@@ -6,10 +6,12 @@ using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -458,6 +460,113 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Enrollment enrollment = (Enrollment)objectResult.Value;
             Assert.IsNotNull(enrollment);
             Assert.AreEqual(EnrollmentStatus.pendingApproval, enrollment.status);
+        }
+
+        private static IEnumerable ListEnrollmentsTestData()
+        {
+            // arg0: pagination
+            // arg1: status
+            // arg2: mocked TableCotinuationToken
+            // arg3: expected options
+            // arg4: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null,
+                    new EnrollmentQueryOptions { },
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    EnrollmentStatus.rejected,
+                    null,
+                    new EnrollmentQueryOptions
+                    {
+                        Top = 10,
+                        TableContinuationToken = new TableContinuationToken
+                        {
+                            NextPartitionKey = "np",
+                            NextRowKey = "nr"
+                        },
+                        Status = EnrollmentStatus.rejected
+                    },
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    new EnrollmentQueryOptions { },
+                    "&np=np&nr=nr"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListEnrollmentsTestData))]
+        public async Task ListEnrollmentsTest(
+            Pagination pagination,
+            EnrollmentStatus? status,
+            TableContinuationToken continuationToken,
+            EnrollmentQueryOptions expectedOptions,
+            string expectedLink)
+        {
+            // input
+            var hackName = "Hack";
+            var cancellationToken = CancellationToken.None;
+            var enrollments = new List<EnrollmentEntity>
+            {
+                new EnrollmentEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                    Status = EnrollmentStatus.approved,
+                }
+            };
+            var segment = MockHelper.CreateTableQuerySegment(enrollments, continuationToken);
+
+            // mock and capture
+            EnrollmentQueryOptions optionsCaptured = null;
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.ListPaginatedEnrollmentsAsync("hack", It.IsAny<EnrollmentQueryOptions>(), cancellationToken))
+                .Callback<string, EnrollmentQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    optionsCaptured = o;
+                })
+                .ReturnsAsync(segment);
+
+            // run
+            var controller = new EnrollmentController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object
+            };
+            var result = await controller.ListEnrollments(hackName, pagination, status, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsTrue(result is OkObjectResult);
+            OkObjectResult objectResult = (OkObjectResult)result;
+            EnrollmentList list = (EnrollmentList)objectResult.Value;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].userId);
+            Assert.AreEqual(EnrollmentStatus.approved, list.value[0].status);
+            Assert.AreEqual(expectedOptions.Status, optionsCaptured.Status);
+            Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
     }
 }

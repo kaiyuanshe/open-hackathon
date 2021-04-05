@@ -1,11 +1,14 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
+using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
@@ -32,20 +35,38 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <summary>
         /// Get nextLink url for paginated results
         /// </summary>
-        /// <param name="action">name for action method in controller</param>
-        /// <param name="controller">name of the controller. No "Controller" suffix. e.g. Enrollment.</param>
         /// <param name="routeValues">values to generate url. Values of current url are implicitly used. 
         /// Add extra key/value pairs or modifications to routeValues. Values not used in route will be appended as QueryString.</param>
         /// <returns></returns>
-        protected string BuildNextLinkUrl(string action, string controller, RouteValueDictionary routeValues)
+        protected string BuildNextLinkUrl(RouteValueDictionary routeValues, TableContinuationToken continuationToken)
         {
-            if (Request == null)
+            if (continuationToken == null)
+                return null;
+
+            if (routeValues == null)
+            {
+                routeValues = new RouteValueDictionary();
+            }
+            routeValues.Add(nameof(Pagination.np), continuationToken.NextPartitionKey);
+            routeValues.Add(nameof(Pagination.nr), continuationToken.NextRowKey);
+
+            if (EnvHelper.IsRunningInTests())
             {
                 // Unit Test
-                return $"{controller}/{action}";
+                StringBuilder stringBuilder = new StringBuilder();
+                foreach (var key in routeValues.Keys)
+                {
+                    stringBuilder.Append($"&{key}={routeValues[key]}");
+                }
+                return stringBuilder.ToString();
             }
 
-            return Url.Action(action, controller, routeValues, Request.Scheme, Request.Host.Value);
+            return Url.Action(
+               ControllerContext.ActionDescriptor.ActionName,
+               ControllerContext.ActionDescriptor.ControllerName,
+               routeValues,
+               Request.Scheme,
+               Request.Host.Value);
         }
 
         #region ObjectResult with ProblemDetails
