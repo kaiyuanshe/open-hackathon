@@ -63,7 +63,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             {
                 PartitionKey = "hack",
                 RowKey = "uid",
-                Status = Server.Models.EnrollmentStatus.approved,
+                Status = EnrollmentStatus.approved,
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now,
             };
@@ -73,9 +73,46 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 
             Assert.AreEqual("hack", enrollment.hackathonName);
             Assert.AreEqual("uid", enrollment.userId);
-            Assert.AreEqual(Server.Models.EnrollmentStatus.approved, enrollment.status);
+            Assert.AreEqual(EnrollmentStatus.approved, enrollment.status);
             Assert.AreEqual(participant.CreatedAt, enrollment.createdAt);
             Assert.AreEqual(participant.Timestamp.DateTime, enrollment.updatedAt);
+        }
+
+        [Test]
+        public void BuildResourceListTest()
+        {
+            string nextLink = "nextlink";
+            List<EnrollmentEntity> enrollments = new List<EnrollmentEntity>
+            {
+                new EnrollmentEntity
+                {
+                    PartitionKey = "pk1",
+                    RowKey = "rk1",
+                    Status = EnrollmentStatus.approved,
+                },
+                new EnrollmentEntity
+                {
+                    PartitionKey = "pk2",
+                    RowKey = "rk2",
+                    Status = EnrollmentStatus.rejected,
+                }
+            };
+
+            var builder = new DefaultResponseBuilder();
+            var result = builder.BuildResourceList<EnrollmentEntity, Enrollment, EnrollmentList>(
+                    enrollments,
+                    builder.BuildEnrollment,
+                    nextLink);
+
+            Assert.AreEqual("nextlink", result.nextLink);
+            Assert.AreEqual(2, result.value.Length);
+            Assert.AreEqual("pk1", result.value[0].hackathonName);
+            Assert.AreEqual("rk1", result.value[0].userId);
+            Assert.AreEqual(EnrollmentStatus.approved, result.value[0].status);
+            Assert.AreEqual("pk2", result.value[1].hackathonName);
+            Assert.AreEqual("rk2", result.value[1].userId);
+            Assert.AreEqual(EnrollmentStatus.rejected, result.value[1].status);
+
         }
     }
 }

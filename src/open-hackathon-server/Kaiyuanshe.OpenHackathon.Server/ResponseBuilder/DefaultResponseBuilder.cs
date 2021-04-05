@@ -13,6 +13,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
 
         Enrollment BuildEnrollment(EnrollmentEntity participant);
+
+        TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
+            where TResult : IResourceList<TResultItem>, new();
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -39,6 +42,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             {
                 p.updatedAt = participant.Timestamp.DateTime;
             });
+        }
+
+        public TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
+            where TResult : IResourceList<TResultItem>, new()
+        {
+            return new TResult
+            {
+                value = items.Select(p => converter(p)).ToArray(),
+                nextLink = nextLink,
+            };
         }
     }
 }

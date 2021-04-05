@@ -2,8 +2,8 @@ using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
-using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -196,6 +196,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="status" example="approved">filter by enrollment status</param>
         /// <returns>the response contains a list of enrollments and a nextLink if there are more results.</returns>
         /// <response code="200">Success.</response>
         [HttpGet]
@@ -206,9 +207,30 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> ListEnrollments(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromQuery] Pagination pagination,
-            [FromQuery] EnrollmentStatus? status)
+            [FromQuery] EnrollmentStatus? status,
+            CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var options = new EnrollmentQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Status = status,
+                Top = pagination.top
+            };
+            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackathonName.ToLower(), options, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            if (status.HasValue)
+            {
+                routeValues.Add(nameof(status), status.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
+            return Ok(ResponseBuilder.BuildResourceList<EnrollmentEntity, Enrollment, EnrollmentList>(
+                    segment,
+                    ResponseBuilder.BuildEnrollment,
+                    nextLink));
         }
 
     }

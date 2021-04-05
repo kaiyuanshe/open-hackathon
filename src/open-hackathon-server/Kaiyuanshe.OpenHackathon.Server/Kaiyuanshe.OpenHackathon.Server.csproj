@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ResponseBuilder\DefaultResponseBuilder.cs~RF1b9c381c.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Authing.ApiClient" Version="4.1.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="bootstrap" Version="4.6.0" />
