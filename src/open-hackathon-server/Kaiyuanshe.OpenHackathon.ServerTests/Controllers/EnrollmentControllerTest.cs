@@ -462,6 +462,62 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(EnrollmentStatus.pendingApproval, enrollment.status);
         }
 
+        [Test]
+        public async Task ListEnrollmentsTest_HackNotFound()
+        {
+            string hack = "Hack";
+            Pagination pagination = new Pagination();
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.ListEnrollments(hack, pagination, null, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404);
+        }
+
+        [Test]
+        public async Task ListEnrollmentsTest_Forbidden()
+        {
+            string hack = "Hack";
+            Pagination pagination = new Pagination();
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var authResult = AuthorizationResult.Failed();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.ListEnrollments(hack, pagination, null, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 403);
+        }
+
         private static IEnumerable ListEnrollmentsTestData()
         {
             // arg0: pagination
@@ -512,7 +568,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test, TestCaseSource(nameof(ListEnrollmentsTestData))]
-        public async Task ListEnrollmentsTest(
+        public async Task ListEnrollmentsTest_Succeed(
             Pagination pagination,
             EnrollmentStatus? status,
             TableContinuationToken continuationToken,
@@ -522,6 +578,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             // input
             var hackName = "Hack";
             var cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
             var enrollments = new List<EnrollmentEntity>
             {
                 new EnrollmentEntity
@@ -534,25 +592,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var segment = MockHelper.CreateTableQuerySegment(enrollments, continuationToken);
 
             // mock and capture
-            EnrollmentQueryOptions optionsCaptured = null;
             var hackathonManagement = new Mock<IHackathonManagement>();
+            EnrollmentQueryOptions optionsCaptured = null;
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
             hackathonManagement.Setup(p => p.ListPaginatedEnrollmentsAsync("hack", It.IsAny<EnrollmentQueryOptions>(), cancellationToken))
                 .Callback<string, EnrollmentQueryOptions, CancellationToken>((n, o, t) =>
                 {
                     optionsCaptured = o;
                 })
                 .ReturnsAsync(segment);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathonEntity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
 
             // run
             var controller = new EnrollmentController
             {
                 ResponseBuilder = new DefaultResponseBuilder(),
-                HackathonManagement = hackathonManagement.Object
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
             };
             var result = await controller.ListEnrollments(hackName, pagination, status, cancellationToken);
 
             // verify
-            Mock.VerifyAll(hackathonManagement);
+            Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
