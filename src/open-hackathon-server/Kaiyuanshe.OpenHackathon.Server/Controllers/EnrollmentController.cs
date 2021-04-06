@@ -3,7 +3,6 @@ using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
-using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -210,13 +209,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromQuery] EnrollmentStatus? status,
             CancellationToken cancellationToken)
         {
+            var hackName = hackathonName.ToLower();
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            if (hackathon == null)
+            {
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
+            }
+
+            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+            }
+
             var options = new EnrollmentQueryOptions
             {
                 TableContinuationToken = pagination.ToContinuationToken(),
                 Status = status,
                 Top = pagination.top
             };
-            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackathonName.ToLower(), options, cancellationToken);
+            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackName, options, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
