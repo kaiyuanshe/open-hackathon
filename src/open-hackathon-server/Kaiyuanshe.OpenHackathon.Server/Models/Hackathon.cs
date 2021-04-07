@@ -137,6 +137,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
         public DateTime? judgeEndedAt { get; set; }
+
+        /// <summary>
+        /// roles of current user. null if anonymous.
+        /// </summary>
+        public HackathonRoles roles { get; internal set; }
+    }
+
+    /// <summary>
+    /// Represents the role of current user
+    /// </summary>
+    public class HackathonRoles
+    {
+        /// <summary>
+        /// whether current user is admin of hackathon.
+        /// </summary>
+        /// <example>true</example>
+        public bool isAdmin { get; internal set; }
+
+        /// <summary>
+        /// whether current user is judge of hackathon.
+        /// </summary>
+        /// <example>true</example>
+        public bool isJudge { get; internal set; }
+
+        /// <summary>
+        /// whether current user enrolled as contestant.
+        /// </summary>
+        /// <example>true</example>
+        public bool isContestant { get; internal set; }
     }
 
     /// <summary>
