@@ -632,5 +632,148 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_NoUserIdClaim()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal();
+            ClaimsPrincipal user2 = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new HackathonManagement(null);
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackName, null, cancellationToken));
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackName, user, cancellationToken));
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackName, user2, cancellationToken));
+        }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_PlatformAdmin()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+            EnrollmentEntity enrollment = null;
+
+            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsNotNull(role);
+            Assert.IsTrue(role.isAdmin);
+            Assert.IsFalse(role.isEnrolled);
+            Assert.IsFalse(role.isJudge);
+        }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_NotHackAdmin()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+            EnrollmentEntity enrollment = null;
+            List<HackathonAdminEntity> admins = new List<HackathonAdminEntity> {
+                new HackathonAdminEntity{ RowKey = "anotherid" }
+            };
+
+            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            hackathonManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsNotNull(role);
+            Assert.IsFalse(role.isAdmin);
+            Assert.IsFalse(role.isEnrolled);
+            Assert.IsFalse(role.isJudge);
+        }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_HackAdmin()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+            EnrollmentEntity enrollment = null;
+            List<HackathonAdminEntity> admins = new List<HackathonAdminEntity> {
+                new HackathonAdminEntity{ RowKey = "uid" }
+            };
+
+            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            hackathonManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsNotNull(role);
+            Assert.IsTrue(role.isAdmin);
+            Assert.IsFalse(role.isEnrolled);
+            Assert.IsFalse(role.isJudge);
+        }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_EnrollmentNotApproved()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+            EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.pendingApproval };
+
+            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsNotNull(role);
+            Assert.IsTrue(role.isAdmin);
+            Assert.IsFalse(role.isEnrolled);
+            Assert.IsFalse(role.isJudge);
+        }
+
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_EnrollmentApproved()
+        {
+            string hackName = "hack";
+            ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+            EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.approved };
+
+            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            Assert.IsNotNull(role);
+            Assert.IsTrue(role.isAdmin);
+            Assert.IsTrue(role.isEnrolled);
+            Assert.IsFalse(role.isJudge);
+        }
     }
 }

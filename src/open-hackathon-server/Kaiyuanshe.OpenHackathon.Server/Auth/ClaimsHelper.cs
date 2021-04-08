@@ -36,5 +36,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
                 return c.Type == AuthConstant.ClaimType.PlatformAdministrator;
             });
         }
+
+        public static string GetUserId(ClaimsPrincipal claimsPrincipal)
+        {
+            var userIdClaim = claimsPrincipal?.Claims?.FirstOrDefault(c => c.Type == AuthConstant.ClaimType.UserId);
+            return userIdClaim?.Value ?? string.Empty;
+        }
     }
 }

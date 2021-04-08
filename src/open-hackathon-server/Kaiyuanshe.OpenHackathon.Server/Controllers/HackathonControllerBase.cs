@@ -27,8 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             get
             {
-                var userIdClaim = User?.Claims?.FirstOrDefault(c => c.Type == AuthConstant.ClaimType.UserId);
-                return userIdClaim?.Value ?? string.Empty;
+                return ClaimsHelper.GetUserId(User);
             }
         }
 
