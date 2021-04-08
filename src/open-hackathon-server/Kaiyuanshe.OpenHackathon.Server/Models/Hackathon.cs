@@ -165,7 +165,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// whether current user enrolled as contestant.
         /// </summary>
         /// <example>true</example>
-        public bool isContestant { get; internal set; }
+        public bool isEnrolled { get; internal set; }
     }
 
     /// <summary>

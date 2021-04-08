@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Helpers;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Helpers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,6 +54,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get roles of a user on a specified hackathon
+        /// </summary>
+        /// <param name="hackathonName"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -205,10 +215,45 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return entities;
         }
+
+        public async Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+        {
+            string userId = ClaimsHelper.GetUserId(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                // no roles for anonymous user
+                return null;
+            }
+
+            bool isAdmin = false, isEnrolled = false, isJudge = false;
+            // admin
+            if (ClaimsHelper.IsPlatformAdministrator(user))
+            {
+                isAdmin = true;
+            }
+            else
+            {
+                var admins = await ListHackathonAdminAsync(hackathonName, cancellationToken);
+                isAdmin = admins.Any(a => a.UserId == userId);
+            }
+
+            // enrollment
+            var enrollment = await GetEnrollmentAsync(hackathonName, userId, cancellationToken);
+            isEnrolled = (enrollment != null && enrollment.Status == EnrollmentStatus.approved);
+
+            // todo judge
+
+            return new HackathonRoles
+            {
+                isAdmin = isAdmin,
+                isEnrolled = isEnrolled,
+                isJudge = isJudge
+            };
+        }
         #endregion
 
         #region Enrollment
-        public async Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
+        public virtual async Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
         {
             if (hackathonName == null || userId == null)
                 return null;
@@ -288,7 +333,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         #region Admin
 
-        public async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
         {
             string cacheKey = CacheKey.Get(CacheKey.Section.HackathonAdmin, name);
             return await CacheHelper.GetOrAddAsync(cacheKey,

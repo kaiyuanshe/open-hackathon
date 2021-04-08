@@ -35,5 +35,28 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
                }))));
 
         }
+
+        [Test]
+        public void GetUserIdTest()
+        {
+            Assert.AreEqual(string.Empty, ClaimsHelper.GetUserId(null));
+
+            Assert.AreEqual(string.Empty, ClaimsHelper.GetUserId(new ClaimsPrincipal()));
+
+            Assert.AreEqual(string.Empty, ClaimsHelper.GetUserId(new ClaimsPrincipal(new ClaimsIdentity())));
+
+            Assert.AreEqual(string.Empty, ClaimsHelper.GetUserId(new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { }))));
+
+            Assert.AreEqual(string.Empty, ClaimsHelper.GetUserId(new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim("type", "value")
+            }))));
+
+            Assert.AreEqual("uid", ClaimsHelper.GetUserId(new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim("type", "value"),
+                new Claim(AuthConstant.ClaimType.UserId, "uid"),
+            }))));
+        }
     }
 }
