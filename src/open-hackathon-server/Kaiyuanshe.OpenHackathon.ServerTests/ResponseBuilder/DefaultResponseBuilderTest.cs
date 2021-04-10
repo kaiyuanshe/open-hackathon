@@ -23,8 +23,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Status = HackathonStatus.online,
             };
 
+            var roles = new HackathonRoles
+            {
+                isAdmin = true,
+                isEnrolled = true,
+                isJudge = true,
+            };
+
             var builder = new DefaultResponseBuilder();
-            var hack = builder.BuildHackathon(entity);
+            var hack = builder.BuildHackathon(entity, roles);
 
             Assert.IsNull(hack.tags);
             Assert.AreEqual("pk", hack.name);
@@ -33,6 +40,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("abc", hack.creatorId);
             Assert.IsTrue(hack.judgeStartedAt.HasValue);
             Assert.IsFalse(hack.judgeEndedAt.HasValue);
+            Assert.IsTrue(hack.roles.isAdmin);
+            Assert.IsTrue(hack.roles.isEnrolled);
+            Assert.IsTrue(hack.roles.isJudge);
         }
 
         [Test]

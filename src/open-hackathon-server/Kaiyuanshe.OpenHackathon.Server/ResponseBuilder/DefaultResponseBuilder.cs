@@ -8,7 +8,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 {
     public interface IResponseBuilder
     {
-        Hackathon BuildHackathon(HackathonEntity hackathonEntity);
+        Hackathon BuildHackathon(HackathonEntity hackathonEntity, HackathonRoles roles);
 
         HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
 
@@ -20,11 +20,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
     public class DefaultResponseBuilder : IResponseBuilder
     {
-        public Hackathon BuildHackathon(HackathonEntity hackathonEntity)
+        public Hackathon BuildHackathon(HackathonEntity hackathonEntity, HackathonRoles roles)
         {
             return hackathonEntity.As<Hackathon>(h =>
             {
                 h.updatedAt = hackathonEntity.Timestamp.DateTime;
+                h.roles = roles;
             });
         }
 
@@ -32,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return new HackathonList
             {
-                values = hackathonEntities.Select(h => BuildHackathon(h)).ToArray(),
+                values = hackathonEntities.Select(h => BuildHackathon(h, null)).ToArray(),
             };
         }
 
