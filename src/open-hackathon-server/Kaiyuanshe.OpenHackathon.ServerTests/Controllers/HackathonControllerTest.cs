@@ -103,7 +103,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(entity);
             hackathonManagement.Setup(p => p.UpdateHackathonAsync(hack, cancellationToken))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test2", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test1", It.IsAny<ClaimsPrincipal>(), cancellationToken))
                .ReturnsAsync(role);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
