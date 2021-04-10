@@ -28,26 +28,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 PartitionKey = "test2",
                 AutoApprove = true
             };
+            var role = new HackathonRoles { isAdmin = true };
+            CancellationToken cancellationToken = CancellationToken.None;
 
-            var hackManagerMock = new Mock<IHackathonManagement>();
-            hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), cancellationToken))
                 .ReturnsAsync(default(HackathonEntity));
-            hackManagerMock.Setup(p => p.CreateHackathonAsync(hack, It.IsAny<CancellationToken>()))
+            hackathonManagement.Setup(p => p.CreateHackathonAsync(hack, cancellationToken))
                 .ReturnsAsync(inserted);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test1", null, cancellationToken))
+                .ReturnsAsync(role);
 
             var controller = new HackathonController();
-            controller.HackathonManagement = hackManagerMock.Object;
+            controller.HackathonManagement = hackathonManagement.Object;
             controller.ResponseBuilder = new DefaultResponseBuilder();
-            var result = await controller.CreateOrUpdate(name, hack);
+            var result = await controller.CreateOrUpdate(name, hack, cancellationToken);
 
-            Mock.VerifyAll(hackManagerMock);
-            hackManagerMock.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
             Assert.AreEqual(name.ToLower(), hack.name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Hackathon resp = (Hackathon)objectResult.Value;
             Assert.AreEqual("test2", resp.name);
             Assert.IsTrue(resp.autoApprove);
+            Assert.IsTrue(resp.roles.isAdmin);
         }
 
         [Test]
@@ -57,9 +62,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var entity = new HackathonEntity();
             var name = "test1";
             var authResult = AuthorizationResult.Failed();
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackManagerMock = new Mock<IHackathonManagement>();
-            hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), cancellationToken))
                 .ReturnsAsync(entity);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
@@ -71,7 +77,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationServiceMock.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.CreateOrUpdate(name, hack);
+            var result = await controller.CreateOrUpdate(name, hack, cancellationToken);
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
@@ -89,24 +95,28 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             };
             var name = "test1";
             var authResult = AuthorizationResult.Success();
+            var role = new HackathonRoles { isAdmin = true };
+            CancellationToken cancellationToken = CancellationToken.None;
 
-            var hackManagerMock = new Mock<IHackathonManagement>();
-            hackManagerMock.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync(It.IsAny<string>(), cancellationToken))
                 .ReturnsAsync(entity);
-            hackManagerMock.Setup(p => p.UpdateHackathonAsync(hack, It.IsAny<CancellationToken>()))
+            hackathonManagement.Setup(p => p.UpdateHackathonAsync(hack, cancellationToken))
                 .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test2", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+               .ReturnsAsync(role);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
                 .ReturnsAsync(authResult);
 
             var controller = new HackathonController();
-            controller.HackathonManagement = hackManagerMock.Object;
+            controller.HackathonManagement = hackathonManagement.Object;
             controller.AuthorizationService = authorizationServiceMock.Object;
             controller.ResponseBuilder = new DefaultResponseBuilder();
-            var result = await controller.CreateOrUpdate(name, hack);
+            var result = await controller.CreateOrUpdate(name, hack, cancellationToken);
 
-            Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
-            hackManagerMock.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
+            hackathonManagement.VerifyNoOtherCalls();
             Assert.AreEqual(name, hack.name);
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
@@ -114,6 +124,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Hackathon resp = (Hackathon)objectResult.Value;
             Assert.AreEqual("test2", resp.name);
             Assert.IsTrue(resp.autoApprove);
+            Assert.IsTrue(resp.roles.isAdmin);
         }
 
         [Test]
@@ -122,6 +133,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string name = "Foo";
             HackathonEntity entity = null;
             Hackathon parameter = new Hackathon();
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
@@ -132,7 +144,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(name, parameter);
+            var result = await controller.Update(name, parameter, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -146,9 +158,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             HackathonEntity entity = new HackathonEntity { };
             Hackathon parameter = new Hackathon();
             var authResult = AuthorizationResult.Failed();
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(entity);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
@@ -160,7 +173,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationServiceMock.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(name, parameter);
+            var result = await controller.Update(name, parameter, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
             hackathonManagement.VerifyNoOtherCalls();
@@ -174,12 +187,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             HackathonEntity entity = new HackathonEntity { DisplayName = "displayname" };
             Hackathon parameter = new Hackathon();
             var authResult = AuthorizationResult.Success();
+            CancellationToken cancellationToken = CancellationToken.None;
+            var role = new HackathonRoles { isAdmin = true };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(p => p.UpdateHackathonAsync(parameter, It.IsAny<CancellationToken>()))
+            hackathonManagement.Setup(p => p.UpdateHackathonAsync(parameter, cancellationToken))
                 .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+               .ReturnsAsync(role);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
                 .ReturnsAsync(authResult);
@@ -190,7 +207,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationServiceMock.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
             };
-            var result = await controller.Update(name, parameter);
+            var result = await controller.Update(name, parameter, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
             hackathonManagement.VerifyNoOtherCalls();
@@ -200,6 +217,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(objectResult.Value is Hackathon);
             Hackathon resp = (Hackathon)objectResult.Value;
             Assert.AreEqual("displayname", resp.displayName);
+            Assert.IsTrue(resp.roles.isAdmin);
         }
 
         [Test]
@@ -207,6 +225,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             string name = "Foo";
             HackathonEntity entity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
@@ -217,7 +236,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Get(name);
+            var result = await controller.Get(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -229,17 +248,21 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             string name = "Foo";
             HackathonEntity entity = new HackathonEntity { Detail = "detail" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            var role = new HackathonRoles { isAdmin = true };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
                 .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+              .ReturnsAsync(role);
 
             var controller = new HackathonController
             {
                 HackathonManagement = hackathonManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
             };
-            var result = await controller.Get(name);
+            var result = await controller.Get(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -247,6 +270,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Hackathon hackathon = ((OkObjectResult)result).Value as Hackathon;
             Assert.IsNotNull(hackathon);
             Assert.AreEqual("detail", hackathon.detail);
+            Assert.IsTrue(hackathon.roles.isAdmin);
         }
 
         [Test]

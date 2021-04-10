@@ -36,6 +36,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ResponseBuilder.BuildHackathonList(entities));
         }
 
+        #region CreateOrUpdate
         /// <summary>
         /// Create or update hackathon. 
         /// If hackathon with the {name} exists, will retrive update it accordingly(must be admin of the hackathon).
@@ -53,22 +54,27 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateOrUpdate(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
-            [FromBody] Hackathon parameter)
+            [FromBody] Hackathon parameter,
+            CancellationToken cancellationToken)
         {
             string nameLowercase = name.ToLower();
             parameter.name = nameLowercase;
-            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             if (entity != null)
             {
-                return await UpdateInternal(entity, parameter);
+                return await UpdateInternal(entity, parameter, cancellationToken);
             }
             else
             {
                 parameter.creatorId = CurrentUserId;
-                var created = await HackathonManagement.CreateHackathonAsync(parameter);
-                return Ok(ResponseBuilder.BuildHackathon(created));
+                var created = await HackathonManagement.CreateHackathonAsync(parameter, cancellationToken);
+                var roles = await HackathonManagement.GetHackathonRolesAsync(nameLowercase, User, cancellationToken);
+                return Ok(ResponseBuilder.BuildHackathon(created, roles));
             }
         }
+        #endregion
+
+        #region Update
 
         /// <summary>
         /// Update hackathon. Caller must be adminstrator of the hackathon. 
@@ -85,20 +91,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Update(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
-            [FromBody] Hackathon parameter)
+            [FromBody] Hackathon parameter,
+            CancellationToken cancellationToken)
         {
             string nameLowercase = name.ToLower();
             parameter.name = nameLowercase;
-            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase);
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             if (entity == null)
             {
                 return NotFound(string.Format(Resources.Hackathon_NotFound, name));
             }
 
-            return await UpdateInternal(entity, parameter);
+            return await UpdateInternal(entity, parameter, cancellationToken);
         }
+        #endregion
 
-        private async Task<object> UpdateInternal(HackathonEntity entity, Hackathon parameter)
+        private async Task<object> UpdateInternal(HackathonEntity entity, Hackathon parameter, CancellationToken cancellationToken)
         {
             // make sure only Admin of this hackathon can update it
             var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
@@ -106,10 +114,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return Forbidden(Resources.Request_Forbidden_HackAdmin);
             }
-            var updated = await HackathonManagement.UpdateHackathonAsync(parameter);
-            return Ok(ResponseBuilder.BuildHackathon(updated));
+            var updated = await HackathonManagement.UpdateHackathonAsync(parameter, cancellationToken);
+            var roles = await HackathonManagement.GetHackathonRolesAsync(parameter.name, User, cancellationToken);
+            return Ok(ResponseBuilder.BuildHackathon(updated, roles));
         }
 
+        #region Get
         /// <summary>
         /// Query a hackathon by name.
         /// </summary>
@@ -122,17 +132,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{name}")]
         public async Task<object> Get(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            CancellationToken cancellationToken)
         {
-            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower(), cancellationToken);
             if (entity == null)
             {
                 return NotFound(string.Format(Resources.Hackathon_NotFound, name));
             }
 
-            return Ok(ResponseBuilder.BuildHackathon(entity));
+            var role = await HackathonManagement.GetHackathonRolesAsync(name.ToLower(), User, cancellationToken);
+            return Ok(ResponseBuilder.BuildHackathon(entity, role));
         }
+        #endregion
 
+        #region Delete
         /// <summary>
         /// Delete a hackathon by name. The hackathon is marked as Deleted, the record becomes invisible.
         /// </summary>
@@ -156,5 +170,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             await HackathonManagement.DeleteHackathonLogically(name.ToLower());
             return NoContent();
         }
+        #endregion
     }
 }
