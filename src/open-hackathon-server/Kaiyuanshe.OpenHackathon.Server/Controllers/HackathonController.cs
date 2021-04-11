@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,6 +36,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var entities = await HackathonManagement.SearchHackathonAsync(null, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathonList(entities));
         }
+
+        #region CheckNameAvailability
+        /// <summary>
+        /// Check the name availability
+        /// </summary>
+        /// <param name="parameter">parameter including the name to check</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>availability and a reason if not available.</returns>
+        [HttpPost]
+        [Route("hackathon/checkNameAvailability")]
+        [SwaggerErrorResponse(400, 401)]
+        [ProducesResponseType(typeof(NameAvailability), StatusCodes.Status200OK)]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> CheckNameAvailability(
+            [FromBody, Required] NameAvailability parameter,
+            CancellationToken cancellationToken)
+        {
+            if (!Regex.IsMatch(parameter.name, ModelConstants.HackathonNamePattern))
+            {
+                return parameter.Invalid(Resources.Hackathon_Name_Invalid);
+            }
+
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(parameter.name.ToLower(), cancellationToken);
+            if (entity != null)
+            {
+                return parameter.AlreadyExists(Resources.Hackathon_Name_Taken);
+            }
+
+            return parameter.OK();
+        }
+        #endregion
 
         #region CreateOrUpdate
         /// <summary>

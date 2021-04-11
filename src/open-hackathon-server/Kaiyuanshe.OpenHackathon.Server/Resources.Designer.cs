@@ -124,6 +124,24 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The name is invalid. Must contain only letters and/or numbers, length between 1 and 100..
+        /// </summary>
+        internal static string Hackathon_Name_Invalid {
+            get {
+                return ResourceManager.GetString("Hackathon_Name_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name is already used. Please try another name..
+        /// </summary>
+        internal static string Hackathon_Name_Taken {
+            get {
+                return ResourceManager.GetString("Hackathon_Name_Taken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hackathon with name {0} not found. Try PUT to create a new one..
         /// </summary>
         internal static string Hackathon_NotFound {
