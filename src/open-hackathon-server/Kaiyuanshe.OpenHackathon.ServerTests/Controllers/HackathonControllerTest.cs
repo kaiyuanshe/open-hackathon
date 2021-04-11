@@ -18,6 +18,75 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     [TestFixture]
     public class HackathonControllerTest
     {
+        [TestCase("")]
+        [TestCase("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+        [TestCase("@")]
+        [TestCase("#")]
+        [TestCase("%")]
+        [TestCase("-")]
+        [TestCase("_")]
+        [TestCase("=")]
+        [TestCase(" ")]
+        public async Task CheckNameAvailability_Invalid(string name)
+        {
+            var parameter = new NameAvailability { name = name };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var controller = new HackathonController();
+            var result = await controller.CheckNameAvailability(parameter, cancellationToken);
+            NameAvailability resp = (NameAvailability)(result);
+            Assert.AreEqual(name, resp.name);
+            Assert.IsFalse(resp.nameAvailable);
+            Assert.AreEqual("Invalid", resp.reason);
+            Assert.AreEqual(Resources.Hackathon_Name_Invalid, resp.message);
+        }
+
+        [Test]
+        public async Task CheckNameAvailability_AlreadyExists()
+        {
+            var parameter = new NameAvailability { name = "Foo" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonEntity entity = new HackathonEntity();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(h => h.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+            };
+            var result = await controller.CheckNameAvailability(parameter, cancellationToken);
+
+            NameAvailability resp = (NameAvailability)(result);
+            Assert.AreEqual("Foo", resp.name);
+            Assert.IsFalse(resp.nameAvailable);
+            Assert.AreEqual("AlreadyExists", resp.reason);
+            Assert.AreEqual(Resources.Hackathon_Name_Taken, resp.message);
+        }
+
+        [Test]
+        public async Task CheckNameAvailability_OK()
+        {
+            var parameter = new NameAvailability { name = "Foo" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonEntity entity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(h => h.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+            };
+            var result = await controller.CheckNameAvailability(parameter, cancellationToken);
+
+            NameAvailability resp = (NameAvailability)(result);
+            Assert.AreEqual("Foo", resp.name);
+            Assert.IsTrue(resp.nameAvailable);
+        }
+
         [Test]
         public async Task CreateOrUpdateTest_Create()
         {
