@@ -244,6 +244,60 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task GetTest_NotOnlineAnonymous()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Detail = "detail" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonRoles role = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+              .ReturnsAsync(role);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Get(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, name));
+        }
+
+        [Test]
+        public async Task GetTest_NotOnlineNotAdmin()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Detail = "detail" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonRoles role = new HackathonRoles { isAdmin = false };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+              .ReturnsAsync(role);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Get(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, name));
+        }
+
+        [Test]
         public async Task GetTest_OK()
         {
             string name = "Foo";

@@ -142,6 +142,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             var role = await HackathonManagement.GetHackathonRolesAsync(name.ToLower(), User, cancellationToken);
+            if (!entity.IsOnline() && (role == null || !role.isAdmin))
+            {
+                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
+            }
+
             return Ok(ResponseBuilder.BuildHackathon(entity, role));
         }
         #endregion

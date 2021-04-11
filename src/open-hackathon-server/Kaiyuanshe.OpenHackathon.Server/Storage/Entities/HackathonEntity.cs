@@ -59,5 +59,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public DateTime? EnrollmentEndedAt { get; set; }
         public DateTime? JudgeStartedAt { get; set; }
         public DateTime? JudgeEndedAt { get; set; }
+
+        public bool IsOnline()
+        {
+            return Status == HackathonStatus.online;
+        }
     }
 }
