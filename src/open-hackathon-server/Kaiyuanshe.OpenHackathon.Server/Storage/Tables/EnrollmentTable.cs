@@ -9,14 +9,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 
     public class EnrollmentTable : AzureTable<EnrollmentEntity>, IEnrollmentTable
     {
-        /// <summary>
-        /// Test only constructor
-        /// </summary>
-        internal EnrollmentTable()
-        {
-
-        }
-
         public EnrollmentTable(CloudStorageAccount storageAccount, string tableName)
             : base(storageAccount, tableName)
         {
