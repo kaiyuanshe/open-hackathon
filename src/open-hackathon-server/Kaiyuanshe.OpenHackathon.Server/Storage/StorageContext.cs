@@ -1,16 +1,14 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public interface IStorageContext
     {
+        IEnrollmentTable EnrollmentTable { get; }
         IHackathonTable HackathonTable { get; }
         IHackathonAdminTable HackathonAdminTable { get; }
-        IEnrollmentTable EnrollmentTable { get; }
+        ITeamTable TeamTable { get; }
+        ITeamMemberTable TeamMemberTable { get; }
         IUserTable UserTable { get; }
         IUserTokenTable UserTokenTable { get; }
     }
@@ -24,6 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public IHackathonAdminTable HackathonAdminTable { get; }
         public IHackathonTable HackathonTable { get; }
         public ITeamTable TeamTable { get; }
+        public ITeamMemberTable TeamMemberTable { get; }
         public IUserTable UserTable { get; }
         public IUserTokenTable UserTokenTable { get; }
 
@@ -37,6 +36,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
             TeamTable = new TeamTable(storageAccount, TableNames.Team);
+            TeamMemberTable = new TeamMemberTable(storageAccount, TableNames.TeamMember);
             UserTable = new UserTable(storageAccount, TableNames.User);
             UserTokenTable = new UserTokenTable(storageAccount, TableNames.UserToken);
         }
