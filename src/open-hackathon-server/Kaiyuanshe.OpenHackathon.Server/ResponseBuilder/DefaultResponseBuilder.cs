@@ -14,6 +14,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Enrollment BuildEnrollment(EnrollmentEntity participant);
 
+        Team BuildTeam(TeamEntity teamEntity);
+
+        TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity);
+
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
             where TResult : IResourceList<TResultItem>, new();
     }
@@ -42,6 +46,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             return participant.As<Enrollment>(p =>
             {
                 p.updatedAt = participant.Timestamp.DateTime;
+            });
+        }
+
+        public Team BuildTeam(TeamEntity teamEntity)
+        {
+            return teamEntity.As<Team>(p =>
+            {
+                p.updatedAt = teamEntity.Timestamp.DateTime;
+            });
+        }
+
+        public TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity)
+        {
+            return teamMemberEntity.As<TeamMember>(p =>
+            {
+                p.updatedAt = teamMemberEntity.Timestamp.DateTime;
             });
         }
 

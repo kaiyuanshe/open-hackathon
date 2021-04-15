@@ -89,6 +89,62 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         }
 
         [Test]
+        public void BuildTeamTest()
+        {
+            var entity = new TeamEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                AutoApprove = false,
+                CreatorId = "uid",
+                Description = "desc",
+                DisplayName = "dp",
+                CreatedAt = DateTime.Now,
+                Timestamp = DateTime.Now
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var team = respBuilder.BuildTeam(entity);
+
+            Assert.AreEqual("pk", team.hackathonName);
+            Assert.AreEqual("rk", team.id);
+            Assert.AreEqual(false, team.autoApprove);
+            Assert.AreEqual("uid", team.creatorId);
+            Assert.AreEqual("desc", team.description);
+            Assert.AreEqual("dp", team.displayName);
+            Assert.AreEqual(entity.CreatedAt, team.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, team.updatedAt);
+        }
+
+        [Test]
+        public void BuildTeamMemberTest()
+        {
+            var entity = new TeamMemberEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                HackathonName = "hack",
+                Description = "desc",
+                Role = TeamMemberRole.Admin,
+                Status = TeamMemberStatus.rejected,
+                CreatedAt = DateTime.Now,
+                Timestamp = DateTime.Now
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var teamMember = respBuilder.BuildTeamMember(entity);
+
+            Assert.AreEqual("hack", teamMember.hackathonName);
+            Assert.AreEqual("pk", teamMember.teamId);
+            Assert.AreEqual("rk", teamMember.userId);
+            Assert.AreEqual("desc", teamMember.description);
+            Assert.AreEqual(TeamMemberRole.Admin, teamMember.role);
+            Assert.AreEqual(TeamMemberStatus.rejected, teamMember.status);
+            Assert.AreEqual(entity.CreatedAt, teamMember.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, teamMember.updatedAt);
+        }
+
+        [Test]
         public void BuildResourceListTest()
         {
             string nextLink = "nextlink";

@@ -18,7 +18,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// name of Hackathon
         /// </summary>
         [IgnoreProperty]
-        public string HackathonName { get; }
+        public string HackathonName
+        {
+            get
+            {
+                return PartitionKey;
+            }
+        }
+
+        /// <summary>
+        /// id of team
+        /// </summary>
+        [IgnoreProperty]
+        public string Id
+        {
+            get
+            {
+                return RowKey;
+            }
+        }
 
         /// <summary>
         /// team display name
