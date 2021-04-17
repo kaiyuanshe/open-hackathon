@@ -64,5 +64,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         {
             return Status == HackathonStatus.online;
         }
+
+        class ValiateOptions { }
+
+
     }
 }
