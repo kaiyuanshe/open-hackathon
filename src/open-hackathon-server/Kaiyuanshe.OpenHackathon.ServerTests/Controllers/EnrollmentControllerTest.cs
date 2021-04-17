@@ -26,6 +26,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             string hackathonName = "Hack";
             HackathonEntity hackathonEntity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -37,7 +38,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Enroll(hackathonName, null);
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -52,6 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(1),
             };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -63,7 +65,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Enroll(hackathonName, null);
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -79,6 +81,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(-1),
             };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -90,7 +93,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Enroll(hackathonName, null);
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -107,6 +110,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
             };
             EnrollmentEntity enrollment = new EnrollmentEntity { PartitionKey = "pk" };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
@@ -120,7 +124,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Enroll(hackathonName, null);
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();

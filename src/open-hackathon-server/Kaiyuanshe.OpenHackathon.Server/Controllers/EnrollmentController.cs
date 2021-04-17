@@ -36,24 +36,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
         public async Task<object> Enroll(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromBody] Enrollment parameter)
+            [FromBody] Enrollment parameter,
+            CancellationToken cancellationToken)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
-            if (hackathon == null)
-            {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName.ToLower()));
-            }
 
-            if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
+            var options = new ValiateOptions
             {
-                // enrollment not started
-                return PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_NotStarted, hackathon.EnrollmentStartedAt.Value));
-            }
-
-            if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
+                EnrollmentOpenRequired = true,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
             {
-                // enrollment not started
-                return PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
+                return options.ValidateResult;
             }
 
             var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
@@ -131,15 +125,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
-            if (hackathon == null)
+            var options = new ValiateOptions
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
-            }
-
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
-            if (!authorizationResult.Succeeded)
+                AdminRequird = true,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
             {
-                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+                return options.ValidateResult;
             }
 
             EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);

@@ -142,7 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hackathon with name {0} not found. Try PUT to create a new one..
+        ///   Looks up a localized string similar to Hackathon with specified name not found. Try PUT to create a new one..
         /// </summary>
         internal static string Hackathon_NotFound {
             get {
