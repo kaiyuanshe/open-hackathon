@@ -156,4 +156,7 @@
   <data name="Request_Forbidden_HackAdmin" xml:space="preserve">
     <value>Access denied. Only the admins of the event are allowed. Please contact the admin to request access.</value>
   </data>
+  <data name="Team_NotEnrolled" xml:space="preserve">
+    <value>Cannot create a new team. must enroll first.</value>
+  </data>
 </root>

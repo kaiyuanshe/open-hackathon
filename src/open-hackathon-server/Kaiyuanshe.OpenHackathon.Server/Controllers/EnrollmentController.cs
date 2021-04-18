@@ -29,7 +29,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns>The enrollment</returns>
         /// <response code="200">Success. The response describes a enrollment.</response>
-        [HttpPost]
+        [HttpPut]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404, 412)]
         [Route("hackathon/{hackathonName}/enrollment")]
@@ -44,6 +44,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValiateOptions
             {
                 EnrollmentOpenRequired = true,
+                OnlineRequired = true,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
             {

@@ -46,12 +46,39 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task EnrollTest_NotOnline()
+        {
+            string hackathonName = "Hack";
+            HackathonEntity hackathonEntity = new HackathonEntity
+            {
+                Status = HackathonStatus.pendingApproval
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404);
+        }
+
+        [Test]
         public async Task EnrollTest_PreConditionFailed1()
         {
             string hackathonName = "Hack";
             HackathonEntity hackathonEntity = new HackathonEntity
             {
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(1),
+                Status = HackathonStatus.online,
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -80,6 +107,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(-1),
+                Status = HackathonStatus.online,
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -108,6 +136,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
+                Status = HackathonStatus.online,
             };
             EnrollmentEntity enrollment = new EnrollmentEntity { PartitionKey = "pk" };
             CancellationToken cancellationToken = CancellationToken.None;
