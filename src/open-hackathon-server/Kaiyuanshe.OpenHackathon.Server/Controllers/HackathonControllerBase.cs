@@ -127,6 +127,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             public bool EnrollmentOpenRequired { get; set; }
             public bool AdminRequird { get; set; }
+            public bool OnlineRequired { get; set; }
 
             /// <summary>
             /// null if validate successfully. Otherwise a response which desribes the failure
@@ -135,13 +136,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public object ValidateResult { get; set; }
         }
 
-        public async Task<bool> ValidateHackathon(HackathonEntity hackathon,
+        protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValiateOptions options,
             CancellationToken cancellationToken = default)
         {
             options.ValidateResult = null; // make sure it's not set by caller
 
             if (hackathon == null)
+            {
+                options.ValidateResult = NotFound(Resources.Hackathon_NotFound);
+                return false;
+            }
+
+            if (options.OnlineRequired && hackathon.Status != HackathonStatus.online)
             {
                 options.ValidateResult = NotFound(Resources.Hackathon_NotFound);
                 return false;
@@ -169,7 +176,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
                 if (!authorizationResult.Succeeded)
                 {
-                    options.ValidateResult= Forbidden(Resources.Request_Forbidden_HackAdmin);
+                    options.ValidateResult = Forbidden(Resources.Request_Forbidden_HackAdmin);
                     return false;
                 }
             }

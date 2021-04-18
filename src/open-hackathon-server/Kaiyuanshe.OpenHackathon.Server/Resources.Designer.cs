@@ -176,5 +176,14 @@ namespace Kaiyuanshe.OpenHackathon.Server {
                 return ResourceManager.GetString("Request_Forbidden_HackAdmin", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot create a new team. must enroll first..
+        /// </summary>
+        internal static string Team_NotEnrolled {
+            get {
+                return ResourceManager.GetString("Team_NotEnrolled", resourceCulture);
+            }
+        }
     }
 }
