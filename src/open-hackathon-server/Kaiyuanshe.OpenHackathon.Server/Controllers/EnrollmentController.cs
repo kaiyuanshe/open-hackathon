@@ -41,10 +41,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
 
-            var options = new ValiateOptions
+            var options = new ValidateHackathonOptions
             {
                 EnrollmentOpenRequired = true,
                 OnlineRequired = true,
+                HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
             {
@@ -126,9 +127,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
-            var options = new ValiateOptions
+            var options = new ValidateHackathonOptions
             {
-                AdminRequird = true,
+                HackAdminRequird = true,
+                HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
