@@ -123,34 +123,54 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
-        public class ValiateOptions
-        {
-            public bool EnrollmentOpenRequired { get; set; }
-            public bool AdminRequird { get; set; }
-            public bool OnlineRequired { get; set; }
+        #region Frequently used validations
 
+        public class ControllerValiationOptions
+        {
             /// <summary>
             /// null if validate successfully. Otherwise a response which desribes the failure
             /// and can be returned to client.
             /// </summary>
             public object ValidateResult { get; set; }
+
+            /// <summary>
+            /// optional hackathon name for error message 
+            /// </summary>
+            public string HackathonName { get; set; } = string.Empty;
+
+            /// <summary>
+            /// optional UserId for error message
+            /// </summary>
+            public string UserId { get; set; } = string.Empty;
+        }
+
+        public class ValidateHackathonOptions : ControllerValiationOptions
+        {
+            public bool EnrollmentOpenRequired { get; set; }
+            public bool HackAdminRequird { get; set; }
+            public bool OnlineRequired { get; set; }
+        }
+
+        public class ValidateEnrollmentOptions : ControllerValiationOptions
+        {
+            public bool ApprovedRequired { get; set; }
         }
 
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
-            ValiateOptions options,
+            ValidateHackathonOptions options,
             CancellationToken cancellationToken = default)
         {
             options.ValidateResult = null; // make sure it's not set by caller
 
             if (hackathon == null)
             {
-                options.ValidateResult = NotFound(Resources.Hackathon_NotFound);
+                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
                 return false;
             }
 
             if (options.OnlineRequired && hackathon.Status != HackathonStatus.online)
             {
-                options.ValidateResult = NotFound(Resources.Hackathon_NotFound);
+                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
                 return false;
             }
 
@@ -171,7 +191,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 }
             }
 
-            if (options.AdminRequird)
+            if (options.HackAdminRequird)
             {
                 var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
                 if (!authorizationResult.Succeeded)
@@ -183,5 +203,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return true;
         }
+
+        protected bool ValidateEnrollment(EnrollmentEntity enrollment, ValidateEnrollmentOptions options)
+        {
+            if (enrollment == null)
+            {
+                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, options.UserId, options.HackathonName));
+                return false;
+            }
+
+            if (options.ApprovedRequired && enrollment.Status != EnrollmentStatus.approved)
+            {
+                options.ValidateResult = PreconditionFailed(Resources.Hackathon_Enrollment_NotApproved);
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }

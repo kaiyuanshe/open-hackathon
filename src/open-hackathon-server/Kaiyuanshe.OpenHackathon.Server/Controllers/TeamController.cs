@@ -44,23 +44,32 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromBody] Team parameter,
             CancellationToken cancellationToken)
         {
+            // validate hackathon
             var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
-            var options = new ValiateOptions
+            var options = new ValidateHackathonOptions
             {
                 OnlineRequired = true,
+                HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
             {
                 return options.ValidateResult;
             }
 
-            // must enroll first
+            // validate enrollment
             var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
-            if (enrollment == null)
+            var enrollmentOptions = new ValidateEnrollmentOptions
             {
-                return PreconditionFailed(Resources.Team_NotEnrolled);
+                ApprovedRequired = true,
+                HackathonName = hackathonName,
+                UserId = CurrentUserId
+            };
+            if (ValidateEnrollment(enrollment, enrollmentOptions) == false)
+            {
+                return enrollmentOptions.ValidateResult;
             }
 
+            // create team
             parameter.hackathonName = hackathonName.ToLower();
             parameter.creatorId = CurrentUserId;
             var teamEntity = await TeamManagement.CreateTeamAsync(parameter, cancellationToken);

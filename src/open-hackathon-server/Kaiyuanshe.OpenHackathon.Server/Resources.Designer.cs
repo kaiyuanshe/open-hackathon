@@ -106,6 +106,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enrollment not approved yet. Please contact the hackathon admistrators for approval..
+        /// </summary>
+        internal static string Hackathon_Enrollment_NotApproved {
+            get {
+                return ResourceManager.GetString("Hackathon_Enrollment_NotApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User {0} not enrolled in hackathon {1}.
         /// </summary>
         internal static string Hackathon_Enrollment_NotFound {
@@ -142,7 +151,7 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hackathon with specified name not found. Try PUT to create a new one..
+        ///   Looks up a localized string similar to Hackathon with name `{0}` not found. Try PUT to create a new one..
         /// </summary>
         internal static string Hackathon_NotFound {
             get {
