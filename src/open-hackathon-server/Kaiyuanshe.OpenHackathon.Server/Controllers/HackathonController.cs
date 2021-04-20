@@ -127,23 +127,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             string nameLowercase = name.ToLower();
             parameter.name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
-            if (entity == null)
-            {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
-            }
-
             return await UpdateInternal(entity, parameter, cancellationToken);
         }
         #endregion
 
         private async Task<object> UpdateInternal(HackathonEntity entity, Hackathon parameter, CancellationToken cancellationToken)
         {
-            // make sure only Admin of this hackathon can update it
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, entity, AuthConstant.Policy.HackathonAdministrator);
-            if (!authorizationResult.Succeeded)
+            var options = new ValidateHackathonOptions
             {
-                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+                HackAdminRequird = true,
+                NotDeletedRequired = true,
+                HackathonName = parameter.name,
+                UserId = CurrentUserId
+            };
+            if(await ValidateHackathon(entity, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
             }
+
             var updated = await HackathonManagement.UpdateHackathonAsync(parameter, cancellationToken);
             var roles = await HackathonManagement.GetHackathonRolesAsync(parameter.name, User, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathon(updated, roles));
