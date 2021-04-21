@@ -126,7 +126,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 HackathonName = "hack",
                 Description = "desc",
                 Role = TeamMemberRole.Admin,
-                Status = TeamMemberStatus.rejected,
+                Status = TeamMemberStatus.pendingApproval,
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now
             };
@@ -139,7 +139,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("rk", teamMember.userId);
             Assert.AreEqual("desc", teamMember.description);
             Assert.AreEqual(TeamMemberRole.Admin, teamMember.role);
-            Assert.AreEqual(TeamMemberStatus.rejected, teamMember.status);
+            Assert.AreEqual(TeamMemberStatus.pendingApproval, teamMember.status);
             Assert.AreEqual(entity.CreatedAt, teamMember.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, teamMember.updatedAt);
         }

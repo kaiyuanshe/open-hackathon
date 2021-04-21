@@ -32,36 +32,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Claim value can be any string, typically the user's id.
             /// </summary>
             public const string PlatformAdministrator = "PlatformAdministrator";
-
-            /// <summary>
-            /// Administrator of a hackathon. The creator who creates the hackathon is an Admin by default.
-            /// Claim value: hackathon Name.
-            /// </summary>
-            public const string HackathonAdministrator = "HackathonAdministrator";
-
-            /// <summary>
-            /// Judge of a hackathon.
-            /// Claim value: hackathon Name.
-            /// </summary>
-            public const string HackathonJudge = "HackathonJudge";
-
-            /// <summary>
-            /// Contestant of a hackathon.
-            /// Claim value: hackathon Name.
-            /// </summary>
-            public const string HackathonContestant = "HackathonContestant";
-
-            /// <summary>
-            /// Admin of a team. Who creates the team is Admin by default.
-            /// Claim value: {hackathon Name}.{team Id}
-            /// </summary>
-            public const string TeamAdministrator = "TeamAdministrator";
-
-            /// <summary>
-            /// Member of a team. Everyone in a team is a TeamMember.
-            /// Claim value: {hackathon Name}.{team Id}
-            /// </summary>
-            public const string TeamMember = "TeamMember";
         }
 
         public static class Policy
@@ -75,6 +45,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Administrator of the OPH platform.
             /// </summary>
             public const string PlatformAdministrator = "PlatformAdministrator";
+
+            /// <summary>
+            /// Administrator of a team.
+            /// </summary>
+            public const string TeamAdministrator = "TeamAdministratorReal";
         }
 
         /// <summary>
@@ -88,6 +63,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Policy to administrate a hackathon.
             /// </summary>
             public const string HackathonAdministrator = "HackathonAdministrator";
+
+            /// <summary>
+            /// Policy to administrate a team.
+            /// </summary>
+            public const string TeamAdministrator = "TeamAdministrator";
 
             /// <summary>
             /// Policy to allow login user.
