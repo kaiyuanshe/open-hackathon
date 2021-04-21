@@ -145,10 +145,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Approved by team admin
         /// </summary>
         approved,
-
-        /// <summary>
-        /// Rejected by team admin
-        /// </summary>
-        rejected,
     }
 }

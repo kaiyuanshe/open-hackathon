@@ -4,10 +4,12 @@ using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,6 +82,59 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(result.Id, teamMember.TeamId);
             Assert.AreEqual("uid", teamMember.UserId);
             Assert.AreEqual(result.CreatedAt, teamMember.CreatedAt);
+        }
+
+        [Test]
+        public async Task ListTeamMembersAsync()
+        {
+            var cancellationToken = CancellationToken.None;
+            List<TeamMemberEntity> teamMembers = new List<TeamMemberEntity>
+            {
+                new TeamMemberEntity
+                {
+                    RowKey = "rk1",
+                    Role = TeamMemberRole.Admin,
+                    Status = TeamMemberStatus.approved
+                },
+                new TeamMemberEntity
+                {
+                    RowKey = "rk2",
+                    Role = TeamMemberRole.Member,
+                    Status = TeamMemberStatus.pendingApproval
+                },
+            };
+
+            string query = null;
+            TableContinuationToken continuationToken = null;
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<TeamMemberEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<TeamMemberEntity>, TableContinuationToken, CancellationToken>((q, t, c) =>
+                {
+                    query = q.FilterString;
+                    continuationToken = t;
+                })
+                .ReturnsAsync(MockHelper.CreateTableQuerySegment(teamMembers, null));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+            var teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var results = await teamManagement.ListTeamMembersAsync("tid", cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            Assert.AreEqual("PartitionKey eq 'tid'", query);
+            Assert.IsNull(continuationToken);
+            Assert.AreEqual(2, results.Count());
+            Assert.AreEqual("rk1", results.First().UserId);
+            Assert.AreEqual(TeamMemberRole.Admin, results.First().Role);
+            Assert.AreEqual(TeamMemberStatus.approved, results.First().Status);
+            Assert.AreEqual("rk2", results.Last().UserId);
+            Assert.AreEqual(TeamMemberRole.Member, results.Last().Role);
+            Assert.AreEqual(TeamMemberStatus.pendingApproval, results.Last().Status);
+
         }
     }
 }

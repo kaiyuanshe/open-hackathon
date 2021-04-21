@@ -15,6 +15,14 @@ namespace Kaiyuanshe.OpenHackathon.Server
             AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(10)
         };
 
+        /// <summary>
+        /// Cache entry evicted in 10 minutes.
+        /// </summary>
+        public static CacheItemPolicy ExpireIn1M = new CacheItemPolicy
+        {
+            AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(1)
+        };
+
         static MemoryCache cache = MemoryCache.Default;
 
         public static T GetOrAdd<T>(string key, Func<T> supplyValue, CacheItemPolicy policy)
