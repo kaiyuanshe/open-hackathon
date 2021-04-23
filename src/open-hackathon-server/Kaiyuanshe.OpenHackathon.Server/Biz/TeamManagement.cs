@@ -20,6 +20,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamEntity> CreateTeamAsync(Team request, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Update a team. Team Admin only
+        /// </summary>
+        /// <param name="request">client request</param>
+        /// <param name="teamEntity">entity to update</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List all team members
         /// </summary>
         /// <param name="teamId">guid of the team</param>
@@ -50,7 +59,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             {
                 PartitionKey = request.hackathonName,
                 RowKey = Guid.NewGuid().ToString(),
-                AutoApprove = request.autoApprove,
+                AutoApprove = request.autoApprove.GetValueOrDefault(false),
                 Description = request.description,
                 DisplayName = request.displayName,
                 CreatorId = request.creatorId,
@@ -96,6 +105,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             string cacheKey = $"team_members_{teamId}";
             return await CacheHelper.GetOrAddAsync(cacheKey, supplyValue, CacheHelper.ExpireIn1M);
+        }
+
+        public async Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default)
+        {
+            if (teamEntity == null || request == null)
+                return teamEntity;
+
+            teamEntity.AutoApprove = request.autoApprove.GetValueOrDefault(teamEntity.AutoApprove);
+            teamEntity.Description = request.description ?? teamEntity.Description;
+            teamEntity.DisplayName = request.displayName ?? teamEntity.DisplayName;
+
+            await StorageContext.TeamTable.MergeAsync(teamEntity, cancellationToken);
+            return teamEntity;
         }
     }
 }

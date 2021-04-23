@@ -134,7 +134,55 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("rk2", results.Last().UserId);
             Assert.AreEqual(TeamMemberRole.Member, results.Last().Role);
             Assert.AreEqual(TeamMemberStatus.pendingApproval, results.Last().Status);
+        }
 
+        [Test]
+        public async Task UpdateTeamAsync_Null()
+        {
+            var cancellationToken = CancellationToken.None;
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var storageContext = new Mock<IStorageContext>();
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            Assert.IsNull(await teamManagement.UpdateTeamAsync(null, null, cancellationToken));
+            Assert.IsNull(await teamManagement.UpdateTeamAsync(new Team(), null, cancellationToken));
+
+            TeamEntity entity = new TeamEntity();
+            Assert.AreEqual(entity, await teamManagement.UpdateTeamAsync(null, entity, cancellationToken));
+            Mock.VerifyAll(logger, storageContext);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
+
+        [Test]
+        public async Task UpdateTeamAsync_Updated()
+        {
+            var request = new Team { description = "newdesc", autoApprove = true };
+            var entity = new TeamEntity { Description = "desc", DisplayName = "dp", AutoApprove = false };
+
+            var cancellationToken = CancellationToken.None;
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamTable = new Mock<ITeamTable>();
+            teamTable.Setup(t => t.MergeAsync(entity, cancellationToken));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamAsync(request, entity, cancellationToken);
+
+            Mock.VerifyAll(logger, storageContext, teamTable);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            teamTable.VerifyNoOtherCalls();
+            Assert.AreEqual("newdesc", result.Description);
+            Assert.AreEqual("dp", result.DisplayName);
+            Assert.AreEqual(true, result.AutoApprove);
         }
     }
 }

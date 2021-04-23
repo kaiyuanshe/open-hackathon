@@ -108,7 +108,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 
             Assert.AreEqual("pk", team.hackathonName);
             Assert.AreEqual("rk", team.id);
-            Assert.AreEqual(false, team.autoApprove);
+            Assert.AreEqual(false, team.autoApprove.Value);
             Assert.AreEqual("uid", team.creatorId);
             Assert.AreEqual("desc", team.description);
             Assert.AreEqual("dp", team.displayName);

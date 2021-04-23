@@ -167,7 +167,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             OkObjectResult objectResult = (OkObjectResult)result;
             Assert.IsTrue(objectResult.Value is Team);
             Team resp = (Team)objectResult.Value;
-            Assert.AreEqual(true, resp.autoApprove);
+            Assert.AreEqual(true, resp.autoApprove.Value);
             Assert.AreEqual("uid", resp.creatorId);
             Assert.AreEqual("pk", resp.hackathonName);
             Assert.AreEqual("rk", resp.id);
