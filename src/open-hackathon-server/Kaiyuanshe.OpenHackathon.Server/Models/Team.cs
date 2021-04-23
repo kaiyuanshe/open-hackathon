@@ -42,7 +42,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// whether or not auto approve team joining request. false by default.
         /// </summary>
         /// <example>true</example>
-        public bool autoApprove { get; set; }
+        public bool? autoApprove { get; set; }
 
         /// <summary>
         /// the id of user who creates the team
