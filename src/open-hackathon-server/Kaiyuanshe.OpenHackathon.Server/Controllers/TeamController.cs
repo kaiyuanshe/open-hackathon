@@ -77,5 +77,53 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ResponseBuilder.BuildTeam(teamEntity));
         }
 
+        /// <summary>
+        /// Update a new team
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique id of the team. Auto-generated on server side.</param>
+        /// <returns>The updated team</returns>
+        /// <response code="200">Success. The response describes a enrollment.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Team), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
+        public async Task<object> Update(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromBody] Team parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                NotDeletedRequired = true,
+                HackathonName = hackathonName,
+                UserId = CurrentUserId,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamOptions = new ValidateTeamOptions
+            {
+                TeamAdminRequired = true,
+            };
+            if (!await ValidateTeam(team, teamOptions, cancellationToken))
+            {
+                return teamOptions.ValidateResult;
+            }
+
+            team = await TeamManagement.UpdateTeamAsync(parameter, team, cancellationToken);
+            return Ok(ResponseBuilder.BuildTeam(team));
+        }
     }
 }

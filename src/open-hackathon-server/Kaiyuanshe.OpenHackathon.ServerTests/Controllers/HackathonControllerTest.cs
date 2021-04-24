@@ -150,7 +150,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackManagerMock, authorizationServiceMock);
             hackManagerMock.VerifyNoOtherCalls();
-            AssertHelper.AssertObjectResult(result, 403, Resources.Request_Forbidden_HackAdmin);
+            AssertHelper.AssertObjectResult(result, 403, Resources.Hackathon_NotAdmin);
         }
 
         [Test]
@@ -246,7 +246,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Mock.VerifyAll(hackathonManagement, authorizationServiceMock);
             hackathonManagement.VerifyNoOtherCalls();
-            AssertHelper.AssertObjectResult(result, 403, Resources.Request_Forbidden_HackAdmin);
+            AssertHelper.AssertObjectResult(result, 403, Resources.Hackathon_NotAdmin);
         }
 
         [Test]

@@ -75,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId);
             if (enrollment == null)
             {
-                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, CurrentUserId, hackathonName));
+                return NotFound(string.Format(Resources.Enrollment_NotFound, CurrentUserId, hackathonName));
             }
 
             return Ok(ResponseBuilder.BuildEnrollment(enrollment));
@@ -142,7 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
             if (enrollment == null)
             {
-                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
+                return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
 
             enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(enrollment, status);
@@ -168,21 +168,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             var hackName = hackathonName.ToLower();
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
-            if (hackathon == null)
+            var options = new ValidateHackathonOptions
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
-            }
-
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
-            if (!authorizationResult.Succeeded)
+                UserId = CurrentUserId,
+                HackathonName = hackathonName,
+                HackAdminRequird = true,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
             {
-                return Forbidden(Resources.Request_Forbidden_HackAdmin);
+                return options.ValidateResult;
             }
 
             EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackName, userId.ToLower());
             if (enrollment == null)
             {
-                return NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, userId, hackathonName));
+                return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
             return Ok(ResponseBuilder.BuildEnrollment(enrollment));
         }
@@ -208,24 +208,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             var hackName = hackathonName.ToLower();
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
-            if (hackathon == null)
+            var options = new ValidateHackathonOptions
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
+                UserId = CurrentUserId,
+                HackathonName = hackathonName,
+                HackAdminRequird = true,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
             }
 
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbidden(Resources.Request_Forbidden_HackAdmin);
-            }
-
-            var options = new EnrollmentQueryOptions
+            var enrollmentOptions = new EnrollmentQueryOptions
             {
                 TableContinuationToken = pagination.ToContinuationToken(),
                 Status = status,
                 Top = pagination.top
             };
-            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackName, options, cancellationToken);
+            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackName, enrollmentOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {

@@ -27,7 +27,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// team display name.
         /// </summary>
         /// <example>My Team</example>
-        [Required]
         [MaxLength(128)]
         public string displayName { get; set; }
 

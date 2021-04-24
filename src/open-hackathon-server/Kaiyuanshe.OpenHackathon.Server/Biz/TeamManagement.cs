@@ -74,6 +74,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 CreatorId = request.creatorId,
                 CreatedAt = DateTime.UtcNow,
             };
+            if (string.IsNullOrWhiteSpace(request.displayName))
+            {
+                teamEntity.DisplayName = teamEntity.RowKey;
+            }
             await StorageContext.TeamTable.InsertAsync(teamEntity, cancellationToken);
 
             TeamMemberEntity teamMember = new TeamMemberEntity
