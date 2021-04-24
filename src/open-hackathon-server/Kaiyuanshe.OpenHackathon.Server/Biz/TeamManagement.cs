@@ -29,6 +29,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Get a team by team Id
+        /// </summary>
+        /// <param name="hackathonName">name of hackathon</param>
+        /// <param name="teamId">unique id of the team</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TeamEntity> GetTeamByIdAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List all team members
         /// </summary>
         /// <param name="teamId">guid of the team</param>
@@ -80,6 +89,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.TeamMemberTable.InsertAsync(teamMember, cancellationToken);
 
             return teamEntity;
+        }
+
+        public async Task<TeamEntity> GetTeamByIdAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(teamId))
+                return null;
+
+            return await StorageContext.TeamTable.RetrieveAsync(hackathonName.ToLower(), teamId, cancellationToken);
         }
 
         public async Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default)

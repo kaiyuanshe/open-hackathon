@@ -184,5 +184,50 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("dp", result.DisplayName);
             Assert.AreEqual(true, result.AutoApprove);
         }
+
+        [TestCase(null, null)]
+        [TestCase(null, "")]
+        [TestCase(null, " ")]
+        [TestCase("", null)]
+        [TestCase(" ", null)]
+        public async Task GetTeamByIdAsync_Null(string hackName, string teamId)
+        {
+            var cancellationToken = CancellationToken.None;
+            var logger = new Mock<ILogger<TeamManagement>>();
+            TeamManagement teamManagement = new TeamManagement(logger.Object);
+            var result = await teamManagement.GetTeamByIdAsync(hackName, teamId, cancellationToken);
+
+            Mock.VerifyAll(logger);
+            logger.VerifyNoOtherCalls();
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task GetTeamByIdAsync_Succeeded()
+        {
+            string hackName = "Hack";
+            string teamId = "tid";
+            var cancellationToken = CancellationToken.None;
+            TeamEntity teamEntity = new TeamEntity { Description = "desc" };
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamTable = new Mock<ITeamTable>();
+            teamTable.Setup(t => t.RetrieveAsync("hack", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.GetTeamByIdAsync(hackName, teamId, cancellationToken);
+
+            Mock.VerifyAll(logger, storageContext, teamTable);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            teamTable.VerifyNoOtherCalls();
+            Assert.AreEqual("desc", result.Description);
+        }
     }
 }

@@ -32,7 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <returns>The enrollment</returns>
+        /// <returns>The team</returns>
         /// <response code="200">Success. The response describes a enrollment.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Team), StatusCodes.Status200OK)]
@@ -76,5 +76,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var teamEntity = await TeamManagement.CreateTeamAsync(parameter, cancellationToken);
             return Ok(ResponseBuilder.BuildTeam(teamEntity));
         }
+
     }
 }
