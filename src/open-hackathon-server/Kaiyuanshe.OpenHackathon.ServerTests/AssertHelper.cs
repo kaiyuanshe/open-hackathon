@@ -31,5 +31,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests
                 extraAssert(problemDetails);
             }
         }
+
+        public static T AssertOKResult<T>(object result)
+        {
+            Assert.IsTrue(result is OkObjectResult);
+            OkObjectResult objectResult = (OkObjectResult)result;
+            Assert.IsNotNull(objectResult.Value);
+            Assert.IsTrue(objectResult.Value.GetType() == typeof(T));
+            return (T)objectResult.Value;
+        }
     }
 }

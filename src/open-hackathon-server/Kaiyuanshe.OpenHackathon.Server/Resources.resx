@@ -129,16 +129,16 @@
   <data name="Auth_Unauthorized" xml:space="preserve">
     <value>Token is either missing or invalid. Please add it to Http request headers: Headers["Authorization"]=token TOKEN. </value>
   </data>
-  <data name="Hackathon_Enrollment_Ended" xml:space="preserve">
+  <data name="Enrollment_Ended" xml:space="preserve">
     <value>Enrollment already ended at {0}</value>
   </data>
-  <data name="Hackathon_Enrollment_NotApproved" xml:space="preserve">
+  <data name="Enrollment_NotApproved" xml:space="preserve">
     <value>Enrollment not approved yet. Please contact the hackathon admistrators for approval.</value>
   </data>
-  <data name="Hackathon_Enrollment_NotFound" xml:space="preserve">
+  <data name="Enrollment_NotFound" xml:space="preserve">
     <value>User {0} not enrolled in hackathon {1}</value>
   </data>
-  <data name="Hackathon_Enrollment_NotStarted" xml:space="preserve">
+  <data name="Enrollment_NotStarted" xml:space="preserve">
     <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
   </data>
   <data name="Hackathon_Name_Invalid" xml:space="preserve">
@@ -146,6 +146,9 @@
   </data>
   <data name="Hackathon_Name_Taken" xml:space="preserve">
     <value>The name is already used. Please try another name.</value>
+  </data>
+  <data name="Hackathon_NotAdmin" xml:space="preserve">
+    <value>Access denied. Only the admins of the hackathon are allowed. Please contact the admin to request access.</value>
   </data>
   <data name="Hackathon_NotFound" xml:space="preserve">
     <value>Hackathon with name `{0}` not found. Try PUT to create a new one.</value>
@@ -156,10 +159,13 @@
   <data name="Parameter_Required" xml:space="preserve">
     <value>Required parameter {0} is null or empty.</value>
   </data>
-  <data name="Request_Forbidden_HackAdmin" xml:space="preserve">
-    <value>Access denied. Only the admins of the event are allowed. Please contact the admin to request access.</value>
+  <data name="Team_NotAdmin" xml:space="preserve">
+    <value>Access denied. Please contact admins of the team.</value>
   </data>
   <data name="Team_NotEnrolled" xml:space="preserve">
     <value>Cannot create a new team. must enroll first.</value>
+  </data>
+  <data name="Team_NotFound" xml:space="preserve">
+    <value>Team with specified id is not found.</value>
   </data>
 </root>

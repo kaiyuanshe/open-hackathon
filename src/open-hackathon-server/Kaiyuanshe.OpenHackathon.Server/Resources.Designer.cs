@@ -99,36 +99,36 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         /// <summary>
         ///   Looks up a localized string similar to Enrollment already ended at {0}.
         /// </summary>
-        internal static string Hackathon_Enrollment_Ended {
+        internal static string Enrollment_Ended {
             get {
-                return ResourceManager.GetString("Hackathon_Enrollment_Ended", resourceCulture);
+                return ResourceManager.GetString("Enrollment_Ended", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Enrollment not approved yet. Please contact the hackathon admistrators for approval..
         /// </summary>
-        internal static string Hackathon_Enrollment_NotApproved {
+        internal static string Enrollment_NotApproved {
             get {
-                return ResourceManager.GetString("Hackathon_Enrollment_NotApproved", resourceCulture);
+                return ResourceManager.GetString("Enrollment_NotApproved", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to User {0} not enrolled in hackathon {1}.
         /// </summary>
-        internal static string Hackathon_Enrollment_NotFound {
+        internal static string Enrollment_NotFound {
             get {
-                return ResourceManager.GetString("Hackathon_Enrollment_NotFound", resourceCulture);
+                return ResourceManager.GetString("Enrollment_NotFound", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Enrollment not started. The enrollment will be accepted starting from {0}.
         /// </summary>
-        internal static string Hackathon_Enrollment_NotStarted {
+        internal static string Enrollment_NotStarted {
             get {
-                return ResourceManager.GetString("Hackathon_Enrollment_NotStarted", resourceCulture);
+                return ResourceManager.GetString("Enrollment_NotStarted", resourceCulture);
             }
         }
         
@@ -147,6 +147,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         internal static string Hackathon_Name_Taken {
             get {
                 return ResourceManager.GetString("Hackathon_Name_Taken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access denied. Only the admins of the hackathon are allowed. Please contact the admin to request access..
+        /// </summary>
+        internal static string Hackathon_NotAdmin {
+            get {
+                return ResourceManager.GetString("Hackathon_NotAdmin", resourceCulture);
             }
         }
         
@@ -178,11 +187,11 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Access denied. Only the admins of the event are allowed. Please contact the admin to request access..
+        ///   Looks up a localized string similar to Access denied. Please contact admins of the team..
         /// </summary>
-        internal static string Request_Forbidden_HackAdmin {
+        internal static string Team_NotAdmin {
             get {
-                return ResourceManager.GetString("Request_Forbidden_HackAdmin", resourceCulture);
+                return ResourceManager.GetString("Team_NotAdmin", resourceCulture);
             }
         }
         
@@ -192,6 +201,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         internal static string Team_NotEnrolled {
             get {
                 return ResourceManager.GetString("Team_NotEnrolled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Team with specified id is not found..
+        /// </summary>
+        internal static string Team_NotFound {
+            get {
+                return ResourceManager.GetString("Team_NotFound", resourceCulture);
             }
         }
     }

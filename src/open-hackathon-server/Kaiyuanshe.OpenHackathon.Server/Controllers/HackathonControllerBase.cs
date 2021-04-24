@@ -157,6 +157,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool ApprovedRequired { get; set; }
         }
 
+        public class ValidateTeamOptions : ControllerValiationOptions
+        {
+            public bool TeamAdminRequired { get; set; }
+        }
+
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValidateHackathonOptions options,
             CancellationToken cancellationToken = default)
@@ -175,7 +180,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return false;
             }
 
-            if(options.NotDeletedRequired && hackathon.IsDeleted)
+            if (options.NotDeletedRequired && hackathon.IsDeleted)
             {
                 options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
                 return false;
@@ -186,14 +191,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
                 {
                     // enrollment not started
-                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_NotStarted, hackathon.EnrollmentStartedAt.Value));
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Enrollment_NotStarted, hackathon.EnrollmentStartedAt.Value));
                     return false;
                 }
 
                 if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
                 {
                     // enrollment not started
-                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Hackathon_Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
                     return false;
                 }
             }
@@ -203,7 +208,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonAdministrator);
                 if (!authorizationResult.Succeeded)
                 {
-                    options.ValidateResult = Forbidden(Resources.Request_Forbidden_HackAdmin);
+                    options.ValidateResult = Forbidden(Resources.Hackathon_NotAdmin);
                     return false;
                 }
             }
@@ -215,14 +220,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             if (enrollment == null)
             {
-                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_Enrollment_NotFound, options.UserId, options.HackathonName));
+                options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.UserId, options.HackathonName));
                 return false;
             }
 
             if (options.ApprovedRequired && enrollment.Status != EnrollmentStatus.approved)
             {
-                options.ValidateResult = PreconditionFailed(Resources.Hackathon_Enrollment_NotApproved);
+                options.ValidateResult = PreconditionFailed(Resources.Enrollment_NotApproved);
                 return false;
+            }
+
+            return true;
+        }
+
+        protected async Task<bool> ValidateTeam(TeamEntity team,
+            ValidateTeamOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            if (team == null)
+            {
+                options.ValidateResult = NotFound(Resources.Team_NotFound);
+                return false;
+            }
+
+            if (options.TeamAdminRequired)
+            {
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, team, AuthConstant.Policy.TeamAdministrator);
+                if (!authorizationResult.Succeeded)
+                {
+                    options.ValidateResult = Forbidden(Resources.Team_NotAdmin);
+                    return false;
+                }
             }
 
             return true;
