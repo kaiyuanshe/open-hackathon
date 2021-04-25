@@ -65,7 +65,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsFalse(result.EventEndedAt.HasValue);
             Assert.AreEqual("loc", hackInserted.Location);
             Assert.AreEqual("test", partInserted.PartitionKey);
-            Assert.IsFalse(hackInserted.IsDeleted);
         }
 
         [Test]
@@ -93,9 +92,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Mock.VerifyAll(storageContext, hackathonTable);
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
-            var entity = new HackathonEntity { IsDeleted = false };
+            var entity = new HackathonEntity { Status = HackathonStatus.online };
             capturedAction(entity);
-            Assert.IsTrue(entity.IsDeleted);
+            Assert.AreEqual(HackathonStatus.offline, entity.Status);
         }
 
         [Test]

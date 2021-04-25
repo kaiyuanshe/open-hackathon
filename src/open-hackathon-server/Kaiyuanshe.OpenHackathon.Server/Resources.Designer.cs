@@ -133,6 +133,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The hackathon is already ended at {0}.
+        /// </summary>
+        internal static string Hackathon_Ended {
+            get {
+                return ResourceManager.GetString("Hackathon_Ended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The name is invalid. Must contain only letters and/or numbers, length between 1 and 100..
         /// </summary>
         internal static string Hackathon_Name_Invalid {
@@ -165,6 +174,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         internal static string Hackathon_NotFound {
             get {
                 return ResourceManager.GetString("Hackathon_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The hackathon is not started yet. .
+        /// </summary>
+        internal static string Hackathon_NotStarted {
+            get {
+                return ResourceManager.GetString("Hackathon_NotStarted", resourceCulture);
             }
         }
         

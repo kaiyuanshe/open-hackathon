@@ -136,7 +136,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValidateHackathonOptions
             {
                 HackAdminRequird = true,
-                NotDeletedRequired = true,
                 HackathonName = parameter.name,
                 UserId = CurrentUserId
             };
@@ -198,7 +197,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
         {
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
-            if (entity == null || entity.IsDeleted)
+            if (entity == null || entity.Status == HackathonStatus.offline)
             {
                 return NoContent();
             }

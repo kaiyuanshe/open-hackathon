@@ -147,9 +147,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public class ValidateHackathonOptions : ControllerValiationOptions
         {
             public bool EnrollmentOpenRequired { get; set; }
+            public bool HackathonOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
             public bool OnlineRequired { get; set; }
-            public bool NotDeletedRequired { get; set; }
         }
 
         public class ValidateEnrollmentOptions : ControllerValiationOptions
@@ -180,10 +180,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return false;
             }
 
-            if (options.NotDeletedRequired && hackathon.IsDeleted)
+            if (options.HackathonOpenRequired)
             {
-                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
-                return false;
+                if(hackathon.EventStartedAt.HasValue && DateTime.UtcNow< hackathon.EventStartedAt.Value)
+                {
+                    // event not started
+                    options.ValidateResult = PreconditionFailed(Resources.Hackathon_NotStarted);
+                    return false;
+                }
+
+                if (hackathon.EventEndedAt.HasValue && DateTime.UtcNow > hackathon.EventEndedAt.Value)
+                {
+                    // event ended
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Hackathon_Ended, hackathon.EventEndedAt.Value));
+                    return false;
+                }
             }
 
             if (options.EnrollmentOpenRequired)
@@ -197,7 +208,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
                 if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
                 {
-                    // enrollment not started
+                    // enrollment ended
                     options.ValidateResult = PreconditionFailed(string.Format(Resources.Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
                     return false;
                 }

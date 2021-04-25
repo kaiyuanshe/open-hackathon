@@ -141,6 +141,9 @@
   <data name="Enrollment_NotStarted" xml:space="preserve">
     <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
   </data>
+  <data name="Hackathon_Ended" xml:space="preserve">
+    <value>The hackathon is already ended at {0}</value>
+  </data>
   <data name="Hackathon_Name_Invalid" xml:space="preserve">
     <value>The name is invalid. Must contain only letters and/or numbers, length between 1 and 100.</value>
   </data>
@@ -152,6 +155,9 @@
   </data>
   <data name="Hackathon_NotFound" xml:space="preserve">
     <value>Hackathon with name `{0}` not found. Try PUT to create a new one.</value>
+  </data>
+  <data name="Hackathon_NotStarted" xml:space="preserve">
+    <value>The hackathon is not started yet. </value>
   </data>
   <data name="Hackathon_UnhandledException" xml:space="preserve">
     <value>An unexpected exception occurs. Please try again later or report an issue at https://github.com/kaiyuanshe/open-hackathon/issues</value>
