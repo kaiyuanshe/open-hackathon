@@ -49,6 +49,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValidateHackathonOptions
             {
                 OnlineRequired = true,
+                HackathonOpenRequired = true,
                 HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
@@ -101,6 +102,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValidateHackathonOptions
             {
                 OnlineRequired = true,
+                HackathonOpenRequired = true,
                 HackathonName = hackathonName,
                 UserId = CurrentUserId,
             };

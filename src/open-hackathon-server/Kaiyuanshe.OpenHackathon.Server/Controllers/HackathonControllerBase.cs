@@ -147,6 +147,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public class ValidateHackathonOptions : ControllerValiationOptions
         {
             public bool EnrollmentOpenRequired { get; set; }
+            public bool HackathonOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
             public bool OnlineRequired { get; set; }
         }
@@ -179,6 +180,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return false;
             }
 
+            if (options.HackathonOpenRequired)
+            {
+                if(hackathon.EventStartedAt.HasValue && DateTime.UtcNow< hackathon.EventStartedAt.Value)
+                {
+                    // event not started
+                    options.ValidateResult = PreconditionFailed(Resources.Hackathon_NotStarted);
+                    return false;
+                }
+
+                if (hackathon.EventEndedAt.HasValue && DateTime.UtcNow > hackathon.EventEndedAt.Value)
+                {
+                    // event ended
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Hackathon_Ended, hackathon.EventEndedAt.Value));
+                    return false;
+                }
+            }
+
             if (options.EnrollmentOpenRequired)
             {
                 if (hackathon.EnrollmentStartedAt.HasValue && DateTime.UtcNow < hackathon.EnrollmentStartedAt.Value)
@@ -190,7 +208,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
                 if (hackathon.EnrollmentEndedAt.HasValue && DateTime.UtcNow > hackathon.EnrollmentEndedAt.Value)
                 {
-                    // enrollment not started
+                    // enrollment ended
                     options.ValidateResult = PreconditionFailed(string.Format(Resources.Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
                     return false;
                 }

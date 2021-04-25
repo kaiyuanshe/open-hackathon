@@ -72,6 +72,56 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task Create_HackNotStarted()
+        {
+            // input
+            string hackName = "Foo";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online, EventStartedAt = DateTime.UtcNow.AddDays(1) };
+            Team parameter = new Team { };
+            CancellationToken cancellationToken = CancellationToken.None;
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Create(hackName, parameter, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 412, Resources.Hackathon_NotStarted);
+        }
+
+        [Test]
+        public async Task Create_HackEnded()
+        {
+            // input
+            string hackName = "Foo";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online, EventEndedAt = DateTime.UtcNow.AddDays(-1) };
+            Team parameter = new Team { };
+            CancellationToken cancellationToken = CancellationToken.None;
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Create(hackName, parameter, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 412, string.Format(Resources.Hackathon_Ended, hackathon.EventEndedAt));
+        }
+
+        [Test]
         public async Task Create_NotEnrolled()
         {
             // input
