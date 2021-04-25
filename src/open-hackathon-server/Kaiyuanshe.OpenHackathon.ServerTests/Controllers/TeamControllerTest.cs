@@ -72,31 +72,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_HackDeleted()
-        {
-            // input
-            string hackName = "Foo";
-            HackathonEntity hackathon = new HackathonEntity { IsDeleted = true, Status = HackathonStatus.online };
-            Team parameter = new Team { };
-            CancellationToken cancellationToken = CancellationToken.None;
-            // moq
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
-                .ReturnsAsync(hackathon);
-            // run
-            var controller = new TeamController
-            {
-                HackathonManagement = hackathonManagement.Object,
-                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
-            };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
-            // verify
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
-            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, hackName));
-        }
-
-        [Test]
         public async Task Create_NotEnrolled()
         {
             // input
@@ -231,32 +206,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string hackName = "Foo";
             string teamId = "tid";
             HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.planning };
-            Team parameter = new Team { };
-            CancellationToken cancellationToken = CancellationToken.None;
-            // moq
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
-                .ReturnsAsync(hackathon);
-            // run
-            var controller = new TeamController
-            {
-                HackathonManagement = hackathonManagement.Object,
-                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
-            };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
-            // verify
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
-            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, hackName));
-        }
-
-        [Test]
-        public async Task Update_HackDeleted()
-        {
-            // input
-            string hackName = "Foo";
-            string teamId = "tid";
-            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online, IsDeleted = true };
             Team parameter = new Team { };
             CancellationToken cancellationToken = CancellationToken.None;
             // moq

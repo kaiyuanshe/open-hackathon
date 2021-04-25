@@ -38,7 +38,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// </summary>
         public string[] Banners { get; set; }
         public HackathonStatus Status { get; set; }
-        public bool IsDeleted { get; set; }
         /// <summary>
         /// Id of User who creates this hackathon. PartitionKey of Users table
         /// </summary>

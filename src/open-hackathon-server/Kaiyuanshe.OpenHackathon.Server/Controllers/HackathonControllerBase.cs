@@ -149,7 +149,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool EnrollmentOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
             public bool OnlineRequired { get; set; }
-            public bool NotDeletedRequired { get; set; }
         }
 
         public class ValidateEnrollmentOptions : ControllerValiationOptions
@@ -175,12 +174,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             if (options.OnlineRequired && hackathon.Status != HackathonStatus.online)
-            {
-                options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
-                return false;
-            }
-
-            if (options.NotDeletedRequired && hackathon.IsDeleted)
             {
                 options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
                 return false;

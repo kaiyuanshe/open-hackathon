@@ -421,7 +421,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         public async Task DeleteTest_AlreadyDeleted()
         {
             string name = "Foo";
-            HackathonEntity entity = new HackathonEntity { IsDeleted = true };
+            HackathonEntity entity = new HackathonEntity { Status =  HackathonStatus.offline };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))

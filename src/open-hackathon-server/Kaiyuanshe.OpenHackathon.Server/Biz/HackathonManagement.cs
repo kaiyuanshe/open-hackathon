@@ -135,7 +135,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 EventEndedAt = request.eventEndedAt,
                 EnrollmentStartedAt = request.enrollmentStartedAt,
                 EnrollmentEndedAt = request.enrollmentEndedAt,
-                IsDeleted = false,
                 JudgeStartedAt = request.judgeStartedAt,
                 JudgeEndedAt = request.judgeEndedAt,
                 Location = request.location,
@@ -161,7 +160,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.HackathonTable.RetrieveAndMergeAsync(name, string.Empty,
                 entity =>
                 {
-                    entity.IsDeleted = true;
+                    entity.Status = HackathonStatus.offline;
                 }, cancellationToken);
         }
 
@@ -205,7 +204,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
         {
             var entities = new List<HackathonEntity>();
-            var filter = TableQuery.GenerateFilterConditionForBool(nameof(HackathonEntity.IsDeleted), QueryComparisons.NotEqual, true);
+            var filter = TableQuery.GenerateFilterConditionForInt(nameof(HackathonEntity.Status), QueryComparisons.Equal, (int)HackathonStatus.online);
             TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>().Where(filter);
 
             await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, (segment) =>
