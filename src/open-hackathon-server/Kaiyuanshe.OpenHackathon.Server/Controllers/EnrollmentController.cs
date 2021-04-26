@@ -157,10 +157,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 403, 404)]
+        [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/enrollment/{userId}")]
-        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
-        public async Task<object> GetByAdmin(
+        public async Task<object> GetById(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required] string userId)
         {
@@ -170,7 +169,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 UserId = CurrentUserId,
                 HackathonName = hackathonName,
-                HackAdminRequird = true,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
@@ -195,9 +193,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success.</response>
         [HttpGet]
         [ProducesResponseType(typeof(EnrollmentList), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 403)]
+        [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/enrollments")]
-        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> ListEnrollments(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromQuery] Pagination pagination,
@@ -210,7 +207,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 UserId = CurrentUserId,
                 HackathonName = hackathonName,
-                HackAdminRequird = true,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
