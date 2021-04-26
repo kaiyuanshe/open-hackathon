@@ -22,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     public class TeamControllerTest
     {
         [Test]
-        public async Task Create_HackNotFound()
+        public async Task CreateTeam_HackNotFound()
         {
             // input
             string hackName = "Foo";
@@ -39,7 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -47,7 +47,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_HackNotOnline()
+        public async Task CreateTeam_HackNotOnline()
         {
             // input
             string hackName = "Foo";
@@ -64,7 +64,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -72,7 +72,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_HackNotStarted()
+        public async Task CreateTeam_HackNotStarted()
         {
             // input
             string hackName = "Foo";
@@ -89,7 +89,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -97,7 +97,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_HackEnded()
+        public async Task CreateTeam_HackEnded()
         {
             // input
             string hackName = "Foo";
@@ -114,7 +114,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -122,7 +122,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_NotEnrolled()
+        public async Task CreateTeam_NotEnrolled()
         {
             // input
             string hackName = "Foo";
@@ -143,7 +143,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
 
             // verify
             Mock.VerifyAll(hackathonManagement);
@@ -152,7 +152,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_EnrollmentNotApproved()
+        public async Task CreateTeam_EnrollmentNotApproved()
         {
             // input
             string hackName = "Foo";
@@ -173,7 +173,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
 
             // verify
             Mock.VerifyAll(hackathonManagement);
@@ -182,7 +182,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Create_Created()
+        public async Task CreateTeam_Created()
         {
             // input
             string hackName = "Foo";
@@ -208,7 +208,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 ResponseBuilder = new DefaultResponseBuilder(),
             };
-            var result = await controller.Create(hackName, parameter, cancellationToken);
+            var result = await controller.CreateTeam(hackName, parameter, cancellationToken);
 
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement);
@@ -224,7 +224,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Update_HackNotFound()
+        public async Task UpdateTeam_HackNotFound()
         {
             // input
             string hackName = "Foo";
@@ -242,7 +242,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
+            var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -250,7 +250,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Update_HackNotOnline()
+        public async Task UpdateTeam_HackNotOnline()
         {
             // input
             string hackName = "Foo";
@@ -268,7 +268,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
+            var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -276,7 +276,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Update_TeamNotFound()
+        public async Task UpdateTeam_TeamNotFound()
         {
             // input
             string hackName = "Foo";
@@ -299,7 +299,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 TeamManagement = teamManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
+            var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -308,7 +308,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Update_TeamNotAdmin()
+        public async Task UpdateTeam_TeamNotAdmin()
         {
             // input
             string hackName = "Foo";
@@ -338,7 +338,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationService.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
+            var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -348,7 +348,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Update_Succeeded()
+        public async Task UpdateTeam_Succeeded()
         {
             // input
             string hackName = "Foo";
@@ -382,7 +382,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Update(hackName, teamId, parameter, cancellationToken);
+            var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -391,6 +391,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("updated", output.description);
+        }
+
+        [Test]
+        public async Task GetTeam_HackNotFound()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, hackName));
+        }
+
+        [Test]
+        public async Task GetTeam_TeamNotFound()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 404, Resources.Team_NotFound);
+        }
+
+        [Test]
+        public async Task GetTeam_Succeeded()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { CreatorId = "uid" };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            Team output = AssertHelper.AssertOKResult<Team>(result);
+            Assert.AreEqual("uid", output.creatorId);
         }
     }
 }
