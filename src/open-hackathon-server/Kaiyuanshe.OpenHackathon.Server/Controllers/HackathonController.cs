@@ -69,25 +69,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         #region CreateOrUpdate
         /// <summary>
         /// Create or update hackathon. 
-        /// If hackathon with the {name} exists, will retrive update it accordingly(must be admin of the hackathon).
+        /// If hackathon with the {hackathonName} exists, will retrive update it accordingly(must be admin of the hackathon).
         /// Else create a new hackathon.
         /// </summary>
         /// <param name="parameter"></param>
-        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 403)]
-        [Route("hackathon/{name}")]
+        [Route("hackathon/{hackathonName}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateOrUpdate(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromBody] Hackathon parameter,
             CancellationToken cancellationToken)
         {
-            string nameLowercase = name.ToLower();
+            string nameLowercase = hackathonName.ToLower();
             parameter.name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             if (entity != null)
@@ -110,21 +110,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// Update hackathon. Caller must be adminstrator of the hackathon. 
         /// </summary>
         /// <param name="parameter"></param>
-        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         [HttpPatch]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 403, 404)]
-        [Route("hackathon/{name}")]
+        [Route("hackathon/{hackathonName}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> Update(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromBody] Hackathon parameter,
             CancellationToken cancellationToken)
         {
-            string nameLowercase = name.ToLower();
+            string nameLowercase = hackathonName.ToLower();
             parameter.name = nameLowercase;
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             return await UpdateInternal(entity, parameter, cancellationToken);
@@ -153,28 +153,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <summary>
         /// Query a hackathon by name.
         /// </summary>
-        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="200">Success. The response describes a hackathon.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404)]
-        [Route("hackathon/{name}")]
+        [Route("hackathon/{hackathonName}")]
         public async Task<object> Get(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name,
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             CancellationToken cancellationToken)
         {
-            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower(), cancellationToken);
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
             if (entity == null)
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
             }
 
-            var role = await HackathonManagement.GetHackathonRolesAsync(name.ToLower(), User, cancellationToken);
+            var role = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
             if (!entity.IsOnline() && (role == null || !role.isAdmin))
             {
-                return NotFound(string.Format(Resources.Hackathon_NotFound, name));
+                return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
             }
 
             return Ok(ResponseBuilder.BuildHackathon(entity, role));
@@ -185,24 +185,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <summary>
         /// Delete a hackathon by name. The hackathon is marked as Deleted, the record becomes invisible.
         /// </summary>
-        /// <param name="name" example="foo">Name of hackathon. Case-insensitive.
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns></returns>
         /// <response code="204">Success. The response indicates the hackathon is deleted.</response>
         [HttpDelete]
-        [Route("hackathon/{name}")]
+        [Route("hackathon/{hackathonName}")]
         [SwaggerErrorResponse(400, 403)]
         [Authorize(AuthConstant.Policy.PlatformAdministrator)]
         public async Task<object> Delete(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string name)
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName)
         {
-            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(name.ToLower());
+            var entity = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
             if (entity == null || entity.Status == HackathonStatus.offline)
             {
                 return NoContent();
             }
 
-            await HackathonManagement.DeleteHackathonLogically(name.ToLower());
+            await HackathonManagement.DeleteHackathonLogically(hackathonName.ToLower());
             return NoContent();
         }
         #endregion

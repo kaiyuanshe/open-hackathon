@@ -148,7 +148,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
 
         /// <summary>
-        /// Get a hackathon enrollement of any enrolled user. Hackthon admin only.
+        /// Get a hackathon enrollement of any enrolled user.
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
