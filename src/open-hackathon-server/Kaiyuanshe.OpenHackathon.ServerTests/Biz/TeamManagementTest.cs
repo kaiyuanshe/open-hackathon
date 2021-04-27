@@ -7,10 +7,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -228,6 +226,85 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
             teamTable.VerifyNoOtherCalls();
             Assert.AreEqual("desc", result.Description);
+        }
+
+        [TestCase(null, null)]
+        [TestCase("", null)]
+        [TestCase("", " ")]
+        [TestCase(null, "")]
+        [TestCase(null, " ")]
+        public async Task GetTeamMember_Null(string teamId, string userId)
+        {
+            var cancellationToken = CancellationToken.None;
+            var logger = new Mock<ILogger<TeamManagement>>();
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+            };
+            var result = await teamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task GetTeamMember_Suecceded()
+        {
+            string teamId = "tid";
+            string userId = "uid";
+            var cancellationToken = CancellationToken.None;
+            TeamMemberEntity teamMember = new TeamMemberEntity { Description = "desc" };
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.RetrieveAsync("tid", "uid", cancellationToken))
+                .ReturnsAsync(teamMember);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.IsNotNull(result);
+            Assert.AreEqual("desc", result.Description);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task CreateTeamMemberAsync(bool autoApprove)
+        {
+            TeamEntity team = new TeamEntity { AutoApprove = autoApprove };
+            TeamMember request = new TeamMember { hackathonName = "hack", };
+            CancellationToken cancellationToken = CancellationToken.None;
+            TeamMemberEntity captured = null;
+            var expectedStatus = autoApprove ? TeamMemberStatus.approved : TeamMemberStatus.pendingApproval;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.InsertAsync(It.IsAny<TeamMemberEntity>(), cancellationToken))
+                .Callback<TeamMemberEntity, CancellationToken>((tm, c) => { captured = tm; });
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.CreateTeamMemberAsync(team, request, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual("hack", result.HackathonName);
+            Assert.AreEqual(expectedStatus, result.Status);
+            Assert.AreEqual(TeamMemberRole.Member, result.Role);
+            Assert.IsNotNull(captured);
+            Assert.AreEqual("hack", captured.HackathonName);
+            Assert.AreEqual(expectedStatus, captured.Status);
+            Assert.AreEqual(TeamMemberRole.Member, captured.Role);
         }
     }
 }

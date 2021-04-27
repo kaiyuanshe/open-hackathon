@@ -96,7 +96,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Role in the team
         /// </summary>
         /// <example>admin</example>
-        public TeamMemberRole role { get; internal set; }
+        public TeamMemberRole? role { get; set; }
 
         /// <summary>
         /// Status of the membership

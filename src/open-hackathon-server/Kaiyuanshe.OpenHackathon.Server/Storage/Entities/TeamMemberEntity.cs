@@ -7,7 +7,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// <summary>
     /// Represents a team member.
     /// 
-    /// PK: Id(RK) of TeamEntity.
+    /// PK: TeamId. Rowkey of Team
     /// RK: UserId.
     /// </summary>
     public class TeamMemberEntity : AdvancedTableEntity
