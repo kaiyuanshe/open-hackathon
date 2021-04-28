@@ -484,5 +484,50 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("uid", output.creatorId);
         }
+
+        [Test]
+        public async Task CreateTeamMember_Create()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            EnrollmentEntity enrollmentEntity = new EnrollmentEntity { Status = EnrollmentStatus.approved };
+            TeamEntity teamEntity = new TeamEntity { CreatorId = "uid" };
+            TeamMemberEntity memberEntity = new TeamMemberEntity { Description = "desc" };
+            TeamMember request = new TeamMember();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            hackathonManagement.Setup(p => p.GetEnrollmentAsync("foo", "", cancellationToken))
+                .ReturnsAsync(enrollmentEntity);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "", cancellationToken))
+                .ReturnsAsync(default(TeamMemberEntity));
+            teamManagement.Setup(t => t.CreateTeamMemberAsync(teamEntity, request, cancellationToken))
+                .ReturnsAsync(memberEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.CreateTeamMember(hackName, teamId, request, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            TeamMember output = AssertHelper.AssertOKResult<TeamMember>(result);
+            Assert.AreEqual("desc", output.description);
+        }
     }
 }
