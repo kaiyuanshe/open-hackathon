@@ -55,13 +55,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamMemberEntity> GetTeamMemberAsync(string teamId, string userId, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Create or Update team member
+        /// Create a new team member. Not existance check. Please check existance before call this method
         /// </summary>
         /// <param name="team"></param>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<TeamMemberEntity> CreateTeamMemberAsync(TeamEntity team, TeamMember request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Upldate a team member. Not existance check. Please check existance before call this method
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default);
     }
 
     public class TeamManagement : ManagementClientBase, ITeamManagement
@@ -83,6 +91,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 PartitionKey = request.teamId,
                 RowKey = request.userId,
                 Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
+                Status = TeamMemberStatus.pendingApproval,
             };
             if (team.AutoApprove)
             {
@@ -185,6 +194,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             await StorageContext.TeamTable.MergeAsync(teamEntity, cancellationToken);
             return teamEntity;
+        }
+
+        public async Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default)
+        {
+            if (member == null || request == null)
+                return member;
+
+            member.Description = request.description ?? member.Description;
+            await StorageContext.TeamMemberTable.MergeAsync(member, cancellationToken);
+            return member;
         }
     }
 }

@@ -306,5 +306,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(expectedStatus, captured.Status);
             Assert.AreEqual(TeamMemberRole.Member, captured.Role);
         }
+
+        [Test]
+        public async Task UpdateTeamMemberAsync()
+        {
+            TeamMember request = new TeamMember { description = "b" };
+            CancellationToken cancellationToken = CancellationToken.None;
+            TeamMemberEntity member = new TeamMemberEntity { Description = "a", Role = TeamMemberRole.Member, Status = TeamMemberStatus.pendingApproval };
+            TeamMemberEntity captured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.MergeAsync(It.IsAny<TeamMemberEntity>(), cancellationToken))
+                .Callback<TeamMemberEntity, CancellationToken>((tm, c) => { captured = tm; });
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamMemberAsync(member, request, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual("b", result.Description);
+            Assert.AreEqual("b", captured.Description);
+            Assert.AreEqual(TeamMemberRole.Member, result.Role);
+            Assert.AreEqual(TeamMemberStatus.pendingApproval, result.Status);
+        }
     }
 }

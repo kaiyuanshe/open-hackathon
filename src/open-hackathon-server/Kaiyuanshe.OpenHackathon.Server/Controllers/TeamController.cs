@@ -229,11 +229,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
             if (teamMember == null)
             {
+                parameter.hackathonName = hackathonName.ToLower();
+                parameter.teamId = team.Id;
+                parameter.userId = CurrentUserId;
                 teamMember = await TeamManagement.CreateTeamMemberAsync(team, parameter, cancellationToken);
             }
             else
             {
-                // TODO update
+                teamMember = await TeamManagement.UpdateTeamMemberAsync(teamMember, parameter, cancellationToken);
             }
             return Ok(ResponseBuilder.BuildTeamMember(teamMember));
         }
