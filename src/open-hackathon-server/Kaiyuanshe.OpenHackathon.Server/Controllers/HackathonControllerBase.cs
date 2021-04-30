@@ -139,9 +139,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public string HackathonName { get; set; } = string.Empty;
 
             /// <summary>
-            /// optional UserId for error message
+            /// optional Team Id for error message 
+            /// </summary>
+            public string TeamId { get; set; } = string.Empty;
+
+            /// <summary>
+            /// optional {userId} in Route for error message
             /// </summary>
             public string UserId { get; set; } = string.Empty;
+
         }
 
         public class ValidateHackathonOptions : ControllerValiationOptions
@@ -160,6 +166,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public class ValidateTeamOptions : ControllerValiationOptions
         {
             public bool TeamAdminRequired { get; set; }
+        }
+
+        public class ValidateTeamMemberOptions : ControllerValiationOptions
+        {
+            public bool ApprovedMemberRequired { get; set; }
         }
 
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
@@ -182,7 +193,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             if (options.HackathonOpenRequired)
             {
-                if(hackathon.EventStartedAt.HasValue && DateTime.UtcNow< hackathon.EventStartedAt.Value)
+                if (hackathon.EventStartedAt.HasValue && DateTime.UtcNow < hackathon.EventStartedAt.Value)
                 {
                     // event not started
                     options.ValidateResult = PreconditionFailed(Resources.Hackathon_NotStarted);
@@ -231,7 +242,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             if (enrollment == null)
             {
-                options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.UserId, options.HackathonName));
+                options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.UserId ?? CurrentUserId, options.HackathonName));
                 return false;
             }
 
@@ -260,6 +271,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (!authorizationResult.Succeeded)
                 {
                     options.ValidateResult = Forbidden(Resources.Team_NotAdmin);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected async Task<bool> ValidateTeamAndMember(TeamEntity team, TeamMemberEntity teamMember,
+            ValidateTeamMemberOptions options,
+            CancellationToken cancellationToken)
+        {
+            if (team == null)
+            {
+                options.ValidateResult = NotFound(Resources.Team_NotFound);
+                return false;
+            }
+
+            if (teamMember == null)
+            {
+                options.ValidateResult = NotFound(string.Format(Resources.TeamMember_NotFound, options.UserId ?? CurrentUserId, options.TeamId));
+                return false;
+            }
+
+            if (options.ApprovedMemberRequired)
+            {
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, team, AuthConstant.Policy.TeamMember);
+                if (!authorizationResult.Succeeded)
+                {
+                    options.ValidateResult = Forbidden(string.Format(Resources.TeamMember_AccessDenied, CurrentUserId));
                     return false;
                 }
             }

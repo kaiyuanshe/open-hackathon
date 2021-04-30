@@ -64,7 +64,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 ApprovedRequired = true,
                 HackathonName = hackathonName,
-                UserId = CurrentUserId
             };
             if (ValidateEnrollment(enrollment, enrollmentOptions) == false)
             {
@@ -105,7 +104,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 OnlineRequired = true,
                 HackathonOpenRequired = true,
                 HackathonName = hackathonName,
-                UserId = CurrentUserId,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
             {
@@ -238,6 +236,60 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 teamMember = await TeamManagement.UpdateTeamMemberAsync(teamMember, parameter, cancellationToken);
             }
+            return Ok(ResponseBuilder.BuildTeamMember(teamMember));
+        }
+
+        /// <summary>
+        /// Update a team member information. Not including the Role/Status. Call other APIs to update Role/Status.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns>The updated team member</returns>
+        /// <response code="200">Success. The response describes a team member.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(TeamMember), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/member/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamMember)]
+        public async Task<object> UpdateTeamMember(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required] string userId,
+            [FromBody] TeamMember parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                HackathonOpenRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team and member
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId.ToLower(), cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMemberValidateOption = new ValidateTeamMemberOptions
+            {
+                TeamId = teamId,
+                UserId = userId,
+                ApprovedMemberRequired = true
+            };
+            if (await ValidateTeamAndMember(team, teamMember, teamMemberValidateOption, cancellationToken) == false)
+            {
+                return teamMemberValidateOption.ValidateResult;
+            }
+
+            // Update team member
+            teamMember = await TeamManagement.UpdateTeamMemberAsync(teamMember, parameter, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember));
         }
     }

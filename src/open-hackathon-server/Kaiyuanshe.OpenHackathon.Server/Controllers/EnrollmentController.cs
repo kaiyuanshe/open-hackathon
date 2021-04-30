@@ -167,8 +167,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
             var options = new ValidateHackathonOptions
             {
-                UserId = CurrentUserId,
                 HackathonName = hackathonName,
+                UserId = userId,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
@@ -205,7 +205,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
             var options = new ValidateHackathonOptions
             {
-                UserId = CurrentUserId,
                 HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options) == false)
