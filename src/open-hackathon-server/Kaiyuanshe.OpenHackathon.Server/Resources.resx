@@ -165,6 +165,12 @@
   <data name="Parameter_Required" xml:space="preserve">
     <value>Required parameter {0} is null or empty.</value>
   </data>
+  <data name="TeamMember_AccessDenied" xml:space="preserve">
+    <value>Member {0} is not allowed to perform this operation.</value>
+  </data>
+  <data name="TeamMember_NotFound" xml:space="preserve">
+    <value>Member {0} is not a member of team {1}</value>
+  </data>
   <data name="Team_NotAdmin" xml:space="preserve">
     <value>Access denied. Please contact admins of the team.</value>
   </data>

@@ -8,22 +8,23 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Auth
 {
-    public class TeamAdministratorRequirement : IAuthorizationRequirement
+    public class TeamMemberRequirement : IAuthorizationRequirement
     {
+        public bool AdminRequired { get; set; }
     }
 
-    public class TeamAdministratorHandler : AuthorizationHandler<TeamAdministratorRequirement, TeamEntity>
+    public class TeamMemberHandler : AuthorizationHandler<TeamMemberRequirement, TeamEntity>
     {
         IHackathonManagement HackathonManagement { get; set; }
         ITeamManagement TeamManagement { get; set; }
 
-        public TeamAdministratorHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
+        public TeamMemberHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
         {
             HackathonManagement = hackathonManagement;
             TeamManagement = teamManagement;
         }
 
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamAdministratorRequirement requirement, TeamEntity resource)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamMemberRequirement requirement, TeamEntity resource)
         {
             if (ClaimsHelper.IsPlatformAdministrator(context.User))
             {
@@ -46,9 +47,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             }
 
             var teamMembers = await TeamManagement.ListTeamMembersAsync(resource.Id);
-            if (teamMembers.Any(m => m.UserId == userId && m.Role == Models.TeamMemberRole.Admin && m.Status == Models.TeamMemberStatus.approved))
+            var teamMember = teamMembers.FirstOrDefault(m => m.UserId == userId && m.Status == Models.TeamMemberStatus.approved);
+            if (teamMember != null)
             {
-                context.Succeed(requirement);
+                if (requirement.AdminRequired && teamMember.Role == Models.TeamMemberRole.Admin)
+                {
+                    context.Succeed(requirement);
+                }
+                else if (!requirement.AdminRequired)
+                {
+                    context.Succeed(requirement);
+                }
             }
         }
     }

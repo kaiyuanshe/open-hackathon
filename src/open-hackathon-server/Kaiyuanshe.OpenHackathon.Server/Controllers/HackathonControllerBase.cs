@@ -139,6 +139,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public string HackathonName { get; set; } = string.Empty;
 
             /// <summary>
+            /// optional Team Id for error message 
+            /// </summary>
+            public string TeamId { get; set; } = string.Empty;
+
+            /// <summary>
             /// optional UserId for error message
             /// </summary>
             public string UserId { get; set; } = string.Empty;
@@ -162,6 +167,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool TeamAdminRequired { get; set; }
         }
 
+        public class ValidateTeamMemberOptions : ControllerValiationOptions
+        {
+            public bool TeamAdminOrSelfRequired { get; set; }
+        }
+
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValidateHackathonOptions options,
             CancellationToken cancellationToken = default)
@@ -182,7 +192,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             if (options.HackathonOpenRequired)
             {
-                if(hackathon.EventStartedAt.HasValue && DateTime.UtcNow< hackathon.EventStartedAt.Value)
+                if (hackathon.EventStartedAt.HasValue && DateTime.UtcNow < hackathon.EventStartedAt.Value)
                 {
                     // event not started
                     options.ValidateResult = PreconditionFailed(Resources.Hackathon_NotStarted);
@@ -260,6 +270,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (!authorizationResult.Succeeded)
                 {
                     options.ValidateResult = Forbidden(Resources.Team_NotAdmin);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected bool ValidateTeamMember(TeamMemberEntity teamMember, ValidateTeamMemberOptions options)
+        {
+            if (teamMember == null)
+            {
+                options.ValidateResult = NotFound(string.Format(Resources.TeamMember_NotFound, options.UserId, options.TeamId));
+                return false;
+            }
+
+            if (options.TeamAdminOrSelfRequired)
+            {
+                if (teamMember.Role != TeamMemberRole.Admin && teamMember.UserId != options.UserId)
+                {
+                    options.ValidateResult = Forbidden(string.Format(Resources.TeamMember_AccessDenied, options.UserId));
                     return false;
                 }
             }

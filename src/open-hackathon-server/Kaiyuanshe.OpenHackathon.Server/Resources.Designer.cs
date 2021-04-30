@@ -230,5 +230,23 @@ namespace Kaiyuanshe.OpenHackathon.Server {
                 return ResourceManager.GetString("Team_NotFound", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member {0} is not allowed to perform this operation..
+        /// </summary>
+        internal static string TeamMember_AccessDenied {
+            get {
+                return ResourceManager.GetString("TeamMember_AccessDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member {0} is not a member of team {1}.
+        /// </summary>
+        internal static string TeamMember_NotFound {
+            get {
+                return ResourceManager.GetString("TeamMember_NotFound", resourceCulture);
+            }
+        }
     }
 }
