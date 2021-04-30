@@ -19,7 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             // data
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement(),
+                new TeamAdministratorRequirement(),
             };
             var claims = new List<Claim>
             {
@@ -32,7 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
@@ -47,7 +47,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             // data
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement(),
+                new TeamAdministratorRequirement(),
             };
             var claims = new List<Claim>
             {
@@ -59,7 +59,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsFalse(context.HasSucceeded);
@@ -75,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             string userid = "uid";
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement(),
+                new TeamAdministratorRequirement(),
             };
             var claims = new List<Claim>
             {
@@ -95,7 +95,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
@@ -111,10 +111,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             string userid = "uid";
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement
-                {
-                    AdminRequired = true
-                },
+                new TeamAdministratorRequirement()
             };
             var claims = new List<Claim>
             {
@@ -144,7 +141,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
@@ -160,10 +157,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             string userid = "uid";
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement
-                {  
-                    AdminRequired = true
-                },
+                new TeamAdministratorRequirement(),
             };
             var claims = new List<Claim>
             {
@@ -208,7 +202,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsFalse(context.HasSucceeded);
@@ -224,10 +218,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             string userid = "uid";
             var requirements = new List<IAuthorizationRequirement>
             {
-                new TeamMemberRequirement
-                {
-                    AdminRequired = false
-                },
+                new TeamMemberRequirement()
             };
             var claims = new List<Claim>
             {

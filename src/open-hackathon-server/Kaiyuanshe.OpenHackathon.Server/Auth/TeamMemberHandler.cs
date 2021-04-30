@@ -8,23 +8,29 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Auth
 {
-    public class TeamMemberRequirement : IAuthorizationRequirement
+    public class TeamAdministratorRequirement : IAuthorizationRequirement
     {
-        public bool AdminRequired { get; set; }
     }
 
-    public class TeamMemberHandler : AuthorizationHandler<TeamMemberRequirement, TeamEntity>
+    public class TeamMemberRequirement : IAuthorizationRequirement
+    {
+    }
+
+    public abstract class TeamMemberBaseHandler<TRequirement> : AuthorizationHandler<TRequirement, TeamEntity>
+        where TRequirement : IAuthorizationRequirement
     {
         IHackathonManagement HackathonManagement { get; set; }
         ITeamManagement TeamManagement { get; set; }
 
-        public TeamMemberHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
+        protected abstract Task HandleTeamRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement, TeamEntity resource, TeamMemberEntity teamMember);
+
+        public TeamMemberBaseHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
         {
             HackathonManagement = hackathonManagement;
             TeamManagement = teamManagement;
         }
 
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamMemberRequirement requirement, TeamEntity resource)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement, TeamEntity resource)
         {
             if (ClaimsHelper.IsPlatformAdministrator(context.User))
             {
@@ -50,15 +56,40 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             var teamMember = teamMembers.FirstOrDefault(m => m.UserId == userId && m.Status == Models.TeamMemberStatus.approved);
             if (teamMember != null)
             {
-                if (requirement.AdminRequired && teamMember.Role == Models.TeamMemberRole.Admin)
-                {
-                    context.Succeed(requirement);
-                }
-                else if (!requirement.AdminRequired)
-                {
-                    context.Succeed(requirement);
-                }
+                await HandleTeamRequirementAsync(context, requirement, resource, teamMember);
             }
+        }
+    }
+
+    public class TeamAdministratorHandler : TeamMemberBaseHandler<TeamAdministratorRequirement>
+    {
+        public TeamAdministratorHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
+            : base(hackathonManagement, teamManagement)
+        {
+        }
+
+        protected override Task HandleTeamRequirementAsync(AuthorizationHandlerContext context, TeamAdministratorRequirement requirement, TeamEntity resource, TeamMemberEntity teamMember)
+        {
+            if (teamMember.Role == Models.TeamMemberRole.Admin)
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
+    public class TeamMemberHandler : TeamMemberBaseHandler<TeamMemberRequirement>
+    {
+        public TeamMemberHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
+            : base(hackathonManagement, teamManagement)
+        {
+        }
+
+        protected override Task HandleTeamRequirementAsync(AuthorizationHandlerContext context, TeamMemberRequirement requirement, TeamEntity resource, TeamMemberEntity teamMember)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
         }
     }
 }

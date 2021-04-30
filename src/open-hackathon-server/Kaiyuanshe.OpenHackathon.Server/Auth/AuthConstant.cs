@@ -50,6 +50,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Administrator of a team.
             /// </summary>
             public const string TeamAdministrator = "TeamAdministratorReal";
+
+            /// <summary>
+            /// Member of a team.
+            /// </summary>
+            public const string TeamMember = "TeamMemberReal";
         }
 
         /// <summary>
@@ -68,6 +73,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Policy to administrate a team.
             /// </summary>
             public const string TeamAdministrator = "TeamAdministrator";
+
+            /// <summary>
+            /// Policy for a team member.
+            /// </summary>
+            public const string TeamMember = "TeamMember";
 
             /// <summary>
             /// Policy to allow login user.

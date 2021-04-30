@@ -137,7 +137,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 HackAdminRequird = true,
                 HackathonName = parameter.name,
-                UserId = CurrentUserId
             };
             if(await ValidateHackathon(entity, options, cancellationToken) == false)
             {

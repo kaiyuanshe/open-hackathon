@@ -144,9 +144,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public string TeamId { get; set; } = string.Empty;
 
             /// <summary>
-            /// optional UserId for error message
+            /// optional {userId} in Route for error message
             /// </summary>
             public string UserId { get; set; } = string.Empty;
+
         }
 
         public class ValidateHackathonOptions : ControllerValiationOptions
@@ -169,7 +170,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public class ValidateTeamMemberOptions : ControllerValiationOptions
         {
-            public bool TeamAdminOrSelfRequired { get; set; }
+            public bool ApprovedMemberRequired { get; set; }
         }
 
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
@@ -241,7 +242,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             if (enrollment == null)
             {
-                options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.UserId, options.HackathonName));
+                options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.UserId ?? CurrentUserId, options.HackathonName));
                 return false;
             }
 
@@ -277,19 +278,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return true;
         }
 
-        protected bool ValidateTeamMember(TeamMemberEntity teamMember, ValidateTeamMemberOptions options)
+        protected async Task<bool> ValidateTeamAndMember(TeamEntity team, TeamMemberEntity teamMember,
+            ValidateTeamMemberOptions options,
+            CancellationToken cancellationToken)
         {
-            if (teamMember == null)
+            if (team == null)
             {
-                options.ValidateResult = NotFound(string.Format(Resources.TeamMember_NotFound, options.UserId, options.TeamId));
+                options.ValidateResult = NotFound(Resources.Team_NotFound);
                 return false;
             }
 
-            if (options.TeamAdminOrSelfRequired)
+            if (teamMember == null)
             {
-                if (teamMember.Role != TeamMemberRole.Admin && teamMember.UserId != options.UserId)
+                options.ValidateResult = NotFound(string.Format(Resources.TeamMember_NotFound, options.UserId ?? CurrentUserId, options.TeamId));
+                return false;
+            }
+
+            if (options.ApprovedMemberRequired)
+            {
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, team, AuthConstant.Policy.TeamMember);
+                if (!authorizationResult.Succeeded)
                 {
-                    options.ValidateResult = Forbidden(string.Format(Resources.TeamMember_AccessDenied, options.UserId));
+                    options.ValidateResult = Forbidden(string.Format(Resources.TeamMember_AccessDenied, CurrentUserId));
                     return false;
                 }
             }
