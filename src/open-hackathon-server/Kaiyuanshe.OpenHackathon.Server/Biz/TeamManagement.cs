@@ -220,8 +220,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (member == null)
                 return member;
 
-            member.Status = teamMemberStatus;
-            await StorageContext.TeamMemberTable.MergeAsync(member);
+            if (member.Status != teamMemberStatus)
+            {
+                member.Status = teamMemberStatus;
+                await StorageContext.TeamMemberTable.MergeAsync(member);
+            }
+
             return member;
         }
     }

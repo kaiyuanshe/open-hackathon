@@ -754,5 +754,104 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<TeamMember>(result);
             Assert.AreEqual("desc2", resp.description);
         }
+
+        [Test]
+        public async Task ApproveTeamMember_MemberNotFound()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            string userId = "uid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            EnrollmentEntity enrollmentEntity = new EnrollmentEntity { Status = EnrollmentStatus.approved };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = null;
+            var authResult = AuthorizationResult.Success();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "uid", cancellationToken))
+                .ReturnsAsync(memberEntity);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
+                .ReturnsAsync(authResult);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.ApproveTeamMember(hackName, teamId, userId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.TeamMember_NotFound, "uid", "tid"));
+        }
+
+        [Test]
+        public async Task ApproveTeamMember_Succeeded()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            string userId = "uid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            EnrollmentEntity enrollmentEntity = new EnrollmentEntity { Status = EnrollmentStatus.approved };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = new TeamMemberEntity();
+            var authResult = AuthorizationResult.Success();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "uid", cancellationToken))
+                .ReturnsAsync(memberEntity);
+            teamManagement.Setup(t => t.UpdateTeamMemberStatusAsync(memberEntity, TeamMemberStatus.approved, cancellationToken))
+                .Callback<TeamMemberEntity, TeamMemberStatus, CancellationToken>((m, s, c) =>
+                {
+                    m.Status = s;
+                })
+                .ReturnsAsync(memberEntity);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
+                .ReturnsAsync(authResult);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.ApproveTeamMember(hackName, teamId, userId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<TeamMember>(result);
+            Assert.AreEqual(TeamMemberStatus.approved, resp.status);
+        }
     }
 }
