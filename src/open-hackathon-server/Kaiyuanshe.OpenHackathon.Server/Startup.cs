@@ -137,7 +137,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             services.AddSingleton<IAuthorizationHandler, PlatformAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, HackathonAdministratorHandler>();
-            //services.AddSingleton<IAuthorizationHandler, TeamAdministratorHandler>();
+            services.AddSingleton<IAuthorizationHandler, TeamAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, TeamMemberHandler>();
             services.AddSingleton<IAuthorizationHandler, NoRequirementHandler>();
 

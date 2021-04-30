@@ -278,7 +278,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return true;
         }
 
-        protected async Task<bool> ValidateTeamAndMember(TeamEntity team, TeamMemberEntity teamMember,
+        protected async Task<bool> ValidateTeamMember(TeamEntity team, TeamMemberEntity teamMember,
             ValidateTeamMemberOptions options,
             CancellationToken cancellationToken)
         {

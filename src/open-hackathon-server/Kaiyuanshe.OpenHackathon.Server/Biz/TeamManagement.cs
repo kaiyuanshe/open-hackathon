@@ -70,6 +70,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Update the status of a member
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="teamMemberStatus"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default);
     }
 
     public class TeamManagement : ManagementClientBase, ITeamManagement
@@ -203,6 +212,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             member.Description = request.description ?? member.Description;
             await StorageContext.TeamMemberTable.MergeAsync(member, cancellationToken);
+            return member;
+        }
+
+        public async Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return member;
+
+            if (member.Status != teamMemberStatus)
+            {
+                member.Status = teamMemberStatus;
+                await StorageContext.TeamMemberTable.MergeAsync(member);
+            }
+
             return member;
         }
     }

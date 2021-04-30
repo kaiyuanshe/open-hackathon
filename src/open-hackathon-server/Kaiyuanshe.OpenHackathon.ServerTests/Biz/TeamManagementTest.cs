@@ -336,5 +336,58 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(TeamMemberRole.Member, result.Role);
             Assert.AreEqual(TeamMemberStatus.pendingApproval, result.Status);
         }
+
+        [TestCase(TeamMemberStatus.approved)]
+        [TestCase(TeamMemberStatus.pendingApproval)]
+        public async Task UpdateTeamMemberStatusAsync_Skip(TeamMemberStatus status)
+        {
+            TeamMemberEntity teamMember = new TeamMemberEntity { Status = status };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            var storageContext = new Mock<IStorageContext>();
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamMemberStatusAsync(teamMember, status, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
+
+        [TestCase(TeamMemberStatus.pendingApproval, TeamMemberStatus.approved)]
+        [TestCase(TeamMemberStatus.approved, TeamMemberStatus.pendingApproval)]
+        public async Task UpdateTeamMemberStatusAsync_Succeeded(TeamMemberStatus oldStatus, TeamMemberStatus newStatus)
+        {
+            TeamMemberEntity teamMember = new TeamMemberEntity { Status = oldStatus };
+            CancellationToken cancellationToken = CancellationToken.None;
+            TeamMemberEntity captured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.MergeAsync(It.IsAny<TeamMemberEntity>(), cancellationToken))
+                .Callback<TeamMemberEntity, CancellationToken>((tm, c) => { captured = tm; });
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamMemberStatusAsync(teamMember, newStatus, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.IsNull(result.Description);
+            Assert.IsNull(captured.Description);
+            Assert.AreEqual(newStatus, result.Status);
+            Assert.AreEqual(newStatus, captured.Status);
+        }
     }
 }
