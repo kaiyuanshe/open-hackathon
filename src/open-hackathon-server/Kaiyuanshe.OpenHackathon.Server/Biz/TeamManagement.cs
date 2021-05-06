@@ -79,6 +79,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Delete a team memter
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="cancellationToken"></param>
+        Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default);
     }
 
     public class TeamManagement : ManagementClientBase, ITeamManagement
@@ -227,6 +234,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return member;
+        }
+
+        public async Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return;
+
+            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
         }
     }
 }
