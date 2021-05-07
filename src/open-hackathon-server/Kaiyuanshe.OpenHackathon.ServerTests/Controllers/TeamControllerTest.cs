@@ -853,5 +853,173 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<TeamMember>(result);
             Assert.AreEqual(TeamMemberStatus.approved, resp.status);
         }
+
+        [Test]
+        public async Task LeaveTeam_NotMember()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "", cancellationToken))
+                .ReturnsAsync(memberEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.LeaveTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+
+        [Test]
+        public async Task LeaveTeam_LastAdmin()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = new TeamMemberEntity { };
+            List<TeamMemberEntity> teamMembers = new List<TeamMemberEntity>
+            {
+                // admin
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "",
+                    Role = TeamMemberRole.Admin,
+                    Status = TeamMemberStatus.approved
+                },
+                // other non-admin
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "user2",
+                    Role = TeamMemberRole.Member,
+                    Status = TeamMemberStatus.approved
+                },
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "user2",
+                    Role = TeamMemberRole.Admin,
+                    Status = TeamMemberStatus.pendingApproval
+                },
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "", cancellationToken))
+                .ReturnsAsync(memberEntity);
+            teamManagement.Setup(t => t.ListTeamMembersAsync("tid", cancellationToken))
+                .ReturnsAsync(teamMembers);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.LeaveTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.TeamMember_LastAdmin);
+        }
+
+        [Test]
+        public async Task LeaveTeam_Succeeded()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = new TeamMemberEntity { };
+            List<TeamMemberEntity> teamMembers = new List<TeamMemberEntity>
+            {
+                // admin, not current user
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "admin",
+                    Role = TeamMemberRole.Admin,
+                    Status = TeamMemberStatus.approved
+                },
+                // other non-admin
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "user2",
+                    Role = TeamMemberRole.Member,
+                    Status = TeamMemberStatus.approved
+                },
+                new TeamMemberEntity
+                {
+                    PartitionKey = teamId,
+                    RowKey = "user2",
+                    Role = TeamMemberRole.Admin,
+                    Status = TeamMemberStatus.pendingApproval
+                },
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "", cancellationToken))
+                .ReturnsAsync(memberEntity);
+            teamManagement.Setup(t => t.ListTeamMembersAsync("tid", cancellationToken))
+                .ReturnsAsync(teamMembers);
+            teamManagement.Setup(t => t.DeleteTeamMemberAsync(memberEntity, cancellationToken));
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.LeaveTeam(hackName, teamId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
     }
 }
