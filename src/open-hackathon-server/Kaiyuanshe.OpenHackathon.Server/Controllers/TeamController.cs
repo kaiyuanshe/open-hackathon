@@ -397,7 +397,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         private async Task<object> DeleteMemberInternalAsync(string teamId, string userId, CancellationToken cancellationToken)
         {
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
             if (teamMember == null)
             {
                 // deleted already

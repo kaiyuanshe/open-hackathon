@@ -40,5 +40,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests
             Assert.IsTrue(objectResult.Value.GetType() == typeof(T));
             return (T)objectResult.Value;
         }
+
+        public static void AssertNoContentResult(object result)
+        {
+            Assert.IsTrue(result is NoContentResult);
+            NoContentResult noContent = (NoContentResult)result;
+            Assert.AreEqual(204, noContent.StatusCode);
+        }
     }
 }
