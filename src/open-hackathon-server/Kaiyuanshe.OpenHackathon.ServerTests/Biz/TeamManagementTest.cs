@@ -413,5 +413,29 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             teamMemberTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
         }
+
+        [Test]
+        public async Task DeleteTeamAsync()
+        {
+            TeamEntity team = new TeamEntity { PartitionKey = "pk", RowKey = "rk" };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamTable = new Mock<ITeamTable>();
+            teamTable.Setup(t => t.DeleteAsync("pk", "rk", cancellationToken));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await teamManagement.DeleteTeamAsync(team, cancellationToken);
+
+            Mock.VerifyAll(logger, teamTable, storageContext);
+            teamTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
     }
 }
