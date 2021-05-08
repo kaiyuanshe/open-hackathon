@@ -38,6 +38,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamEntity> GetTeamByIdAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Delete a team
+        /// </summary>
+        /// <param name="team"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task DeleteTeamAsync(TeamEntity team, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List all team members
         /// </summary>
         /// <param name="teamId">guid of the team</param>
@@ -242,6 +250,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return;
 
             await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
+        }
+
+        public async Task DeleteTeamAsync(TeamEntity team, CancellationToken cancellationToken = default)
+        {
+            if (team == null)
+                return;
+
+            await StorageContext.TeamTable.DeleteAsync(team.PartitionKey, team.RowKey, cancellationToken);
         }
     }
 }
