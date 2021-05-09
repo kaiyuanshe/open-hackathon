@@ -416,5 +416,55 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             await TeamManagement.DeleteTeamMemberAsync(teamMember, cancellationToken);
             return NoContent();
         }
+
+        /// <summary>
+        /// Delete a team
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <returns></returns>
+        /// <response code="204">Deleted. The response indicates the team is removed.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 403, 412)]
+        [Route("hackathon/{hackathonName}/team/{teamId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
+        public async Task<object> DeleteTeam(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                HackathonOpenRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            if (team == null)
+            {
+                return NoContent();
+            }
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+                TeamAdminRequired = true,
+            };
+            if (await ValidateTeam(team, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+            // Delete team
+            await TeamManagement.DeleteTeamAsync(team, cancellationToken);
+            return NoContent();
+        }
     }
 }
