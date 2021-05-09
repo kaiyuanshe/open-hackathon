@@ -165,23 +165,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
 
         /// <summary>
-        /// Join a team after enrolled
+        /// Delete a team
         /// </summary>
-        /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
-        /// <returns>The team member</returns>
-        /// <response code="200">Success. The response describes a team member.</response>
-        [HttpPut]
-        [ProducesResponseType(typeof(TeamMember), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 404, 412)]
-        [Route("hackathon/{hackathonName}/team/{teamId}/member")]
-        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> CreateTeamMember(
+        /// <returns></returns>
+        /// <response code="204">Deleted. The response indicates the team is removed.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 403, 412)]
+        [Route("hackathon/{hackathonName}/team/{teamId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
+        public async Task<object> DeleteTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
-            [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -197,13 +194,97 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
+            // Validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            if (team == null)
+            {
+                return NoContent();
+            }
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+                TeamAdminRequired = true,
+            };
+            if (await ValidateTeam(team, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+            // Delete team
+            await TeamManagement.DeleteTeamAsync(team, cancellationToken);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Join a team after enrolled
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <returns>The team member</returns>
+        /// <response code="200">Success. The response describes a team member.</response>
+        [HttpPut]
+        [ProducesResponseType(typeof(TeamMember), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/member")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> JoinTeam(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromBody] TeamMember parameter,
+            CancellationToken cancellationToken)
+        {
+            return await AddTeamMemberInternal(hackathonName.ToLower(), teamId, CurrentUserId, parameter, false, cancellationToken);
+        }
+
+        /// <summary>
+        /// Add a new member to a team by team admin
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns>The team member</returns>
+        /// <response code="200">Success. The response describes a team member.</response>
+        [HttpPut]
+        [ProducesResponseType(typeof(TeamMember), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404, 412)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/member/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
+        public async Task<object> AddTeamMember(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required] string userId,
+            [FromBody] TeamMember parameter,
+            CancellationToken cancellationToken)
+        {
+            return await AddTeamMemberInternal(hackathonName.ToLower(), teamId, userId, parameter, true, cancellationToken);
+        }
+
+        private async Task<object> AddTeamMemberInternal(string hackathonName, string teamId,
+            string userId, TeamMember parameter, bool teamAdminRequired, CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                HackathonOpenRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
             // validate enrollment
-            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
+            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), userId, cancellationToken);
             var enrollmentOptions = new ValidateEnrollmentOptions
             {
                 ApprovedRequired = true,
                 HackathonName = hackathonName,
-                UserId = CurrentUserId
+                UserId = userId,
             };
             if (ValidateEnrollment(enrollment, enrollmentOptions) == false)
             {
@@ -214,6 +295,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
             var teamValidateOptions = new ValidateTeamOptions
             {
+                TeamAdminRequired = teamAdminRequired,
             };
             if (await ValidateTeam(team, teamValidateOptions) == false)
             {
@@ -221,12 +303,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // join team
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
             if (teamMember == null)
             {
                 parameter.hackathonName = hackathonName.ToLower();
                 parameter.teamId = team.Id;
-                parameter.userId = CurrentUserId;
+                parameter.userId = userId;
                 teamMember = await TeamManagement.CreateTeamMemberAsync(team, parameter, cancellationToken);
             }
             else
@@ -414,56 +496,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // remove it
             await TeamManagement.DeleteTeamMemberAsync(teamMember, cancellationToken);
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Delete a team
-        /// </summary>
-        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
-        /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
-        /// <returns></returns>
-        /// <response code="204">Deleted. The response indicates the team is removed.</response>
-        [HttpDelete]
-        [SwaggerErrorResponse(400, 403, 412)]
-        [Route("hackathon/{hackathonName}/team/{teamId}")]
-        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
-        public async Task<object> DeleteTeam(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
-            CancellationToken cancellationToken)
-        {
-            // validate hackathon
-            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
-            var options = new ValidateHackathonOptions
-            {
-                OnlineRequired = true,
-                HackathonOpenRequired = true,
-                HackathonName = hackathonName,
-            };
-            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
-            {
-                return options.ValidateResult;
-            }
-
-            // Validate team
-            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
-            if (team == null)
-            {
-                return NoContent();
-            }
-            var teamValidateOptions = new ValidateTeamOptions
-            {
-                TeamAdminRequired = true,
-            };
-            if (await ValidateTeam(team, teamValidateOptions) == false)
-            {
-                return teamValidateOptions.ValidateResult;
-            }
-
-            // Delete team
-            await TeamManagement.DeleteTeamAsync(team, cancellationToken);
             return NoContent();
         }
     }
