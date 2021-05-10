@@ -272,20 +272,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("desc", result.Description);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task CreateTeamMemberAsync(bool autoApprove)
+        [Test]
+        public async Task CreateTeamMemberAsync()
         {
-            TeamEntity team = new TeamEntity { AutoApprove = autoApprove };
             TeamMember request = new TeamMember { hackathonName = "hack", };
             CancellationToken cancellationToken = CancellationToken.None;
-            TeamMemberEntity captured = null;
-            var expectedStatus = autoApprove ? TeamMemberStatus.approved : TeamMemberStatus.pendingApproval;
 
             var logger = new Mock<ILogger<TeamManagement>>();
             var teamMemberTable = new Mock<ITeamMemberTable>();
-            teamMemberTable.Setup(t => t.InsertAsync(It.IsAny<TeamMemberEntity>(), cancellationToken))
-                .Callback<TeamMemberEntity, CancellationToken>((tm, c) => { captured = tm; });
+            teamMemberTable.Setup(t => t.InsertAsync(It.IsAny<TeamMemberEntity>(), cancellationToken));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
 
@@ -293,18 +288,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object,
             };
-            var result = await teamManagement.CreateTeamMemberAsync(team, request, cancellationToken);
+            var result = await teamManagement.CreateTeamMemberAsync(request, cancellationToken);
 
             Mock.VerifyAll(logger, teamMemberTable, storageContext);
             teamMemberTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             Assert.AreEqual("hack", result.HackathonName);
-            Assert.AreEqual(expectedStatus, result.Status);
             Assert.AreEqual(TeamMemberRole.Member, result.Role);
-            Assert.IsNotNull(captured);
-            Assert.AreEqual("hack", captured.HackathonName);
-            Assert.AreEqual(expectedStatus, captured.Status);
-            Assert.AreEqual(TeamMemberRole.Member, captured.Role);
         }
 
         [Test]
