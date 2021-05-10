@@ -234,7 +234,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
         {
-            return await AddTeamMemberInternal(hackathonName.ToLower(), teamId, CurrentUserId, parameter, false, cancellationToken);
+            return await AddTeamMemberInternalAsync(hackathonName.ToLower(), teamId, CurrentUserId, parameter, false, cancellationToken);
         }
 
         /// <summary>
@@ -259,10 +259,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
         {
-            return await AddTeamMemberInternal(hackathonName.ToLower(), teamId, userId, parameter, true, cancellationToken);
+            return await AddTeamMemberInternalAsync(hackathonName.ToLower(), teamId, userId, parameter, true, cancellationToken);
         }
 
-        private async Task<object> AddTeamMemberInternal(string hackathonName, string teamId,
+        private async Task<object> AddTeamMemberInternalAsync(string hackathonName, string teamId,
             string userId, TeamMember parameter, bool teamAdminRequired, CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -309,7 +309,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 parameter.hackathonName = hackathonName.ToLower();
                 parameter.teamId = team.Id;
                 parameter.userId = userId;
-                teamMember = await TeamManagement.CreateTeamMemberAsync(team, parameter, cancellationToken);
+                parameter.status = TeamMemberStatus.pendingApproval;
+                if (team.AutoApprove || teamAdminRequired)
+                {
+                    parameter.status = TeamMemberStatus.approved;
+                }
+                teamMember = await TeamManagement.CreateTeamMemberAsync(parameter, cancellationToken);
             }
             else
             {
@@ -439,7 +444,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
-        /// <returns>The updated team member</returns>
+        /// <returns></returns>
         /// <response code="204">Deleted. The response indicates the member is removed from the team.</response>
         [HttpDelete]
         [SwaggerErrorResponse(400, 404, 412)]
@@ -475,6 +480,53 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Delete team member
             return await DeleteMemberInternalAsync(teamId.ToLower(), CurrentUserId, cancellationToken);
+        }
+
+        /// <summary>
+        /// Remove a team member or reject a team member joining request.  Team Admin only.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns></returns>
+        /// <response code="204">Deleted. The response indicates the member is removed from the team.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 403, 404, 412)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/member/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
+        public async Task<object> DeleteTeamMember(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+             [FromRoute, Required] string userId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                HackathonOpenRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+                TeamAdminRequired = true,
+            };
+            if (await ValidateTeam(team, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+            // Delete team member
+            return await DeleteMemberInternalAsync(teamId.ToLower(), userId, cancellationToken);
         }
 
         private async Task<object> DeleteMemberInternalAsync(string teamId, string userId, CancellationToken cancellationToken)

@@ -69,7 +69,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<TeamMemberEntity> CreateTeamMemberAsync(TeamEntity team, TeamMember request, CancellationToken cancellationToken = default);
+        Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Upldate a team member. Not existance check. Please check existance before call this method
@@ -105,7 +105,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Logger = logger;
         }
 
-        public async Task<TeamMemberEntity> CreateTeamMemberAsync(TeamEntity team, TeamMember request, CancellationToken cancellationToken = default)
+        public async Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default)
         {
             var entity = new TeamMemberEntity
             {
@@ -115,12 +115,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 PartitionKey = request.teamId,
                 RowKey = request.userId,
                 Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
-                Status = TeamMemberStatus.pendingApproval,
+                Status = request.status,
             };
-            if (team.AutoApprove)
-            {
-                entity.Status = TeamMemberStatus.approved;
-            }
+            
             await StorageContext.TeamMemberTable.InsertAsync(entity);
 
             return entity;
