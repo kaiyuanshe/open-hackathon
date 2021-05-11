@@ -550,5 +550,60 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             await TeamManagement.DeleteTeamMemberAsync(teamMember, cancellationToken);
             return NoContent();
         }
+
+        /// <summary>
+        /// Query a team member
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns>The team member</returns>
+        /// <response code="200">Success. The response describes a team member.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(TeamMember), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/member/{userId}")]
+        public async Task<object> GetTeamMember(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required] string userId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+            };
+            if (await ValidateTeam(team, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+            // Validate team member
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMemberValidateOption = new ValidateTeamMemberOptions
+            {
+                TeamId = teamId,
+                UserId = userId,
+            };
+            if (await ValidateTeamMember(team, teamMember, teamMemberValidateOption, cancellationToken) == false)
+            {
+                return teamMemberValidateOption.ValidateResult;
+            }
+
+            return Ok(ResponseBuilder.BuildTeamMember(teamMember));
+        }
     }
 }
