@@ -1284,5 +1284,44 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             AssertHelper.AssertNoContentResult(result);
         }
 
+        [Test]
+        public async Task GetTeamMember_Succeeded()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            string userId = "uid";
+            HackathonEntity hackathon = new HackathonEntity { };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity teamMemberEntity = new TeamMemberEntity { Description = "desc" };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("tid", "uid", cancellationToken))
+                .ReturnsAsync(teamMemberEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetTeamMember(hackName, teamId, userId, cancellationToken);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<TeamMember>(result);
+            Assert.AreEqual("desc", resp.description);
+        }
     }
 }
