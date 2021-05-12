@@ -380,6 +380,59 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(newStatus, captured.Status);
         }
 
+        [TestCase(TeamMemberRole.Member)]
+        [TestCase(TeamMemberRole.Admin)]
+        public async Task UpdateTeamMemberRoleAsync_Skip(TeamMemberRole role)
+        {
+            TeamMemberEntity teamMember = new TeamMemberEntity { Role = role };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            var storageContext = new Mock<IStorageContext>();
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamMemberRoleAsync(teamMember, role, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
+
+        [TestCase(TeamMemberRole.Member, TeamMemberRole.Admin)]
+        [TestCase(TeamMemberRole.Admin, TeamMemberRole.Member)]
+        public async Task UpdateTeamMemberRoleAsync_Succeeded(TeamMemberRole oldRole, TeamMemberRole newRole)
+        {
+            TeamMemberEntity teamMember = new TeamMemberEntity { Role = oldRole };
+            CancellationToken cancellationToken = CancellationToken.None;
+            TeamMemberEntity captured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.MergeAsync(It.IsAny<TeamMemberEntity>(), cancellationToken))
+                .Callback<TeamMemberEntity, CancellationToken>((tm, c) => { captured = tm; });
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+
+            TeamManagement teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await teamManagement.UpdateTeamMemberRoleAsync(teamMember, newRole, cancellationToken);
+
+            Mock.VerifyAll(logger, teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.IsNull(result.Description);
+            Assert.IsNull(captured.Description);
+            Assert.AreEqual(newRole, result.Role);
+            Assert.AreEqual(newRole, captured.Role);
+        }
+
         [Test]
         public async Task DeleteTeamMemberStatusAsync()
         {
