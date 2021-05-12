@@ -72,7 +72,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Upldate a team member. Not existance check. Please check existance before call this method
+        /// Upldate a team member(not including status/role). Not existance check. Please check existance before call this method
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
@@ -87,6 +87,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Update the status of a member
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="teamMemberRole"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a team memter
@@ -117,7 +126,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
                 Status = request.status,
             };
-            
+
             await StorageContext.TeamMemberTable.InsertAsync(entity);
 
             return entity;
@@ -255,6 +264,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return;
 
             await StorageContext.TeamTable.DeleteAsync(team.PartitionKey, team.RowKey, cancellationToken);
+        }
+
+        public async Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return member;
+
+            if (member.Role != teamMemberRole)
+            {
+                member.Role = teamMemberRole;
+                await StorageContext.TeamMemberTable.MergeAsync(member);
+            }
+
+            return member;
         }
     }
 }
