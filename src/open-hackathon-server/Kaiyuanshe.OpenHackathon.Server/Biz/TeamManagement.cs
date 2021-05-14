@@ -46,6 +46,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task DeleteTeamAsync(TeamEntity team, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// List paged teams of hackathon
+        /// </summary>
+        /// <param name="hackathonName">name of hackathon</param>
+        /// <param name="options">options for query</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
         /// List all team members
         /// </summary>
         /// <param name="teamId">guid of the team</param>
@@ -278,6 +288,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return member;
+        }
+
+        public async Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQuery.GenerateFilterCondition(
+                           nameof(TeamEntity.PartitionKey),
+                           QueryComparisons.Equal,
+                           hackathonName);
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<TeamEntity> query = new TableQuery<TeamEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.TeamTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
     }
 }

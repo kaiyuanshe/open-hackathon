@@ -480,5 +480,107 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             teamTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
         }
+
+        [Test]
+        public async Task ListPaginatedTeamsAsync_NoOptions()
+        {
+            string hackName = "foo";
+            TeamQueryOptions options = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+            var entities = MockHelper.CreateTableQuerySegment<TeamEntity>(
+                 new List<TeamEntity>
+                 {
+                     new TeamEntity{  PartitionKey="pk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" }
+                );
+
+            TableQuery<TeamEntity> tableQueryCaptured = null;
+            TableContinuationToken tableContinuationTokenCapatured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamTable = new Mock<ITeamTable>();
+            teamTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<TeamEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<TeamEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
+                {
+                    tableQueryCaptured = query;
+                    tableContinuationTokenCapatured = c;
+                })
+                .ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+
+            var teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await teamManagement.ListPaginatedTeamsAsync(hackName, options, cancellationToken);
+
+            Mock.VerifyAll(teamTable, storageContext);
+            teamTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("pk", segment.First().HackathonName);
+            Assert.AreEqual("np", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
+            Assert.IsNull(tableContinuationTokenCapatured);
+            Assert.AreEqual("PartitionKey eq 'foo'", tableQueryCaptured.FilterString);
+            Assert.AreEqual(100, tableQueryCaptured.TakeCount.Value);
+        }
+
+        [TestCase(5, 5)]
+        [TestCase(-1, 100)]
+        public async Task ListPaginatedTeamsAsync_Options(int topInPara, int expectedTop)
+        {
+            string hackName = "foo";
+            TeamQueryOptions options = new TeamQueryOptions
+            {
+                TableContinuationToken = new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" },
+                Top = topInPara,
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+            var entities = MockHelper.CreateTableQuerySegment<TeamEntity>(
+                 new List<TeamEntity>
+                 {
+                     new TeamEntity{  PartitionKey="pk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np2", NextRowKey = "nr2" }
+                );
+
+            TableQuery<TeamEntity> tableQueryCaptured = null;
+            TableContinuationToken tableContinuationTokenCapatured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamTable = new Mock<ITeamTable>();
+            teamTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<TeamEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<TeamEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
+                {
+                    tableQueryCaptured = query;
+                    tableContinuationTokenCapatured = c;
+                })
+                .ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+
+            var teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await teamManagement.ListPaginatedTeamsAsync(hackName, options, cancellationToken);
+
+            Mock.VerifyAll(teamTable, storageContext);
+            teamTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("pk", segment.First().HackathonName);
+            Assert.AreEqual("np2", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr2", segment.ContinuationToken.NextRowKey);
+            Assert.AreEqual("np", tableContinuationTokenCapatured.NextPartitionKey);
+            Assert.AreEqual("nr", tableContinuationTokenCapatured.NextRowKey);
+            Assert.AreEqual("PartitionKey eq 'foo'", tableQueryCaptured.FilterString);
+            Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
+        }
     }
 }
