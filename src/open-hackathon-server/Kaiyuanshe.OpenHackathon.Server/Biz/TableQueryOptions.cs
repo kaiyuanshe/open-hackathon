@@ -17,4 +17,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
         public EnrollmentStatus? Status { get; set; }
     }
+
+    public class TeamQueryOptions : TableQueryOptions
+    {
+
+    }
 }
