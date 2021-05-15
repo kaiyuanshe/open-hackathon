@@ -2,10 +2,12 @@
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
@@ -162,6 +164,51 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             return Ok(ResponseBuilder.BuildTeam(team));
+        }
+
+        /// <summary>
+        /// List paginated teams of a hackathon.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>the response contains a list of teams and a nextLink if there are more results.</returns>
+        /// <response code="200">Success.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(TeamList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/teams")]
+        public async Task<object> ListTeams(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            var hackName = hackathonName.ToLower();
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            var teamQueryOptions = new TeamQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top
+            };
+            var segment = await TeamManagement.ListPaginatedTeamsAsync(hackName, teamQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
+            return Ok(ResponseBuilder.BuildResourceList<TeamEntity, Team, TeamList>(
+                    segment,
+                    ResponseBuilder.BuildTeam,
+                    nextLink));
         }
 
         /// <summary>

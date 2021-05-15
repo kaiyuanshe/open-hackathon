@@ -541,7 +541,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackName = "Hack";
             var cancellationToken = CancellationToken.None;
             HackathonEntity hackathonEntity = new HackathonEntity();
-            var authResult = AuthorizationResult.Success();
             var enrollments = new List<EnrollmentEntity>
             {
                 new EnrollmentEntity
@@ -576,10 +575,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             // verify
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is OkObjectResult);
-            OkObjectResult objectResult = (OkObjectResult)result;
-            EnrollmentList list = (EnrollmentList)objectResult.Value;
-            Assert.IsNotNull(list);
+            var list = AssertHelper.AssertOKResult<EnrollmentList>(result);
             Assert.AreEqual(expectedLink, list.nextLink);
             Assert.AreEqual(1, list.value.Length);
             Assert.AreEqual("pk", list.value[0].hackathonName);
