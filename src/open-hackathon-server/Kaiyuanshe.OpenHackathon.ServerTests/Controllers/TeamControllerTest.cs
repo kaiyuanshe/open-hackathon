@@ -6,13 +6,13 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -483,6 +483,109 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("uid", output.creatorId);
+        }
+
+        private static IEnumerable ListTeamsTestData()
+        {
+            // arg0: pagination
+            // arg1: mocked TableCotinuationToken
+            // arg2: expected options
+            // arg3: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    new EnrollmentQueryOptions { },
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    new EnrollmentQueryOptions
+                    {
+                        Top = 10,
+                        TableContinuationToken = new TableContinuationToken
+                        {
+                            NextPartitionKey = "np",
+                            NextRowKey = "nr"
+                        },
+                        Status = EnrollmentStatus.rejected
+                    },
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    new EnrollmentQueryOptions { },
+                    "&np=np&nr=nr"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListTeamsTestData))]
+        public async Task ListTeams(
+            Pagination pagination,
+            TableContinuationToken continuationToken,
+            EnrollmentQueryOptions expectedOptions,
+            string expectedLink)
+        {
+            // input
+            var hackName = "Hack";
+            var cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var teams = new List<TeamEntity>
+            {
+                new TeamEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                }
+            };
+            var segment = MockHelper.CreateTableQuerySegment(teams, continuationToken);
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+            var teamManagement = new Mock<ITeamManagement>();
+            TeamQueryOptions optionsCaptured = null;
+            teamManagement.Setup(p => p.ListPaginatedTeamsAsync("hack", It.IsAny<TeamQueryOptions>(), cancellationToken))
+                .Callback<string, TeamQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    optionsCaptured = o;
+                })
+                .ReturnsAsync(segment);
+
+            // run
+            var controller = new TeamController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+            };
+            var result = await controller.ListTeams(hackName, pagination, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<TeamList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].id);
+            Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
 
         [TestCase(true, TeamMemberStatus.approved)]
