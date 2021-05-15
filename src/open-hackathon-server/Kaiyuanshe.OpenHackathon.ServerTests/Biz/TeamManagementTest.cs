@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -580,6 +581,115 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("np", tableContinuationTokenCapatured.NextPartitionKey);
             Assert.AreEqual("nr", tableContinuationTokenCapatured.NextRowKey);
             Assert.AreEqual("PartitionKey eq 'foo'", tableQueryCaptured.FilterString);
+            Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
+        }
+
+        private static IEnumerable ListPaginatedEnrollmentsAsyncTestData()
+        {
+            // arg0: options
+            // arg1: expected top
+            // arg2: expected query
+
+            // no options
+            yield return new TestCaseData(
+                null,
+                100,
+                "PartitionKey eq 'foo'"
+                );
+
+            // top
+            yield return new TestCaseData(
+                new TeamMemberQueryOptions { Top = 5 },
+                5,
+                "PartitionKey eq 'foo'"
+                );
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions { Top = -1 },
+               100,
+               "PartitionKey eq 'foo'"
+               );
+
+            // status
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions { Status = TeamMemberStatus.approved },
+               100,
+               "(PartitionKey eq 'foo') and (Status eq 1)"
+               );
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions { Status = TeamMemberStatus.pendingApproval },
+               100,
+               "(PartitionKey eq 'foo') and (Status eq 0)"
+               );
+
+            // Role
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions { Role = TeamMemberRole.Admin },
+               100,
+               "(PartitionKey eq 'foo') and (Role eq 0)"
+               );
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions { Role = TeamMemberRole.Member },
+               100,
+               "(PartitionKey eq 'foo') and (Role eq 1)"
+               );
+
+            // all options
+            yield return new TestCaseData(
+               new TeamMemberQueryOptions
+               {
+                   Top = 20,
+                   Role = TeamMemberRole.Member,
+                   Status = TeamMemberStatus.approved,
+               },
+               20,
+               "((PartitionKey eq 'foo') and (Status eq 1)) and (Role eq 1)"
+               );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedEnrollmentsAsyncTestData))]
+        public async Task ListPaginatedEnrollmentsAsync_Options(TeamMemberQueryOptions options, int expectedTop, string expectedFilter)
+        {
+            string hackName = "foo";
+            CancellationToken cancellationToken = CancellationToken.None;
+            var entities = MockHelper.CreateTableQuerySegment<TeamMemberEntity>(
+                 new List<TeamMemberEntity>
+                 {
+                     new TeamMemberEntity{  PartitionKey="pk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" }
+                );
+
+            TableQuery<TeamMemberEntity> tableQueryCaptured = null;
+            TableContinuationToken tableContinuationTokenCapatured = null;
+
+            var logger = new Mock<ILogger<TeamManagement>>();
+            var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<TeamMemberEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<TeamMemberEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
+                {
+                    tableQueryCaptured = query;
+                    tableContinuationTokenCapatured = c;
+                })
+                .ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+
+            var teamManagement = new TeamManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await teamManagement.ListPaginatedTeamMembersAsync(hackName, options, cancellationToken);
+
+            Mock.VerifyAll(teamMemberTable, storageContext);
+            teamMemberTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("pk", segment.First().TeamId);
+            Assert.AreEqual("np", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
+            Assert.IsNull(tableContinuationTokenCapatured);
+            Assert.AreEqual(expectedFilter, tableQueryCaptured.FilterString);
             Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
         }
     }

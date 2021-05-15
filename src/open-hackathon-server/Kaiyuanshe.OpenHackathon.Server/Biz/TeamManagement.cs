@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.Helpers;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -54,7 +55,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default);
 
-
         /// <summary>
         /// List all team members
         /// </summary>
@@ -62,6 +62,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// List paginated team members with optional filters
+        /// </summary>
+        /// <param name="teamId">guid of the team</param>
+        /// <param name="options">options for query</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default);
+
 
         /// <summary>
         /// Get a team member by userId
@@ -308,6 +318,47 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.TeamTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+        }
+
+        public async Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQuery.GenerateFilterCondition(
+                           nameof(TeamMemberEntity.PartitionKey),
+                           QueryComparisons.Equal,
+                           teamId);
+
+            if (options != null)
+            {
+                if (options.Status.HasValue)
+                {
+                    var statusFilter = TableQuery.GenerateFilterConditionForInt(
+                        nameof(TeamMemberEntity.Status),
+                        QueryComparisons.Equal,
+                        (int)options.Status.Value);
+                    filter = TableQueryHelper.And(filter, statusFilter);
+                }
+                if (options.Role.HasValue)
+                {
+                    var roleFilter = TableQuery.GenerateFilterConditionForInt(
+                        nameof(TeamMemberEntity.Role),
+                        QueryComparisons.Equal,
+                        (int)options.Role.Value);
+                    filter = TableQueryHelper.And(filter, roleFilter);
+                }
+            }
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<TeamMemberEntity> query = new TableQuery<TeamMemberEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.TeamMemberTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+
         }
     }
 }

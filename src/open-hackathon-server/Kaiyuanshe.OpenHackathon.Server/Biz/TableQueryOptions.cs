@@ -22,4 +22,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
 
     }
+
+    public class TeamMemberQueryOptions : TableQueryOptions
+    {
+        public TeamMemberRole? Role { get; set; }
+        public TeamMemberStatus? Status { get; set; }
+    }
 }
