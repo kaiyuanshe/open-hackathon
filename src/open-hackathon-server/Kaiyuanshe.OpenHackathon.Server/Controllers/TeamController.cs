@@ -714,5 +714,78 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return Ok(ResponseBuilder.BuildTeamMember(teamMember));
         }
+
+        /// <summary>
+        /// List paginated members of a team.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="status" example="approved">optional filter by member status.</param>
+        /// <param name="role" example="member">optional filter by role of team member. </param>
+        /// <returns>the response contains a list of team members and a nextLink if there are more results.</returns>
+        /// <response code="200">Success.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(TeamMemberList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/members")]
+        public async Task<object> ListMembers(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromQuery] Pagination pagination,
+            [FromQuery] TeamMemberRole? role,
+            [FromQuery] TeamMemberStatus? status,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackName = hackathonName.ToLower();
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+            };
+            if (await ValidateTeam(team, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+            // list
+            var qureyOptions = new TeamMemberQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Status = status,
+                Role = role,
+                Top = pagination.top
+            };
+            var segment = await TeamManagement.ListPaginatedTeamMembersAsync(teamId, qureyOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            if (status.HasValue)
+            {
+                routeValues.Add(nameof(status), status.Value);
+            }
+            if (role.HasValue)
+            {
+                routeValues.Add(nameof(role), role.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
+            return Ok(ResponseBuilder.BuildResourceList<TeamMemberEntity, TeamMember, TeamMemberList>(
+                    segment,
+                    ResponseBuilder.BuildTeamMember,
+                    nextLink));
+        }
     }
 }
