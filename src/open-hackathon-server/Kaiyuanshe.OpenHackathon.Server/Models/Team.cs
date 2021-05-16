@@ -134,6 +134,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public DateTime updatedAt { get; internal set; }
     }
 
+    /// <summary>
+    /// a list of team members and a optional nextLink for more results.
+    /// </summary>
+    public class TeamMemberList : IResourceList<TeamMember>
+    {
+        /// <summary>
+        /// a list of members
+        /// </summary>
+        public TeamMember[] value { get; set; }
+
+        /// <summary>
+        ///  The URL the client should use to fetch the next page (per server side paging).
+        ///  No more results if it's null or empty.
+        /// </summary>
+        public string nextLink { get; set; }
+    }
+
     public enum TeamMemberRole
     {
         /// <summary>
