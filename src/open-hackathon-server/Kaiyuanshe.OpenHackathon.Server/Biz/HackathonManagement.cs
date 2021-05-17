@@ -34,12 +34,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Change the hackathon to Deleted.
+        /// Change the status of a hackathon.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="hackathonEntity"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteHackathonLogically(string name, CancellationToken cancellationToken = default);
+        Task<HackathonEntity> UpdateHackathonStatusAsync(HackathonEntity hackathonEntity, HackathonStatus status, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get Hackathon By name. Return null if not found.
@@ -155,13 +155,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return entity;
         }
 
-        public async Task DeleteHackathonLogically(string name, CancellationToken cancellationToken = default)
+        public async Task<HackathonEntity> UpdateHackathonStatusAsync(HackathonEntity hackathonEntity, HackathonStatus status, CancellationToken cancellationToken = default)
         {
-            await StorageContext.HackathonTable.RetrieveAndMergeAsync(name, string.Empty,
-                entity =>
-                {
-                    entity.Status = HackathonStatus.offline;
-                }, cancellationToken);
+            if (hackathonEntity == null || hackathonEntity.Status == status)
+                return hackathonEntity;
+
+            hackathonEntity.Status = status;
+            await StorageContext.HackathonTable.MergeAsync(hackathonEntity, cancellationToken);
+            return hackathonEntity;
         }
 
         public async Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default)

@@ -401,41 +401,43 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             string name = "Foo";
             HackathonEntity entity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(entity);
 
             var controller = new HackathonController
             {
                 HackathonManagement = hackathonManagement.Object
             };
-            var result = await controller.Delete(name);
+            var result = await controller.Delete(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is NoContentResult);
+            AssertHelper.AssertNoContentResult(result);
         }
 
         [Test]
         public async Task DeleteTest_AlreadyDeleted()
         {
             string name = "Foo";
-            HackathonEntity entity = new HackathonEntity { Status =  HackathonStatus.offline };
+            HackathonEntity entity = new HackathonEntity { Status = HackathonStatus.offline };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(entity);
 
             var controller = new HackathonController
             {
                 HackathonManagement = hackathonManagement.Object
             };
-            var result = await controller.Delete(name);
+            var result = await controller.Delete(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is NoContentResult);
+            AssertHelper.AssertNoContentResult(result);
         }
 
         [Test]
@@ -443,21 +445,22 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             string name = "Foo";
             HackathonEntity entity = new HackathonEntity();
+            CancellationToken cancellationToken = CancellationToken.None;
 
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(m => m.DeleteHackathonLogically("foo", CancellationToken.None));
+            hackathonManagement.Setup(m => m.UpdateHackathonStatusAsync(entity, HackathonStatus.offline, cancellationToken));
 
             var controller = new HackathonController
             {
                 HackathonManagement = hackathonManagement.Object
             };
-            var result = await controller.Delete(name);
+            var result = await controller.Delete(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
-            Assert.IsTrue(result is NoContentResult);
+            AssertHelper.AssertNoContentResult(result);
         }
     }
 }

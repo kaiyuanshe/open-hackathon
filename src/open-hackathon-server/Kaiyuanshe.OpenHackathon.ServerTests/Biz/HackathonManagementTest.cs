@@ -67,18 +67,40 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("test", partInserted.PartitionKey);
         }
 
-        [Test]
-        public async Task DeleteHackathonLogicallyTest()
+        [TestCase(HackathonStatus.planning, HackathonStatus.planning)]
+        [TestCase(HackathonStatus.pendingApproval, HackathonStatus.pendingApproval)]
+        [TestCase(HackathonStatus.online, HackathonStatus.online)]
+        [TestCase(HackathonStatus.offline, HackathonStatus.offline)]
+        public async Task UpdateHackathonStatusAsync_Skip(HackathonStatus origin, HackathonStatus target)
         {
-            string name = "foo";
             CancellationToken cancellationToken = CancellationToken.None;
-            Action<HackathonEntity> capturedAction = null;
+            HackathonEntity hackathonEntity = new HackathonEntity { Status = origin };
 
+            var hackathonManagement = new HackathonManagement(null)
+            {
+            };
+            var updated = await hackathonManagement.UpdateHackathonStatusAsync(hackathonEntity, target, cancellationToken);
+            Assert.AreEqual(target, updated.Status);
+            Assert.IsNull(await hackathonManagement.UpdateHackathonStatusAsync(null, target, cancellationToken));
+        }
+
+        [TestCase(HackathonStatus.planning, HackathonStatus.pendingApproval)]
+        [TestCase(HackathonStatus.planning, HackathonStatus.online)]
+        [TestCase(HackathonStatus.planning, HackathonStatus.offline)]
+        [TestCase(HackathonStatus.pendingApproval, HackathonStatus.online)]
+        [TestCase(HackathonStatus.pendingApproval, HackathonStatus.offline)]
+        [TestCase(HackathonStatus.online, HackathonStatus.offline)]
+        public async Task UpdateHackathonStatusAsync_Succeeded(HackathonStatus origin, HackathonStatus target)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = new HackathonEntity { Status = origin };
+
+            HackathonEntity captured = null;
             var hackathonTable = new Mock<IHackathonTable>();
-            hackathonTable.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), cancellationToken))
-                .Callback<string, string, Action<HackathonEntity>, CancellationToken>((pk, rk, action, ct) =>
+            hackathonTable.Setup(p => p.MergeAsync(It.IsAny<HackathonEntity>(), cancellationToken))
+                .Callback<HackathonEntity, CancellationToken>((entity, ct) =>
                 {
-                    capturedAction = action;
+                    captured = entity;
                 });
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
@@ -87,14 +109,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object
             };
-            await hackathonManagement.DeleteHackathonLogically(name, cancellationToken);
+            var updated = await hackathonManagement.UpdateHackathonStatusAsync(hackathonEntity, target, cancellationToken);
 
             Mock.VerifyAll(storageContext, hackathonTable);
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
-            var entity = new HackathonEntity { Status = HackathonStatus.online };
-            capturedAction(entity);
-            Assert.AreEqual(HackathonStatus.offline, entity.Status);
+
+            Assert.AreEqual(target, captured.Status);
+            Assert.AreEqual(target, updated.Status);
         }
 
         [Test]
