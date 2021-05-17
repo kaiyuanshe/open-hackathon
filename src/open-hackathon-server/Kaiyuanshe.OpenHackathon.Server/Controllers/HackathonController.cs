@@ -138,7 +138,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 HackAdminRequird = true,
                 HackathonName = parameter.name,
             };
-            if(await ValidateHackathon(entity, options, cancellationToken) == false)
+            if (await ValidateHackathon(entity, options, cancellationToken) == false)
             {
                 return options.ValidateResult;
             }
@@ -193,7 +193,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [SwaggerErrorResponse(400, 403)]
         [Authorize(AuthConstant.Policy.PlatformAdministrator)]
         public async Task<object> Delete(
-            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName)
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            CancellationToken cancellationToken)
         {
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
             if (entity == null || entity.Status == HackathonStatus.offline)
@@ -201,7 +202,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NoContent();
             }
 
-            await HackathonManagement.DeleteHackathonLogically(hackathonName.ToLower());
+            await HackathonManagement.UpdateHackathonStatusAsync(entity, HackathonStatus.offline, cancellationToken);
             return NoContent();
         }
         #endregion
