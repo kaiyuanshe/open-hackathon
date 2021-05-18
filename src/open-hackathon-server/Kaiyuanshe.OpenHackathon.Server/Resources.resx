@@ -141,6 +141,12 @@
   <data name="Enrollment_NotStarted" xml:space="preserve">
     <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
   </data>
+  <data name="Hackathon_AlreadyOnline" xml:space="preserve">
+    <value>Hackathon {0} is already Online.</value>
+  </data>
+  <data name="Hackathon_Deleted" xml:space="preserve">
+    <value>Hackathon {0} is Offline. Cannot be updated.</value>
+  </data>
   <data name="Hackathon_Ended" xml:space="preserve">
     <value>The hackathon is already ended at {0}</value>
   </data>

@@ -206,5 +206,49 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return NoContent();
         }
         #endregion
+
+        #region Publish
+        /// <summary>
+        /// Send an request to publish a draft hackathon. The hackathon will go online after the request approved.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>the hackathon</returns>
+        [HttpPost]
+        [Route("hackathon/{hackathonName}/publish")]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> Publish(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                UserId = CurrentUserId,
+                HackAdminRequird = true,
+                NotDeletedRequired = true,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+            if (hackathon.Status == HackathonStatus.online)
+            {
+                return PreconditionFailed(string.Format(Resources.Hackathon_AlreadyOnline, hackathonName));
+            }
+
+            // update status
+            hackathon = await HackathonManagement.UpdateHackathonStatusAsync(hackathon, HackathonStatus.pendingApproval, cancellationToken);
+
+            // resp
+            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
+            return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
+        }
+        #endregion
     }
 }
