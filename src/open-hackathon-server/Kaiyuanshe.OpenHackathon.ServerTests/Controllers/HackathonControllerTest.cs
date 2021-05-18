@@ -462,5 +462,101 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             hackathonManagement.VerifyNoOtherCalls();
             AssertHelper.AssertNoContentResult(result);
         }
+
+        [Test]
+        public async Task Publish_Deleted()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Status = HackathonStatus.offline };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Publish(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, string.Format(Resources.Hackathon_Deleted, name));
+        }
+
+        [Test]
+        public async Task Publish_AlreadyOnline()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Status = HackathonStatus.online };
+            var authResult = AuthorizationResult.Success();
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.Publish(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, string.Format(Resources.Hackathon_AlreadyOnline, name));
+        }
+
+        [TestCase(HackathonStatus.planning)]
+        [TestCase(HackathonStatus.pendingApproval)]
+        public async Task Publish_Succeeded(HackathonStatus status)
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Status = status };
+            var authResult = AuthorizationResult.Success();
+            var role = new HackathonRoles { isAdmin = true };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(m => m.UpdateHackathonStatusAsync(entity, HackathonStatus.pendingApproval, cancellationToken))
+                .Callback<HackathonEntity, HackathonStatus, CancellationToken>((e, s, c) =>
+                {
+                    e.Status = s;
+                })
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", null, cancellationToken))
+               .ReturnsAsync(role);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                AuthorizationService = authorizationService.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.Publish(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Hackathon>(result);
+            Assert.AreEqual(HackathonStatus.pendingApproval, resp.status);
+        }
     }
 }

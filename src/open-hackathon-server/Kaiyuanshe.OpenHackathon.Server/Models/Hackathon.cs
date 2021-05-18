@@ -60,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string[] banners { get; set; }
 
         /// <summary>
-        /// Status of Hackathon. Readonly. Can be updated though other API
+        /// Status of Hackathon. Readonly. Can be updated though status change APIs like approve, delete.
         /// </summary>
         /// <example>online</example>
         public HackathonStatus status { get; internal set; }
@@ -189,9 +189,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// </summary>
     public enum HackathonStatus
     {
+        /// <summary>
+        /// the hackathon is in planning, a.k.a draft stage. Only visible to hackathon admins.
+        /// </summary>
         planning,
+        /// <summary>
+        /// a request to make hackathon online is sent, and the request is not approved yet. Only visible to hackahton admins.
+        /// </summary>
         pendingApproval,
+        /// <summary>
+        /// Online. visible to everyone.
+        /// </summary>
         online,
+        /// <summary>
+        /// The hackathon is marked as Deleted. Only visible to platform admin.
+        /// </summary>
         offline
     }
 }

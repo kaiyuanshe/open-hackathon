@@ -156,6 +156,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool HackathonOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
             public bool OnlineRequired { get; set; }
+            public bool NotDeletedRequired { get; set; }
         }
 
         public class ValidateEnrollmentOptions : ControllerValiationOptions
@@ -173,6 +174,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool ApprovedMemberRequired { get; set; }
         }
 
+        #region ValidateHackathon
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValidateHackathonOptions options,
             CancellationToken cancellationToken = default)
@@ -188,6 +190,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             if (options.OnlineRequired && hackathon.Status != HackathonStatus.online)
             {
                 options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
+                return false;
+            }
+
+            if (options.NotDeletedRequired && hackathon.Status == HackathonStatus.offline)
+            {
+                options.ValidateResult = PreconditionFailed(string.Format(Resources.Hackathon_Deleted, options.HackathonName));
                 return false;
             }
 
@@ -237,7 +245,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return true;
         }
+        #endregion
 
+        #region ValidateEnrollment
         protected bool ValidateEnrollment(EnrollmentEntity enrollment, ValidateEnrollmentOptions options)
         {
             if (enrollment == null)
@@ -254,7 +264,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return true;
         }
+        #endregion
 
+        #region ValidateTeam
         protected async Task<bool> ValidateTeam(TeamEntity team,
             ValidateTeamOptions options,
             CancellationToken cancellationToken = default)
@@ -277,7 +289,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return true;
         }
+        #endregion
 
+        #region ValidateTeamMember
         protected async Task<bool> ValidateTeamMember(TeamEntity team, TeamMemberEntity teamMember,
             ValidateTeamMemberOptions options,
             CancellationToken cancellationToken)
@@ -306,6 +320,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             return true;
         }
+        #endregion
 
         #endregion
     }

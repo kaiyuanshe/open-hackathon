@@ -26,6 +26,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public ITeamManagement TeamManagement { get; set; }
 
+        #region CreateTeam
         /// <summary>
         /// Create a new team
         /// </summary>
@@ -75,7 +76,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var teamEntity = await TeamManagement.CreateTeamAsync(parameter, cancellationToken);
             return Ok(ResponseBuilder.BuildTeam(teamEntity));
         }
+        #endregion
 
+        #region UpdateTeam
         /// <summary>
         /// Update a new team
         /// </summary>
@@ -122,7 +125,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             team = await TeamManagement.UpdateTeamAsync(parameter, team, cancellationToken);
             return Ok(ResponseBuilder.BuildTeam(team));
-        }
+        } 
+        #endregion
 
         /// <summary>
         /// Get a team
