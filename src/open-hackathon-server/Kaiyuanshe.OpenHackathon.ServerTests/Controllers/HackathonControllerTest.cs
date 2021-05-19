@@ -464,7 +464,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Publish_Deleted()
+        public async Task RequestPublish_Deleted()
         {
             string name = "Foo";
             HackathonEntity entity = new HackathonEntity { Status = HackathonStatus.offline };
@@ -479,7 +479,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Publish(name, cancellationToken);
+            var result = await controller.RequestPublish(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -488,7 +488,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task Publish_AlreadyOnline()
+        public async Task RequestPublish_AlreadyOnline()
         {
             string name = "Foo";
             HackathonEntity entity = new HackathonEntity { Status = HackathonStatus.online };
@@ -508,7 +508,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.Publish(name, cancellationToken);
+            var result = await controller.RequestPublish(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -519,7 +519,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
         [TestCase(HackathonStatus.planning)]
         [TestCase(HackathonStatus.pendingApproval)]
-        public async Task Publish_Succeeded(HackathonStatus status)
+        public async Task RequestPublish_Succeeded(HackathonStatus status)
         {
             string name = "Foo";
             HackathonEntity entity = new HackathonEntity { Status = status };
@@ -549,7 +549,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationService.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
             };
-            var result = await controller.Publish(name, cancellationToken);
+            var result = await controller.RequestPublish(name, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
@@ -557,6 +557,43 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var resp = AssertHelper.AssertOKResult<Hackathon>(result);
             Assert.AreEqual(HackathonStatus.pendingApproval, resp.status);
+        }
+
+        [TestCase(HackathonStatus.planning)]
+        [TestCase(HackathonStatus.pendingApproval)]
+        [TestCase(HackathonStatus.offline)]
+        public async Task Publish_Succeeded(HackathonStatus status)
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { Status = status };
+            var role = new HackathonRoles { isAdmin = true };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(m => m.UpdateHackathonStatusAsync(entity, HackathonStatus.online, cancellationToken))
+                .Callback<HackathonEntity, HackathonStatus, CancellationToken>((e, s, c) =>
+                {
+                    e.Status = s;
+                })
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", null, cancellationToken))
+               .ReturnsAsync(role);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.Publish(name, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Hackathon>(result);
+            Assert.AreEqual(HackathonStatus.online, resp.status);
         }
     }
 }
