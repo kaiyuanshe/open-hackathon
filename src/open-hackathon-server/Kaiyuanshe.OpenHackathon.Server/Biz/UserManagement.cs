@@ -91,6 +91,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 UserId = userInfo.Id,
                 TokenExpiredAt = userInfo.TokenExpiredAt,
                 Token = userInfo.Token,
+                CreatedAt = DateTime.UtcNow,
             };
             await StorageContext.UserTokenTable.InsertOrReplaceAsync(userToken, cancellationToken);
         }

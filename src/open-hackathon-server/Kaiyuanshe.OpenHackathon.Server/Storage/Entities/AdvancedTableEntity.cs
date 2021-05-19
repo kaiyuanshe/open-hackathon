@@ -1,5 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using System;
 using System.Collections.Generic;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
@@ -8,6 +9,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     {
         public AdvancedTableEntity() : base() { }
         public AdvancedTableEntity(string partitionKey, string rowKey) : base(partitionKey, rowKey) { }
+
+        /// <summary>
+        /// datetime when the entity is created
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
 
         public override IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
         {

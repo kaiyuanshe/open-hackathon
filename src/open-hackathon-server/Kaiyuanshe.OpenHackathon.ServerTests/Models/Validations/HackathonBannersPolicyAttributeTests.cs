@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Models.Validations.Tests
 {
@@ -13,26 +14,26 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Models.Validations.Tests
             {
                 yield return new TestCaseData(null, true);
                 // at least 1
-                yield return new TestCaseData(new string[] { }, false);
-                yield return new TestCaseData(new string[] { "https://foo.com/bar.jpg" }, true);
-                // invalid uri
-                yield return new TestCaseData(new string[] { "invalid uri" }, false);
+                yield return new TestCaseData(new PictureInfo[] { }, false);
+                yield return new TestCaseData(new PictureInfo[] {
+                    new PictureInfo{ Uri= "https://foo.com/bar.jpg" }
+                }, true);
 
-                List<string> images = new List<string>();
+                List<PictureInfo> images = new List<PictureInfo>();
                 for (int i = 0; i < HackathonBannersPolicyAttribute.MaxBannerCount; i++)
                 {
-                    images.Add($"http://foo.com/bar{i}.jpg");
+                    images.Add(new PictureInfo { Uri = $"http://foo.com/bar{i}.jpg" });
                 }
                 yield return new TestCaseData(images.ToArray(), true);
 
                 // too many
-                images.Add("https://foo.com/barx.jpg");
+                images.Add(new PictureInfo { Uri = "https://foo.com/barx.jpg" });
                 yield return new TestCaseData(images.ToArray(), false);
             }
         }
 
         [Test, TestCaseSource(nameof(PolicyTestCaseData))]
-        public void IsValidTest(string[] banners, bool valid)
+        public void IsValidTest(PictureInfo[] banners, bool valid)
         {
             var attribute = new HackathonBannersPolicyAttribute();
             Assert.AreEqual(valid, attribute.IsValid(banners));

@@ -27,6 +27,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 name = "test",
                 location = "loc",
                 eventStartedAt = DateTime.UtcNow,
+                tags = new string[] { "a", "b", "c" },
+                banners = new PictureInfo[] { new PictureInfo { Name = "pn", Description = "pd", Uri = "pu" } }
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -64,6 +66,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsTrue(result.EventStartedAt.HasValue);
             Assert.IsFalse(result.EventEndedAt.HasValue);
             Assert.AreEqual("loc", hackInserted.Location);
+            Assert.AreEqual(new string[] { "a", "b", "c" }, hackInserted.Tags);
+            Assert.AreEqual(1, hackInserted.Banners.Length);
+            Assert.AreEqual("pn", hackInserted.Banners[0].Name);
+            Assert.AreEqual("pd", hackInserted.Banners[0].Description);
+            Assert.AreEqual("pu", hackInserted.Banners[0].Uri);
             Assert.AreEqual("test", partInserted.PartitionKey);
         }
 
