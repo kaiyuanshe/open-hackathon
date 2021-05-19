@@ -207,7 +207,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
-        #region Publish
+        #region RequestPublish
         /// <summary>
         /// Send an request to publish a draft hackathon. The hackathon will go online after the request approved.
         /// </summary>
@@ -216,11 +216,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns>the hackathon</returns>
         [HttpPost]
-        [Route("hackathon/{hackathonName}/publish")]
+        [Route("hackathon/{hackathonName}/requestPublish")]
         [SwaggerErrorResponse(400, 404, 412)]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
-        public async Task<object> Publish(
+        public async Task<object> RequestPublish(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             CancellationToken cancellationToken)
         {
@@ -244,6 +244,44 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // update status
             hackathon = await HackathonManagement.UpdateHackathonStatusAsync(hackathon, HackathonStatus.pendingApproval, cancellationToken);
+
+            // resp
+            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
+            return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
+        }
+        #endregion
+
+        #region Publish
+        /// <summary>
+        /// Publish a hackathon. The hackathon will go online and become visible to everyone.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>the hackathon</returns>
+        [HttpPost]
+        [Route("hackathon/{hackathonName}/publish")]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [Authorize(Policy = AuthConstant.Policy.PlatformAdministrator)]
+        public async Task<object> Publish(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                UserId = CurrentUserId,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // update status
+            hackathon = await HackathonManagement.UpdateHackathonStatusAsync(hackathon, HackathonStatus.online, cancellationToken);
 
             // resp
             var roles = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
