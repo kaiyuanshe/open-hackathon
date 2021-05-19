@@ -125,6 +125,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default);
     }
 
+    /// <inheritdoc cref="ITeamManagement"/>
     public class TeamManagement : ManagementClientBase, ITeamManagement
     {
         private readonly ILogger Logger;

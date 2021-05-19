@@ -36,7 +36,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// Uploaded pictures for display as banners
         /// </summary>
-        public string[] Banners { get; set; }
+        [ConvertableEntityProperty]
+        public PictureInfo[] Banners { get; set; }
         public HackathonStatus Status { get; set; }
         /// <summary>
         /// Id of User who creates this hackathon. PartitionKey of Users table
@@ -50,8 +51,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// whether or not user registration needs admin's manual approval
         /// </summary>
         public bool AutoApprove { get; set; }
+        [ConvertableEntityProperty]
         public string[] Tags { get; set; }
-        public DateTime CreatedAt { get; set; }
         public DateTime? EventStartedAt { get; set; }
         public DateTime? EventEndedAt { get; set; }
         public DateTime? EnrollmentStartedAt { get; set; }

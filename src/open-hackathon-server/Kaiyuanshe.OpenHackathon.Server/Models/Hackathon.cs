@@ -55,9 +55,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// A list of banner images. At least 1 image. Max 10 images supported. All images must be invalid Uri.
         /// </summary>
-        /// <example>["https://example.com/a.png", "https://example.com/b.png"]</example>
         [HackathonBannersPolicy]
-        public string[] banners { get; set; }
+        public PictureInfo[] banners { get; set; }
 
         /// <summary>
         /// Status of Hackathon. Readonly. Can be updated though status change APIs like approve, delete.

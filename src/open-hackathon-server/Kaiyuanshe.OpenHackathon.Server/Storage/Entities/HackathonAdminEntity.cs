@@ -34,8 +34,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
-        public DateTime CreatedAt { get; set; }
-
         public bool IsPlatformAdministrator()
         {
             return string.IsNullOrEmpty(HackathonName);

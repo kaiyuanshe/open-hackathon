@@ -33,7 +33,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         }
 
         public EnrollmentStatus Status { get; set; }
-
-        public DateTime CreatedAt { get; set; }
     }
 }

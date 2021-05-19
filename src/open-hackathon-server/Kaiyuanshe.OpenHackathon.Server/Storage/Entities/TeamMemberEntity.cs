@@ -37,10 +37,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public TeamMemberRole Role { get; set; }
 
         public TeamMemberStatus Status { get; set; }
-
-        /// <summary>
-        /// datetime when the member joons the team
-        /// </summary>
-        public DateTime CreatedAt { get; set; }
     }
 }

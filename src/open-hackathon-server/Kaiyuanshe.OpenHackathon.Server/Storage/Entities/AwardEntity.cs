@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,12 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     /// <summary>
-    /// entity for team information
+    /// entity for award information
     /// 
     /// PK: hackathon name
     /// RK: auto-generated GUID
     /// </summary>
-    public class TeamEntity : AdvancedTableEntity
+    public class AwardEntity : AdvancedTableEntity
     {
         /// <summary>
         /// name of Hackathon
@@ -27,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         }
 
         /// <summary>
-        /// id of team
+        /// id of award
         /// </summary>
         [IgnoreProperty]
         public string Id
@@ -38,24 +39,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
-        /// <summary>
-        /// team display name
-        /// </summary>
-        public string DisplayName { get; set; }
-
-        /// <summary>
-        /// description about the team
-        /// </summary>
+        public string Name { get; set; }
         public string Description { get; set; }
+        public int Quantity { get; set; }
+        public AwardTarget Target { get; set; }
 
-        /// <summary>
-        /// whether or not auto approve team joining request.
-        /// </summary>
-        public bool AutoApprove { get; set; }
-
-        /// <summary>
-        /// the id of user who creates the team
-        /// </summary>
-        public string CreatorId { get; set; }
+        [ConvertableEntityProperty]
+        public PictureInfo[] pictures { get; set; }
     }
 }
