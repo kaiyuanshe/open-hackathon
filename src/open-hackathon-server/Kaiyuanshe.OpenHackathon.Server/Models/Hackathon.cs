@@ -54,6 +54,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
 
         /// <summary>
         /// A list of banner images. At least 1 image. Max 10 images supported. All images must be invalid Uri.
+        /// To add a new picture, be sure to submit all pictures in request including the existing ones. 
+        /// The entire list will be replaced with list in request.
         /// </summary>
         [HackathonBannersPolicy]
         public PictureInfo[] banners { get; set; }
@@ -97,7 +99,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public DateTime createdAt { get; internal set; }
 
         /// <summary>
-        /// The timestamp when the hackathon is created
+        /// The timestamp when the hackathon is updated
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
         public DateTime updatedAt { get; internal set; }
