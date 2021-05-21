@@ -32,7 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public DateTime createdAt { get; internal set; }
 
         /// <summary>
-        /// The timestamp when the enrollment submitted.
+        /// The timestamp when the enrollment updated.
         /// </summary>
         /// <example>2008-01-14T04:33:35Z</example>
         public DateTime updatedAt { get; internal set; }
