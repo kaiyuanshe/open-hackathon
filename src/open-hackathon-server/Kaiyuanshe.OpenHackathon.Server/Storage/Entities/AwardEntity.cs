@@ -45,6 +45,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public AwardTarget Target { get; set; }
 
         [ConvertableEntityProperty]
-        public PictureInfo[] pictures { get; set; }
+        public PictureInfo[] Pictures { get; set; }
     }
 }

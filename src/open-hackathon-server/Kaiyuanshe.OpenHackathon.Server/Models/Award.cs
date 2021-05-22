@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,30 +24,34 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Name of the award.
         /// </summary>
         /// <example>一等奖</example>
+        [MaxLength(64)]
         public string name { get; set; }
 
         /// <summary>
         /// description of the award
         /// </summary>
         /// <example>Apple Watch, 3 teams</example>
+        [MaxLength(256)]
         public string description { get; set; }
 
         /// <summary>
-        /// quantity of the award.
+        /// quantity of the award. 1 by default.
         /// </summary>
         /// <example>3</example>
-        public int quantity { get; set; }
+        [Range(1, 10_000)]
+        public int? quantity { get; set; }
 
         /// <summary>
-        /// target whom the award is given. team or individual.
+        /// target whom the award is given. team or individual. team by default.
         /// </summary>
         /// <example>team</example>
-        public AwardTarget target { get; set; }
+        public AwardTarget? target { get; set; }
 
         /// <summary>
         /// A list of images of the award. To add a new picture, be sure to submit all pictures in request including the existing ones. 
         /// The entire list will be replaced with list in request.
         /// </summary>
+        [MaxLength(50)]
         public PictureInfo[] pictures { get; set; }
 
         /// <summary>
