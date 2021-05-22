@@ -29,6 +29,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<AwardEntity> CreateAwardAsync(string hackathonName, Award award, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Update a new Award. No existeance check.
+        /// </summary>
+        /// <param name="entity">award to update.</param>
+        /// <param name="award">award from request</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default);
+
     }
 
 
@@ -67,6 +76,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return null;
 
             return await StorageContext.AwardTable.RetrieveAsync(hackathonName.ToLower(), awardId, cancellationToken);
+        }
+
+        public async Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default)
+        {
+            if (entity == null || award == null)
+                return entity;
+
+            if (!string.IsNullOrEmpty(award.description)) entity.Description = award.description;
+            if (!string.IsNullOrEmpty(award.name)) entity.Name = award.name;
+            if (award.pictures != null) entity.Pictures = award.pictures;
+            if (award.quantity.HasValue) entity.Quantity = award.quantity.Value;
+            if (award.target.HasValue) entity.Target = award.target.Value;
+
+            await StorageContext.AwardTable.MergeAsync(entity);
+            return entity;
         }
     }
 }
