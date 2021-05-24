@@ -18,6 +18,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity);
 
+        Award BuildAward(AwardEntity awardEntity);
+
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
             where TResult : IResourceList<TResultItem>, new();
     }
@@ -73,6 +75,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
                 value = items.Select(p => converter(p)).ToArray(),
                 nextLink = nextLink,
             };
+        }
+
+        public Award BuildAward(AwardEntity awardEntity)
+        {
+            return awardEntity.As<Award>(p =>
+            {
+                p.updatedAt = awardEntity.Timestamp.DateTime;
+            });
         }
     }
 }
