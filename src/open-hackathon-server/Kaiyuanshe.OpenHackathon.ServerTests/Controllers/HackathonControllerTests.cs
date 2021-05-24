@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 {
     [TestFixture]
-    public class HackathonControllerTest
+    public class HackathonControllerTests
     {
         [TestCase("")]
         [TestCase("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]

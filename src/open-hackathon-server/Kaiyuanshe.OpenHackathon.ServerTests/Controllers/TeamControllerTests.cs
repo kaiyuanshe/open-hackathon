@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 {
     [TestFixture]
-    public class TeamControllerTest
+    public class TeamControllerTests
     {
         [Test]
         public async Task CreateTeam_HackNotFound()

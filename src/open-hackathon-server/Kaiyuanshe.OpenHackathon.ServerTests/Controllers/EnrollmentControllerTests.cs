@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 {
     [TestFixture]
-    public class EnrollmentControllerTest
+    public class EnrollmentControllerTests
     {
         [Test]
         public async Task EnrollTest_NotFound()
