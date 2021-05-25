@@ -50,19 +50,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         {
             int count = 10;
             var list = new List<HackathonEntity>();
+            string nextLink = "nl";
             for (int i = 0; i < count; i++)
             {
                 list.Add(new HackathonEntity { PartitionKey = i.ToString() });
             }
 
             var builder = new DefaultResponseBuilder();
-            var hacklist = builder.BuildHackathonList(list);
+            var hacklist = builder.BuildHackathonList(list, nextLink);
 
             Assert.IsNotNull(hacklist);
-            Assert.AreEqual(count, hacklist.values.Length);
+            Assert.AreEqual(count, hacklist.value.Length);
             for (int i = 0; i < count; i++)
             {
-                Assert.AreEqual(i.ToString(), hacklist.values[i].name);
+                Assert.AreEqual(i.ToString(), hacklist.value[i].name);
             }
         }
 

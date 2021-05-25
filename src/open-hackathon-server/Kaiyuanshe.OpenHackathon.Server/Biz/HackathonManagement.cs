@@ -53,7 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default);
+        Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get roles of a user on a specified hackathon
@@ -202,18 +202,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
         }
 
-        public async Task<IEnumerable<HackathonEntity>> SearchHackathonAsync(HackathonSearchOptions options, CancellationToken cancellationToken = default)
+        public async Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default)
         {
-            var entities = new List<HackathonEntity>();
-            var filter = TableQuery.GenerateFilterConditionForInt(nameof(HackathonEntity.Status), QueryComparisons.Equal, (int)HackathonStatus.online);
-            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>().Where(filter);
+            var filter = TableQuery.GenerateFilterConditionForInt(
+                          nameof(HackathonEntity.Status),
+                          QueryComparisons.Equal,
+                          (int)HackathonStatus.online);
 
-            await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, (segment) =>
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
             {
-                entities.AddRange(segment);
-            }, cancellationToken);
+                top = options.Top.Value;
+            }
+            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>()
+                .Where(filter)
+                .Take(top);
 
-            return entities;
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
 
         public async Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default)
@@ -345,11 +351,4 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
     }
-
-    public class HackathonSearchOptions
-    {
-
-    }
-
-
 }
