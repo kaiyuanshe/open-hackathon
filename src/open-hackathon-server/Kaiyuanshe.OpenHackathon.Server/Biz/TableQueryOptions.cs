@@ -13,6 +13,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public int? Top { get; set; }
     }
 
+    public class HackathonQueryOptions : TableQueryOptions
+    {
+        public HackathonStatus? Status { get; set; }
+    }
+
     public class EnrollmentQueryOptions : TableQueryOptions
     {
         public EnrollmentStatus? Status { get; set; }

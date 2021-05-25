@@ -172,17 +172,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Represents a list of hackathon
     /// </summary>
-    public class HackathonList
+    public class HackathonList : IResourceList<Hackathon>
     {
         /// <summary>
         /// List of hackathon
         /// </summary>
-        public Hackathon[] values { get; set; }
+        public Hackathon[] value { get; set; }
 
-        public HackathonList()
-        {
-            values = new Hackathon[0];
-        }
+
+        /// <summary>
+        ///  The URL the client should use to fetch the next page (per server side paging).
+        ///  No more results if it's null or empty.
+        /// </summary>
+        public string nextLink { get; set; }
     }
 
     /// <summary>

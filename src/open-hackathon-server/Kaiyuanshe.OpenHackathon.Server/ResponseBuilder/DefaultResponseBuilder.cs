@@ -10,7 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
     {
         Hackathon BuildHackathon(HackathonEntity hackathonEntity, HackathonRoles roles);
 
-        HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities);
+        HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities, string nextLink);
 
         Enrollment BuildEnrollment(EnrollmentEntity participant);
 
@@ -35,11 +35,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             });
         }
 
-        public HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities)
+        public HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities, string nextLink)
         {
             return new HackathonList
             {
-                values = hackathonEntities.Select(h => BuildHackathon(h, null)).ToArray(),
+                value = hackathonEntities.Select(h => BuildHackathon(h, null)).ToArray(),
+                nextLink = nextLink
             };
         }
 

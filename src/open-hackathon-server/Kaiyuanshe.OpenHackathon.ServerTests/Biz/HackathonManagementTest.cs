@@ -156,6 +156,61 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("loc", result.Location);
         }
 
+        #region ListPaginatedHackathonsAsync
+        [TestCase(5, 5)]
+        [TestCase(-1, 100)]
+        public async Task ListPaginatedHackathonsAsync_Options(int topInPara, int expectedTop)
+        {
+            HackathonQueryOptions options = new HackathonQueryOptions
+            {
+                TableContinuationToken = new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" },
+                Top = topInPara,
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+            var entities = MockHelper.CreateTableQuerySegment<HackathonEntity>(
+                 new List<HackathonEntity>
+                 {
+                     new HackathonEntity{  PartitionKey="pk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np2", NextRowKey = "nr2" }
+                );
+
+            TableQuery<HackathonEntity> tableQueryCaptured = null;
+            TableContinuationToken tableContinuationTokenCapatured = null;
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<HackathonEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<HackathonEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
+                {
+                    tableQueryCaptured = query;
+                    tableContinuationTokenCapatured = c;
+                })
+                .ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await hackathonManagement.ListPaginatedHackathonsAsync(options, cancellationToken);
+
+            Mock.VerifyAll(hackathonTable, storageContext);
+            hackathonTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("pk", segment.First().Name);
+            Assert.AreEqual("np2", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr2", segment.ContinuationToken.NextRowKey);
+            Assert.AreEqual("np", tableContinuationTokenCapatured.NextPartitionKey);
+            Assert.AreEqual("nr", tableContinuationTokenCapatured.NextRowKey);
+            Assert.AreEqual("Status eq 2", tableQueryCaptured.FilterString);
+            Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
+        }
+        #endregion
+
         [Test]
         public async Task ListHackathonAdminAsyncTest()
         {

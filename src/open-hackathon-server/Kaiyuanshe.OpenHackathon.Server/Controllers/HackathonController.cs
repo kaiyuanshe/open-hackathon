@@ -7,6 +7,7 @@ using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public IHackathonManagement HackathonManagement { get; set; }
 
         /// <summary>
-        /// List hackathons.
+        /// List paginated online hackathons.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns>A list of hackathon.</returns>
@@ -29,10 +30,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
-        public async Task<object> ListHackathon(CancellationToken cancellationToken)
+        public async Task<object> ListHackathon(
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
         {
-            var entities = await HackathonManagement.SearchHackathonAsync(null, cancellationToken);
-            return Ok(ResponseBuilder.BuildHackathonList(entities));
+            var hackathonQueryOptions = new HackathonQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top
+            };
+            var segment = await HackathonManagement.ListPaginatedHackathonsAsync(hackathonQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
+            return Ok(ResponseBuilder.BuildHackathonList(segment, nextLink));
         }
 
         #region CheckNameAvailability
