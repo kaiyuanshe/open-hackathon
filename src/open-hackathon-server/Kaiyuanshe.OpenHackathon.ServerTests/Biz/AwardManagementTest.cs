@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var cancellationToken = CancellationToken.None;
             var logger = new Mock<ILogger<AwardManagement>>();
             AwardManagement awardManagement = new AwardManagement(logger.Object);
-            var result = await awardManagement.GeAwardByIdAsync(hackName, awardId, cancellationToken);
+            var result = await awardManagement.GetAwardByIdAsync(hackName, awardId, cancellationToken);
 
             Mock.VerifyAll(logger);
             logger.VerifyNoOtherCalls();
@@ -51,7 +51,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object,
             };
-            var result = await awardManagement.GeAwardByIdAsync(hackName, awardId, cancellationToken);
+            var result = await awardManagement.GetAwardByIdAsync(hackName, awardId, cancellationToken);
 
             Mock.VerifyAll(logger, storageContext, awardTable);
             logger.VerifyNoOtherCalls();

@@ -129,6 +129,9 @@
   <data name="Auth_Unauthorized" xml:space="preserve">
     <value>Token is either missing or invalid. Please add it to Http request headers: Headers["Authorization"]=token TOKEN. </value>
   </data>
+  <data name="Award_NotFound" xml:space="preserve">
+    <value>Award with specified id is not found.</value>
+  </data>
   <data name="Enrollment_Ended" xml:space="preserve">
     <value>Enrollment already ended at {0}</value>
   </data>
