@@ -171,6 +171,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool ApprovedMemberRequired { get; set; }
         }
 
+        public class ValidateAwardOptions : ControllerValiationOptions
+        {
+        }
+
         #region ValidateHackathon
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValidateHackathonOptions options,
@@ -313,6 +317,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     options.ValidateResult = Forbidden(string.Format(Resources.TeamMember_AccessDenied, CurrentUserId));
                     return false;
                 }
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region ValidateAward
+        protected bool ValidateAward(AwardEntity award, ValidateAwardOptions options)
+        {
+            if (award == null)
+            {
+                options.ValidateResult = NotFound(Resources.Award_NotFound);
+                return false;
             }
 
             return true;

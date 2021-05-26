@@ -18,7 +18,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="awardId">unique id of the award</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<AwardEntity> GeAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
+        Task<AwardEntity> GetAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Create a new Award. No existeance check.
@@ -70,7 +70,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return awardEnity;
         }
 
-        public async Task<AwardEntity> GeAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
+        public async Task<AwardEntity> GetAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(awardId))
                 return null;
