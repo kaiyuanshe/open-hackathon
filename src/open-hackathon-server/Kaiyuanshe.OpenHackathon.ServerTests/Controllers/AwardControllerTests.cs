@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         {
             // input
             string hackName = "Foo";
-            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            HackathonEntity hackathon = new HackathonEntity { };
             Award parameter = new Award { };
             AwardEntity awardEntity = new AwardEntity
             {
@@ -165,6 +165,75 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Mock.VerifyAll(hackathonManagement, awardManagement);
             hackathonManagement.VerifyNoOtherCalls();
             awardManagement.VerifyNoOtherCalls();
+
+            Award resp = AssertHelper.AssertOKResult<Award>(result);
+            Assert.AreEqual("desc", resp.description);
+            Assert.AreEqual("pk", resp.hackathonName);
+            Assert.AreEqual("rk", resp.id);
+            Assert.AreEqual("n", resp.name);
+            Assert.AreEqual(5, resp.quantity);
+            Assert.AreEqual(AwardTarget.individual, resp.target);
+            Assert.AreEqual(1, resp.pictures.Length);
+            Assert.AreEqual("d1", resp.pictures[0].Description);
+            Assert.AreEqual("u1", resp.pictures[0].Uri);
+            Assert.AreEqual("p1", resp.pictures[0].Name);
+        }
+        #endregion
+
+        #region UpdateAward
+        [Test]
+        public async Task UpdateAward()
+        {
+            // input
+            string hackName = "Foo";
+            string awardId = "aid";
+            HackathonEntity hackathon = new HackathonEntity { };
+            Award parameter = new Award { };
+            AwardEntity awardEntity = new AwardEntity
+            {
+                Name = "n",
+                PartitionKey = "pk",
+                RowKey = "rk",
+                Description = "desc",
+                Quantity = 5,
+                Target = AwardTarget.individual,
+                Pictures = new PictureInfo[]
+                {
+                    new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
+                }
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, cancellationToken))
+                .ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.UpdateAwardAsync(awardEntity, parameter, cancellationToken))
+                .ReturnsAsync(awardEntity);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            // run
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                ResponseBuilder = new DefaultResponseBuilder(),
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.UpdateAward(hackName, awardId, parameter, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
 
             Award resp = AssertHelper.AssertOKResult<Award>(result);
             Assert.AreEqual("desc", resp.description);
