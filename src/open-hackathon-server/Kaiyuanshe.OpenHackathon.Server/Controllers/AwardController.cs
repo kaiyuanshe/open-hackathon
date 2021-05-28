@@ -27,7 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <returns>The team</returns>
+        /// <returns>The award</returns>
         /// <response code="200">Success. The response describes a award.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
@@ -43,8 +43,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
             var options = new ValidateHackathonOptions
             {
-                OnlineRequired = true,
-                HackathonOpenRequired = true,
                 HackAdminRequird = true,
                 HackathonName = hackathonName,
             };
@@ -97,6 +95,53 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return awardOptions.ValidateResult;
             }
             return Ok(ResponseBuilder.BuildAward(award));
+        }
+        #endregion
+
+        #region UpdateAward
+        /// <summary>
+        /// Update a award
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the team. Auto-generated on server side.</param>
+        /// <returns>The award</returns>
+        /// <response code="200">Success. The response describes a award.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/award/{awardId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> UpdateAward(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            [FromBody] Award parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate award
+            var award = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
+            var awardOptions = new ValidateAwardOptions { };
+            if (ValidateAward(award, awardOptions) == false)
+            {
+                return awardOptions.ValidateResult;
+            }
+
+            // update award
+            var updated = await AwardManagement.UpdateAwardAsync(award, parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildAward(updated));
         }
         #endregion
     }
