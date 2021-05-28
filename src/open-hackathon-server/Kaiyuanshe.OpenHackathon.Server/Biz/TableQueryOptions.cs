@@ -33,4 +33,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public TeamMemberRole? Role { get; set; }
         public TeamMemberStatus? Status { get; set; }
     }
+
+    public class AwardQueryOptions : TableQueryOptions
+    {
+
+    }
 }

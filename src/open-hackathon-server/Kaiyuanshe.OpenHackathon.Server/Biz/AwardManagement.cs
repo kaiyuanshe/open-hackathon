@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// List paged awards of hackathon
+        /// </summary>
+        /// <param name="hackathonName">name of hackathon</param>
+        /// <param name="options">options for query</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default);
 
     }
 
@@ -76,6 +87,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return null;
 
             return await StorageContext.AwardTable.RetrieveAsync(hackathonName.ToLower(), awardId, cancellationToken);
+        }
+
+        public async Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQuery.GenerateFilterCondition(
+                           nameof(AwardEntity.PartitionKey),
+                           QueryComparisons.Equal,
+                           hackathonName);
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<AwardEntity> query = new TableQuery<AwardEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.AwardTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
 
         public async Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default)
