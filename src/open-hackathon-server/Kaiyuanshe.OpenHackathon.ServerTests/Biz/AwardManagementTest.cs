@@ -4,10 +4,13 @@ using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -253,5 +256,81 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(expectedEntity.Pictures[0].Description, result.Pictures[0].Description);
             }
         }
+
+        #region ListPaginatedAwardsAsync
+
+        private static IEnumerable ListPaginatedAwardsAsyncTestData()
+        {
+            // arg0: options
+            // arg1: expected top
+            // arg2: expected query
+
+            // no options
+            yield return new TestCaseData(
+                null,
+                100,
+                "PartitionKey eq 'foo'"
+                );
+
+            // top
+            yield return new TestCaseData(
+                new AwardQueryOptions { Top = 5 },
+                5,
+                "PartitionKey eq 'foo'"
+                );
+            yield return new TestCaseData(
+               new AwardQueryOptions { Top = -1 },
+               100,
+               "PartitionKey eq 'foo'"
+               );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedAwardsAsyncTestData))]
+        public async Task ListPaginatedAwardsAsync_Options(AwardQueryOptions options, int expectedTop, string expectedFilter)
+        {
+            string hackName = "foo";
+            CancellationToken cancellationToken = CancellationToken.None;
+            var entities = MockHelper.CreateTableQuerySegment<AwardEntity>(
+                 new List<AwardEntity>
+                 {
+                     new AwardEntity{  PartitionKey="pk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" }
+                );
+
+            TableQuery<AwardEntity> tableQueryCaptured = null;
+            TableContinuationToken tableContinuationTokenCapatured = null;
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardTable = new Mock<IAwardTable>();
+            awardTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<AwardEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
+                .Callback<TableQuery<AwardEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
+                {
+                    tableQueryCaptured = query;
+                    tableContinuationTokenCapatured = c;
+                })
+                .ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardTable).Returns(awardTable.Object);
+
+            var awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await awardManagement.ListPaginatedAwardsAsync(hackName, options, cancellationToken);
+
+            Mock.VerifyAll(awardTable, storageContext);
+            awardTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("pk", segment.First().HackathonName);
+            Assert.AreEqual("np", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
+            Assert.IsNull(tableContinuationTokenCapatured);
+            Assert.AreEqual(expectedFilter, tableQueryCaptured.FilterString);
+            Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
+        }
+        #endregion
     }
 }
