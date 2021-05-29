@@ -6,9 +6,11 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -246,6 +248,110 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("d1", resp.pictures[0].Description);
             Assert.AreEqual("u1", resp.pictures[0].Uri);
             Assert.AreEqual("p1", resp.pictures[0].Name);
+        }
+        #endregion
+
+        #region ListAwards
+        private static IEnumerable ListAwardsTestData()
+        {
+            // arg0: pagination
+            // arg1: mocked TableCotinuationToken
+            // arg2: expected options
+            // arg3: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    new AwardQueryOptions { },
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    new AwardQueryOptions
+                    {
+                        Top = 10,
+                        TableContinuationToken = new TableContinuationToken
+                        {
+                            NextPartitionKey = "np",
+                            NextRowKey = "nr"
+                        },
+                    },
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    new AwardQueryOptions { },
+                    "&np=np&nr=nr"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListAwardsTestData))]
+        public async Task ListAwards(
+            Pagination pagination,
+            TableContinuationToken continuationToken,
+            AwardQueryOptions expectedOptions,
+            string expectedLink)
+        {
+            // input
+            var hackName = "Hack";
+            var cancellationToken = CancellationToken.None;
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var awards = new List<AwardEntity>
+            {
+                new AwardEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                }
+            };
+            var segment = MockHelper.CreateTableQuerySegment(awards, continuationToken);
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+            var awardManagement = new Mock<IAwardManagement>();
+            AwardQueryOptions optionsCaptured = null;
+            awardManagement.Setup(p => p.ListPaginatedAwardsAsync("hack", It.IsAny<AwardQueryOptions>(), cancellationToken))
+                .Callback<string, AwardQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    optionsCaptured = o;
+                })
+                .ReturnsAsync(segment);
+
+            // run
+            var controller = new AwardController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+            };
+            var result = await controller.ListAwards(hackName, pagination, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<AwardList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].id);
+            Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
         #endregion
     }
