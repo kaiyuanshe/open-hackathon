@@ -332,5 +332,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
         }
         #endregion
+
+        #region DeleteAwardAsync
+        [Test]
+        public async Task DeleteAwardAsync()
+        {
+            var cancellationToken = CancellationToken.None;
+            AwardEntity award = new AwardEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+            };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardTable = new Mock<IAwardTable>();
+            awardTable.Setup(t => t.DeleteAsync("pk", "rk", cancellationToken));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardTable).Returns(awardTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await awardManagement.DeleteAwardAsync(award, cancellationToken);
+
+            Mock.VerifyAll(logger, storageContext, awardTable);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            awardTable.VerifyNoOtherCalls();
+        }
+        #endregion
     }
 }
