@@ -62,7 +62,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region GetAward
         /// <summary>
-        /// Query a award
+        /// Query an award
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
@@ -102,7 +102,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region UpdateAward
         /// <summary>
-        /// Update a award
+        /// Update an award
         /// </summary>
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
@@ -192,6 +192,46 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     segment,
                     ResponseBuilder.BuildAward,
                     nextLink));
+        }
+        #endregion
+
+        #region DeleteAward
+        /// <summary>
+        /// Delete an award
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the team. Auto-generated on server side.</param>
+        /// <response code="204">Success. The response indicates that a award is deleted.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/award/{awardId}")]
+        public async Task<object> DeleteAward(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // get award
+            var award = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
+            if(award == null)
+            {
+                return NoContent();
+            }
+
+            // delete award
+            await AwardManagement.DeleteAwardAsync(award, cancellationToken);
+            return NoContent();
         }
         #endregion
     }

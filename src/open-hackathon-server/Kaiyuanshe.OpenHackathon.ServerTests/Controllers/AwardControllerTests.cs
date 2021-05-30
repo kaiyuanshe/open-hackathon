@@ -354,5 +354,74 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
         #endregion
+
+        #region DeleteAward
+        [Test]
+        public async Task DeleteAward_FirstTime()
+        {
+            // input
+            string hackName = "Foo";
+            HackathonEntity hackathon = new HackathonEntity { };
+            string awardId = "aid";
+            AwardEntity awardEntity = new AwardEntity { };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, cancellationToken))
+                .ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.DeleteAwardAsync(awardEntity, cancellationToken));
+
+            // run
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+            };
+            var result = await controller.DeleteAward(hackName, awardId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertNoContentResult(result);
+        }
+
+        [Test]
+        public async Task DeleteAward_SecondTime()
+        {
+            // input
+            string hackName = "Foo";
+            HackathonEntity hackathon = new HackathonEntity { };
+            string awardId = "aid";
+            AwardEntity awardEntity = null;
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, cancellationToken))
+                .ReturnsAsync(awardEntity);
+
+            // run
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+            };
+            var result = await controller.DeleteAward(hackName, awardId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }
