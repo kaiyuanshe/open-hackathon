@@ -49,6 +49,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Delete a new Award. 
+        /// </summary>
+        /// <param name="entity">award to update.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default);
     }
 
 
@@ -79,6 +86,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             };
             await StorageContext.AwardTable.InsertAsync(awardEnity);
             return awardEnity;
+        }
+
+        public async Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default)
+        {
+            if (entity == null)
+                return;
+
+            await StorageContext.AwardTable.DeleteAsync(entity.PartitionKey, entity.RowKey, cancellationToken);
         }
 
         public async Task<AwardEntity> GetAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
