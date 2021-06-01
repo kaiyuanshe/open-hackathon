@@ -5,6 +5,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
     public interface IStorageContext
     {
         IAwardTable AwardTable { get; }
+        IAwardAssignmentTable AwardAssignmentTable { get; }
         IEnrollmentTable EnrollmentTable { get; }
         IHackathonTable HackathonTable { get; }
         IHackathonAdminTable HackathonAdminTable { get; }
@@ -20,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IStorageAccountProvider StorageAccountProvider { get; }
 
         public IAwardTable AwardTable { get; }
+        public IAwardAssignmentTable AwardAssignmentTable { get; }
         public IEnrollmentTable EnrollmentTable { get; }
         public IHackathonAdminTable HackathonAdminTable { get; }
         public IHackathonTable HackathonTable { get; }
@@ -35,6 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             // tables
             var storageAccount = storageAccountProvider.HackathonServerStorage;
             AwardTable = new AwardTable(storageAccount, TableNames.Award);
+            AwardAssignmentTable = new AwardAssignmentTable(storageAccount, TableNames.AwardAssignment);
             EnrollmentTable = new EnrollmentTable(storageAccount, TableNames.Enrollment);
             HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);

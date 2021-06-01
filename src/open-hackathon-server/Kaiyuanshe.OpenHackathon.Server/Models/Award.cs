@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
+    /// <summary>
+    /// represents an award which can be assigned to a team or an individual.
+    /// </summary>
     public class Award
     {
         /// <summary>
