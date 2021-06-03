@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using System;
 using System.Threading;
@@ -43,6 +44,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.CronJobs
     public abstract class CronJobBase : ICronJob
     {
         public IStorageContext StorageContext { get; set; }
+
+        public ILoggerFactory LoggerFactory { get; set; }
+
+        protected ILogger Logger
+        {
+            get
+            {
+                return LoggerFactory.CreateLogger("CronJob");
+            }
+        }
 
         public virtual JobDataMap JobDataMap
         {

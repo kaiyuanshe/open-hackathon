@@ -1,7 +1,10 @@
 ﻿using Autofac;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.CronJobs;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
+using Quartz;
+using Quartz.Spi;
 
 namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 {
@@ -21,6 +24,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 
             // Response
             builder.RegisterType<DefaultResponseBuilder>().As<IResponseBuilder>().PropertiesAutowired().SingleInstance();
+
+            // CronJob
+            builder.RegisterTypes(typeof(ICronJob).SubTypes()).SingleInstance().PropertiesAutowired();
+            builder.RegisterType<CronJobFactory>().AsSelf().As<IJobFactory>().SingleInstance().PropertiesAutowired();
+            builder.RegisterType<CronJobSchedulerFactory>().AsSelf().As<ISchedulerFactory>().SingleInstance().PropertiesAutowired();
+            builder.RegisterType<CronJobScheduler>().As<ICronJobScheduler>().SingleInstance().PropertiesAutowired();
         }
     }
 }
