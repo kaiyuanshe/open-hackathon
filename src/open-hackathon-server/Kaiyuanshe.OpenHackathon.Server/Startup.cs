@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
+using Kaiyuanshe.OpenHackathon.Server.CronJobs;
 using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
 using Kaiyuanshe.OpenHackathon.Server.Middlewares;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
@@ -118,6 +119,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // Configure Swagger
             SwaggerStartup.Configure(app, env);
+
+            // start CronJobs
+            var cronJobScheduler = AutofacContainer.Resolve<ICronJobScheduler>();
+            cronJobScheduler.ScheduleJobsAsync(AutofacContainer).Wait();
         }
 
         private void RegisterMiddlewares(IApplicationBuilder app)
