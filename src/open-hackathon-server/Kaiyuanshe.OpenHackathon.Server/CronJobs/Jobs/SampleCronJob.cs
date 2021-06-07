@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.CronJobs
+namespace Kaiyuanshe.OpenHackathon.Server.CronJobs.Jobs
 {
     public class SampleCronJob : CronJobBase
     {

@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="CronJobs\CronJobHostedService.cs~RF81bb8f2e.TMP" />
     <None Remove="ResponseBuilder\DefaultResponseBuilder.cs~RF1b9c381c.TMP" />
   </ItemGroup>
 
