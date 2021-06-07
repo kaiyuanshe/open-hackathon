@@ -67,8 +67,12 @@ namespace Kaiyuanshe.OpenHackathon.Server
             // AuthN & AuthZ
             RegisterAuthorizeHandlers(services);
 
+            // Cron Jobs
+            services.AddHostedService<CronJobHostedService>();
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             SwaggerStartup.ConfigureService(services);
+
         }
 
         // ConfigureContainer is where you can register things directly
@@ -119,10 +123,6 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
             // Configure Swagger
             SwaggerStartup.Configure(app, env);
-
-            // start CronJobs
-            var cronJobScheduler = AutofacContainer.Resolve<ICronJobScheduler>();
-            cronJobScheduler.ScheduleJobsAsync(AutofacContainer).Wait();
         }
 
         private void RegisterMiddlewares(IApplicationBuilder app)
