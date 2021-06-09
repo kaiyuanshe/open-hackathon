@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.CronJobs;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
@@ -24,6 +25,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 
             // Response
             builder.RegisterType<DefaultResponseBuilder>().As<IResponseBuilder>().PropertiesAutowired().SingleInstance();
+
+            // Cache
+            builder.RegisterType<DefaultCacheProvider>().As<ICacheProvider>().PropertiesAutowired().SingleInstance();
 
             // CronJob
             builder.RegisterTypes(typeof(ICronJob).SubTypes()).SingleInstance().PropertiesAutowired();

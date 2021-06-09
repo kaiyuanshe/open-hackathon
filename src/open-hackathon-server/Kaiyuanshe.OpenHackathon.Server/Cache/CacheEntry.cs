@@ -23,7 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         {
             get
             {
-                return $"{CacheEntryType}-{SubCacheKey}";
+                return GetCacheKey(CacheEntryType, SubCacheKey);
             }
         }
 
@@ -31,6 +31,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
 
         public abstract bool AutoRefresh { get; }
 
+        public abstract Task<object> SupplyValueAsync(CancellationToken cancellationToken);
+
+        public static string GetCacheKey(CacheEntryType cacheEntryType, string subCacheKey)
+        {
+            return $"{cacheEntryType}-{subCacheKey}";
+        }
     }
 
     public class CacheEntry<TValue> : CacheEntry
@@ -59,7 +65,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
 
         public override bool AutoRefresh => autoRefresh;
 
-        public async Task<TValue> SupplyValueAsync(CancellationToken cancellationToken)
+        public override async Task<object> SupplyValueAsync(CancellationToken cancellationToken)
         {
             return await supplyValueAsync(cancellationToken);
         }
