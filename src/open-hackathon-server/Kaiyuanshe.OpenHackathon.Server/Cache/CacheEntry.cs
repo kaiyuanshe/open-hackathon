@@ -9,23 +9,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
 {
     public abstract class CacheEntry
     {
-        public CacheEntryType CacheEntryType { get; protected set; }
-
-        /// <summary>
-        /// sub key in each CacheEntryType. The full cache key is of format `{CacheEntryType}-{SubCacheKeyk}`
-        /// </summary>
-        public string SubCacheKey { get; protected set; }
-
         /// <summary>
         /// Unique Key to set/retrive data in Cache provider
         /// </summary>
-        public string CacheKey
-        {
-            get
-            {
-                return GetCacheKey(CacheEntryType, SubCacheKey);
-            }
-        }
+        public string CacheKey { get; protected set; }
 
         public CacheItemPolicy CachePolicy { get; protected set; }
 
@@ -33,10 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
 
         public abstract Task<object> SupplyValueAsync(CancellationToken cancellationToken);
 
-        public static string GetCacheKey(CacheEntryType cacheEntryType, string subCacheKey)
-        {
-            return $"{cacheEntryType}-{subCacheKey}";
-        }
+
     }
 
     public class CacheEntry<TValue> : CacheEntry
@@ -47,17 +31,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         private Func<CancellationToken, Task<TValue>> supplyValueAsync;
         private bool autoRefresh;
 
-        public CacheEntry(CacheEntryType cacheEntryType, string subCacheKey, bool autoRefresh, CacheItemPolicy policy, Func<CancellationToken, Task<TValue>> supplyValue)
+        public CacheEntry(string cacheKey, bool autoRefresh, CacheItemPolicy policy, Func<CancellationToken, Task<TValue>> supplyValue)
         {
-            if (subCacheKey == null)
-                throw new ArgumentNullException(nameof(subCacheKey));
+            if (cacheKey == null)
+                throw new ArgumentNullException(nameof(cacheKey));
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
             if (supplyValue == null)
                 throw new ArgumentNullException(nameof(supplyValue));
 
-            CacheEntryType = cacheEntryType;
-            SubCacheKey = subCacheKey;
+            CacheKey = cacheKey;
             this.autoRefresh = autoRefresh;
             CachePolicy = policy;
             supplyValueAsync = supplyValue;

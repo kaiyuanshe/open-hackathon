@@ -15,8 +15,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         public async Task GetOrAddAsync()
         {
             CacheEntry<string> entry = new CacheEntry<string>(
-                CacheEntryType.Default,
-                "key",
+                "GetOrAddAsync",
                 false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
                 (token) => { return Task.FromResult("second"); }
@@ -34,7 +33,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             // not autofresh
             CacheEntry<string> first = new CacheEntry<string>(
-                CacheEntryType.Default,
                 "first",
                 false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
@@ -42,7 +40,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
                 );
             // existing in cache
             CacheEntry<string> second = new CacheEntry<string>(
-                CacheEntryType.Default,
                 "second",
                 true,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
@@ -50,7 +47,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
                 );
             // refreshed
             CacheEntry<string> third = new CacheEntry<string>(
-                CacheEntryType.Default,
                 "third",
                 true,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
@@ -80,8 +76,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         public async Task RefreshAsync()
         {
             CacheEntry<string> entry = new CacheEntry<string>(
-                CacheEntryType.User,
-                "t3",
+                "RefreshAsync",
                 false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
                 (token) => { return Task.FromResult("t3"); }
@@ -92,19 +87,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
             await cacheProvider.GetOrAddAsync(entry, cancellationToken);
             Assert.IsFalse(MemoryCache.Default.Contains(entry.CacheKey));
 
-            await cacheProvider.RefreshAsync(entry.CacheEntryType, entry.SubCacheKey, cancellationToken);
+            await cacheProvider.RefreshAsync(entry.CacheKey, cancellationToken);
             Assert.IsTrue(MemoryCache.Default.Contains(entry.CacheKey));
             Assert.AreEqual("t3", (string)MemoryCache.Default.Get(entry.CacheKey));
 
-            await cacheProvider.RefreshAsync(entry.CacheEntryType, "unknown", cancellationToken);
-            Assert.IsFalse(MemoryCache.Default.Contains(CacheEntry.GetCacheKey(entry.CacheEntryType, "unknown")));
+            await cacheProvider.RefreshAsync("unknown", cancellationToken);
+            Assert.IsFalse(MemoryCache.Default.Contains("unknown"));
         }
 
         [Test]
         public async Task GetOrAddInternalTest()
         {
             CacheEntry<string> entry = new CacheEntry<string>(
-               CacheEntryType.Token,
                "internal",
                false,
                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },

@@ -22,11 +22,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         /// <summary>
         /// Refresh the cached value. Ignored if CacheEntry is not found.
         /// </summary>
-        /// <param name="cacheEntryType"></param>
-        /// <param name="subCacheKey"></param>
+        /// <param name="cacheKey"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task RefreshAsync(CacheEntryType cacheEntryType, string subCacheKey, CancellationToken cancellationToken);
+        public Task RefreshAsync(string cacheKey, CancellationToken cancellationToken);
 
         /// <summary>
         /// Refresh all cached values if expired and AutoRefresh is enabled
@@ -73,9 +72,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
             }
         }
 
-        public async Task RefreshAsync(CacheEntryType cacheEntryType, string subCacheKey, CancellationToken cancellationToken)
+        public async Task RefreshAsync(string cacheKey, CancellationToken cancellationToken)
         {
-            if (cacheEntries.TryGetValue(CacheEntry.GetCacheKey(cacheEntryType, subCacheKey), out CacheEntry cacheEntry))
+            if (cacheEntries.TryGetValue(cacheKey, out CacheEntry cacheEntry))
             {
                 var value = await cacheEntry.SupplyValueAsync(cancellationToken);
                 cache.Add(cacheEntry.CacheKey, value, cacheEntry.CachePolicy);
