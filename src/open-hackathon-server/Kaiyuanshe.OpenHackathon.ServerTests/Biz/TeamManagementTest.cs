@@ -117,7 +117,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 .ReturnsAsync(MockHelper.CreateTableQuerySegment(teamMembers, null));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
-            var cache = new DefaultCacheProvider();
+            var cache = new DefaultCacheProvider(null);
 
             var teamManagement = new TeamManagement(logger.Object)
             {

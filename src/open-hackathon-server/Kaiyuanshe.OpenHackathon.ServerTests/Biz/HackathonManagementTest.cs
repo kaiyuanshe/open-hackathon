@@ -227,7 +227,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var hackAdminTable = new Mock<IHackathonAdminTable>();
             storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackAdminTable.Object);
             hackAdminTable.Setup(p => p.ListByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
-            var cache = new DefaultCacheProvider();
+            var cache = new DefaultCacheProvider(null);
 
             var hackathonManagement = new HackathonManagement(null)
             {

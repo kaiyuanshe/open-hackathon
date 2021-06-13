@@ -23,7 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
             CancellationToken cancellationToken = CancellationToken.None;
 
             MemoryCache.Default.Add(entry.CacheKey, "first", entry.CachePolicy);
-            var cacheProvider = new DefaultCacheProvider();
+            var cacheProvider = new DefaultCacheProvider(null);
             string value = await cacheProvider.GetOrAddAsync(entry, cancellationToken);
             Assert.AreEqual("second", value);
         }
@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
                 );
             CancellationToken cancellationToken = CancellationToken.None;
 
-            var cacheProvider = new DefaultCacheProvider();
+            var cacheProvider = new DefaultCacheProvider(null);
             await cacheProvider.GetOrAddAsync(first, cancellationToken);
             await cacheProvider.GetOrAddAsync(second, cancellationToken);
             await cacheProvider.GetOrAddAsync(third, cancellationToken);
@@ -83,7 +83,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
                 );
             CancellationToken cancellationToken = CancellationToken.None;
 
-            var cacheProvider = new DefaultCacheProvider();
+            var cacheProvider = new DefaultCacheProvider(null);
             await cacheProvider.GetOrAddAsync(entry, cancellationToken);
             Assert.IsFalse(MemoryCache.Default.Contains(entry.CacheKey));
 
@@ -107,7 +107,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
                }, false);
             CancellationToken cancellationToken = CancellationToken.None;
 
-            var cacheProvider = new DefaultCacheProvider();
+            var cacheProvider = new DefaultCacheProvider(null);
 
             MemoryCache.Default.Add(entry.CacheKey, "existing", entry.CachePolicy);
             string value = (string)await cacheProvider.GetOrAddAsyncInternal(entry, cancellationToken);
