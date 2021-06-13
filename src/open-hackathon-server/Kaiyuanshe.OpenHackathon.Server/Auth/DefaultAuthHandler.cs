@@ -1,5 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
-using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
@@ -33,17 +34,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
         private IUserManagement userManagement;
         private ProblemDetailsFactory problemDetailsFactory;
         private Func<HttpResponse, string, CancellationToken, Task> writeToResponse;
+        private ICacheProvider cache;
 
         public DefaultAuthHandler(IOptionsMonitor<DefaultAuthSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder, ISystemClock clock,
             IUserManagement userManagement,
+            ICacheProvider cache,
             ProblemDetailsFactory problemDetailsFactory,
             Func<HttpResponse, string, CancellationToken, Task> writeToResponse = null)
             : base(options, logger, encoder, clock)
         {
             this.userManagement = userManagement;
             this.problemDetailsFactory = problemDetailsFactory;
+            this.cache = cache;
             this.writeToResponse = writeToResponse ?? HttpResponseWritingExtensions.WriteAsync;
         }
 
@@ -71,10 +75,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             }
 
             // get Claims
-            string cacheKey = CacheKey.Get(CacheKey.Section.Token, DigestHelper.SHA512Digest(token));
-            var claims = await CacheHelper.GetOrAddAsync(cacheKey,
-                () => userManagement.GetUserBasicClaimsAsync(token),
-                CacheHelper.ExpireIn10M);
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.Token, DigestHelper.SHA512Digest(token));
+            var claims = await cache.GetOrAddAsync(
+                cacheKey,
+                CachePolicies.ExpireIn10M,
+                (cancellationToken) => userManagement.GetUserBasicClaimsAsync(token, cancellationToken));
             var identity = new ClaimsIdentity(claims, AuthConstant.AuthType.Token);
             var claimsPrincipal = new ClaimsPrincipal(identity);
             return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, AuthConstant.AuthType.Token));

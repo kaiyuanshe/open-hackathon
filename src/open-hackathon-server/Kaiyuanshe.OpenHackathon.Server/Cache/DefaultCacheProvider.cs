@@ -20,6 +20,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         public Task<TValue> GetOrAddAsync<TValue>(CacheEntry<TValue> cacheEntry, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Removes a cache entry from the cache.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns>If the entry is found in the cache, the removed cache entry; otherwise, null.</returns>
+        public object Remove(string key);
+
+        /// <summary>
         /// Refresh the cached value. Ignored if CacheEntry is not found.
         /// </summary>
         /// <param name="cacheKey"></param>
@@ -81,6 +88,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
             }
         }
 
+        public object Remove(string key)
+        {
+            if (cache.Contains(key))
+            {
+                return cache.Remove(key);
+            }
+
+            return null;
+        }
+
         internal async Task<object> GetOrAddAsyncInternal(CacheEntry cacheEntry, CancellationToken cancellationToken)
         {
             if (!cache.Contains(cacheEntry.CacheKey))
@@ -100,6 +117,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
             {
                 return cache[cacheEntry.CacheKey];
             }
+        }
+    }
+
+    public static class CacheProviderExtension
+    {
+        public static Task<TValue> GetOrAddAsync<TValue>(
+            this ICacheProvider cache,
+            string cacheKey,
+            CacheItemPolicy policy,
+            Func<CancellationToken, Task<TValue>> supplyVaule,
+            bool autoRefresh = false,
+            CancellationToken cancellationToken = default)
+        {
+            if (cache == null)
+                return null;
+
+            var entry = new CacheEntry<TValue>(cacheKey, policy, supplyVaule, autoRefresh);
+            return cache.GetOrAddAsync(entry, cancellationToken);
         }
     }
 }

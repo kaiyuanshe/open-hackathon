@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server;
 using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -40,11 +41,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
             usertable.Setup(u => u.SaveUserAsync(userInfo, cancellationToken)).ReturnsAsync(dynamicEntity);
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), cancellationToken));
+            var cache = new DefaultCacheProvider();
 
             // test
             var userMgmt = new UserManagement
             {
-                StorageContext = storage.Object
+                StorageContext = storage.Object,
+                Cache = cache,
             };
             await userMgmt.AuthingAsync(userInfo, cancellationToken);
 

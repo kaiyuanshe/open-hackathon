@@ -16,9 +16,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                 "GetOrAddAsync",
-                false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
-                (token) => { return Task.FromResult("second"); }
+                (token) => { return Task.FromResult("second"); },
+                false
                 );
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -34,23 +34,23 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
             // not autofresh
             CacheEntry<string> first = new CacheEntry<string>(
                 "first",
-                false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
-                (token) => { return Task.FromResult("first"); }
+                (token) => { return Task.FromResult("first"); },
+                false
                 );
             // existing in cache
             CacheEntry<string> second = new CacheEntry<string>(
                 "second",
-                true,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
-                (token) => { return Task.FromResult("second"); }
+                (token) => { return Task.FromResult("second"); },
+                true
                 );
             // refreshed
             CacheEntry<string> third = new CacheEntry<string>(
                 "third",
-                true,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
-                (token) => { return Task.FromResult("third"); }
+                (token) => { return Task.FromResult("third"); },
+                true
                 );
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -77,9 +77,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                 "RefreshAsync",
-                false,
                 new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
-                (token) => { return Task.FromResult("t3"); }
+                (token) => { return Task.FromResult("t3"); },
+                false
                 );
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -100,12 +100,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                "internal",
-               false,
                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
                (token) =>
                {
                    return Task.FromResult("first");
-               });
+               }, false);
             CancellationToken cancellationToken = CancellationToken.None;
 
             var cacheProvider = new DefaultCacheProvider();

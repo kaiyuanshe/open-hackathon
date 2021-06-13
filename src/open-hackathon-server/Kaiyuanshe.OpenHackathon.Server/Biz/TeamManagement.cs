@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Helpers;
+﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
+using Kaiyuanshe.OpenHackathon.Server.Helpers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
@@ -85,7 +86,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Create a new team member. Not existance check. Please check existance before call this method
         /// </summary>
-        /// <param name="team"></param>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
@@ -211,7 +211,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public async Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default)
         {
-            Func<Task<IEnumerable<TeamMemberEntity>>> supplyValue = async () =>
+            Func<CancellationToken, Task<IEnumerable<TeamMemberEntity>>> supplyValue = async (ct) =>
             {
                 var filter = TableQuery.GenerateFilterCondition(
                               nameof(EnrollmentEntity.PartitionKey),
@@ -224,14 +224,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 TableContinuationToken continuationToken = null;
                 do
                 {
-                    var segment = await StorageContext.TeamMemberTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+                    var segment = await StorageContext.TeamMemberTable.ExecuteQuerySegmentedAsync(query, continuationToken, ct);
                     members.AddRange(segment);
                 } while (continuationToken != null);
                 return members;
             };
 
             string cacheKey = $"team_members_{teamId}";
-            return await CacheHelper.GetOrAddAsync(cacheKey, supplyValue, CacheHelper.ExpireIn1M);
+            return await Cache.GetOrAddAsync(cacheKey, CachePolicies.ExpireIn1M, supplyValue, false, cancellationToken);
         }
 
         public async Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default)
