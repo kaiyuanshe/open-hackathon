@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
     {
         static MemoryCache cache = MemoryCache.Default;
         static Dictionary<string, CacheEntry> cacheEntries = new Dictionary<string, CacheEntry>();
+        private readonly ILogger Logger;
+
+        public DefaultCacheProvider(ILogger<DefaultCacheProvider> logger)
+        {
+            Logger = logger;
+        }
 
         public async Task<TValue> GetOrAddAsync<TValue>(CacheEntry<TValue> cacheEntry, CancellationToken cancellationToken)
         {
@@ -74,6 +81,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
                     continue;
                 }
 
+                Logger?.LogInformation($"Refreshing entry in cache: {cacheEntry.CacheKey}");
                 var value = await cacheEntry.SupplyValueAsync(cancellationToken);
                 cache.Add(cacheEntry.CacheKey, value, cacheEntry.CachePolicy);
             }

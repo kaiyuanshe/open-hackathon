@@ -41,7 +41,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storage.SetupGet(s => s.UserTokenTable).Returns(tokenTable.Object);
             usertable.Setup(u => u.SaveUserAsync(userInfo, cancellationToken)).ReturnsAsync(dynamicEntity);
             tokenTable.Setup(t => t.InsertOrReplaceAsync(It.IsAny<UserTokenEntity>(), cancellationToken));
-            var cache = new DefaultCacheProvider();
+            var cache = new DefaultCacheProvider(null);
 
             // test
             var userMgmt = new UserManagement
