@@ -1,6 +1,7 @@
 ﻿using Authing.ApiClient.Auth;
 using Authing.ApiClient.Types;
 using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
@@ -81,7 +82,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             userInfo.Id = userInfo.Id?.ToLower();
             await StorageContext.UserTable.SaveUserAsync(userInfo, cancellationToken);
-            CacheHelper.Remove(CacheKey.Get(CacheKey.Section.User, userInfo.Id));
+            Cache.Remove(CacheKeys.GetCacheKey(CacheEntryType.User, userInfo.Id));
 
             // UserTokenEntity. 
             var userToken = new UserTokenEntity

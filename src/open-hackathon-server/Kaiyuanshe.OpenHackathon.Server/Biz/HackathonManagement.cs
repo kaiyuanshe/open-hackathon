@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Helpers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -341,13 +342,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
         {
-            string cacheKey = CacheKey.Get(CacheKey.Section.HackathonAdmin, name);
-            return await CacheHelper.GetOrAddAsync(cacheKey,
-                async () =>
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.HackathonAdmin, name);
+            return await Cache.GetOrAddAsync(cacheKey,
+                CachePolicies.ExpireIn10M,
+                (token) =>
                 {
-                    return await StorageContext.HackathonAdminTable.ListByHackathonAsync(name, cancellationToken);
-                },
-                CacheHelper.ExpireIn10M);
+                    return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
+                }, false, cancellationToken);
         }
         #endregion
     }

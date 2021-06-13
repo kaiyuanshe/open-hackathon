@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -226,10 +227,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var hackAdminTable = new Mock<IHackathonAdminTable>();
             storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackAdminTable.Object);
             hackAdminTable.Setup(p => p.ListByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
+            var cache = new DefaultCacheProvider();
 
             var hackathonManagement = new HackathonManagement(null)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache,
             };
             var results = await hackathonManagement.ListHackathonAdminAsync(name, cancellationToken);
 

@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -116,10 +117,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 .ReturnsAsync(MockHelper.CreateTableQuerySegment(teamMembers, null));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+            var cache = new DefaultCacheProvider();
 
             var teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache,
             };
             var results = await teamManagement.ListTeamMembersAsync("tid", cancellationToken);
 

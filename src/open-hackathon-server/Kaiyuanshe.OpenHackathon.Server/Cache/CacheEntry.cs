@@ -31,7 +31,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         private Func<CancellationToken, Task<TValue>> supplyValueAsync;
         private bool autoRefresh;
 
-        public CacheEntry(string cacheKey, bool autoRefresh, CacheItemPolicy policy, Func<CancellationToken, Task<TValue>> supplyValue)
+        public CacheEntry(string cacheKey, CacheItemPolicy policy, Func<CancellationToken, Task<TValue>> supplyValue, bool autoRefresh)
         {
             if (cacheKey == null)
                 throw new ArgumentNullException(nameof(cacheKey));
