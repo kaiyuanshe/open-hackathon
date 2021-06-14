@@ -1,10 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Helpers
+namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public static class TableQueryHelper
     {

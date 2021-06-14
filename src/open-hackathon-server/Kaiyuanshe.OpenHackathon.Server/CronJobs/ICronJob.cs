@@ -51,7 +51,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.CronJobs
         {
             get
             {
-                return LoggerFactory.CreateLogger("CronJob");
+                return LoggerFactory?.CreateLogger("CronJob");
             }
         }
 
