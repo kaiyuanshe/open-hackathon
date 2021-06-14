@@ -1,13 +1,11 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
-using Kaiyuanshe.OpenHackathon.Servers;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
