@@ -16,6 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
     public enum CacheEntryType
     {
         Default,
+        Hackathon,
         Token,
         HackathonAdmin,
         User,

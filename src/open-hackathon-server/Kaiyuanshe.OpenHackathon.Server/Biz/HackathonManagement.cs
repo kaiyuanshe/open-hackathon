@@ -57,6 +57,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// List all hackathons
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Get roles of a user on a specified hackathon
         /// </summary>
         /// <param name="hackathonName"></param>
@@ -257,6 +265,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 isJudge = isJudge
             };
         }
+
+        public async Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default)
+        {
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
+            return await Cache.GetOrAddAsync(cacheKey,
+                CachePolicies.ExpireIn1H,
+                (token) =>
+                {
+                    return StorageContext.HackathonTable.ListAllHackathonsAsync(token);
+                }, true, cancellationToken);
+        }
         #endregion
 
         #region Enrollment
@@ -350,6 +369,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
                 }, false, cancellationToken);
         }
+
         #endregion
     }
 }
