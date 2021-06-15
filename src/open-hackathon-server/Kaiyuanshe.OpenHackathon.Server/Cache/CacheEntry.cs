@@ -37,7 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
                 throw new ArgumentNullException(nameof(cacheKey));
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
-            if (supplyValue == null)
+            if (supplyValue == null && !EnvHelper.IsRunningInTests())
                 throw new ArgumentNullException(nameof(supplyValue));
 
             CacheKey = cacheKey;
