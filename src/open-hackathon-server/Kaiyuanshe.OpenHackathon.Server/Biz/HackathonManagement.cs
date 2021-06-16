@@ -114,14 +114,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     /// <inheritdoc cref="IHackathonManagement"/>
     public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
-        private readonly ILogger Logger;
+        private readonly ILogger logger;
+        internal static string cacheKeyForAllHackathon = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
 
         public HackathonManagement(ILogger<HackathonManagement> logger)
         {
-            Logger = logger;
+            this.logger = logger;
         }
 
-        #region Hackahton
+        #region Hackathon Cache
+        private void InvalidateCacheAllHackathon()
+        {
+            // TODO need better cache strategy to:
+            //  1. Partially update cache;
+            //  2. cache required data only like those for filter/ordering
+            Cache.Remove(cacheKeyForAllHackathon);
+        }
+        #endregion
+
+        #region CreateHackathonAsync
         public async Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             #region Insert HackathonEntity
@@ -149,6 +160,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Location = request.location,
             };
             await StorageContext.HackathonTable.InsertAsync(entity, cancellationToken);
+            InvalidateCacheAllHackathon();
             #endregion
 
             #region Add creator as Admin
@@ -163,7 +175,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return entity;
         }
+        #endregion CreateHackathonAsync
 
+        #region UpdateHackathonStatusAsync
         public async Task<HackathonEntity> UpdateHackathonStatusAsync(HackathonEntity hackathonEntity, HackathonStatus status, CancellationToken cancellationToken = default)
         {
             if (hackathonEntity == null || hackathonEntity.Status == status)
@@ -171,15 +185,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             hackathonEntity.Status = status;
             await StorageContext.HackathonTable.MergeAsync(hackathonEntity, cancellationToken);
+
+            InvalidateCacheAllHackathon();
             return hackathonEntity;
         }
+        #endregion
 
+        #region GetHackathonEntityByNameAsync
         public async Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default)
         {
             var entity = await StorageContext.HackathonTable.RetrieveAsync(name, string.Empty, cancellationToken);
             return entity;
         }
+        #endregion
 
+        #region UpdateHackathonAsync
         public async Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default)
         {
             await StorageContext.HackathonTable.RetrieveAndMergeAsync(request.name, string.Empty, (entity) =>
@@ -208,9 +228,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 if (request.judgeEndedAt.HasValue)
                     entity.JudgeEndedAt = request.judgeEndedAt.Value;
             }, cancellationToken);
-            return await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
+            var updated = await StorageContext.HackathonTable.RetrieveAsync(request.name, string.Empty, cancellationToken);
+            InvalidateCacheAllHackathon();
+            return updated;
         }
+        #endregion
 
+        #region ListPaginatedHackathonsAsync
         public async Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default)
         {
             var filter = TableQuery.GenerateFilterConditionForInt(
@@ -230,7 +254,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
+        #endregion
 
+        #region GetHackathonRolesAsync
         public async Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default)
         {
             string userId = ClaimsHelper.GetUserId(user);
@@ -265,11 +291,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 isJudge = isJudge
             };
         }
+        #endregion
 
+        #region ListAllHackathonsAsync
         public async Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default)
         {
-            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
-            return await Cache.GetOrAddAsync(cacheKey,
+            return await Cache.GetOrAddAsync(cacheKeyForAllHackathon,
                 CachePolicies.ExpireIn1H,
                 (token) =>
                 {
@@ -293,7 +320,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             if (entity != null)
             {
-                Logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
+                logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
                 return entity;
             }
             else
@@ -311,7 +338,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 }
                 await StorageContext.EnrollmentTable.InsertAsync(entity, cancellationToken);
             }
-            Logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
+            logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
 
             return entity;
         }
@@ -323,7 +350,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             participant.Status = status;
             await StorageContext.EnrollmentTable.MergeAsync(participant, cancellationToken);
-            Logger.TraceInformation($"Pariticipant {participant.HackathonName}/{participant.UserId} stastus updated to: {status} ");
+            logger.TraceInformation($"Pariticipant {participant.HackathonName}/{participant.UserId} stastus updated to: {status} ");
             return participant;
         }
 
@@ -357,8 +384,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region Admin
-
+        #region ListHackathonAdminAsync
         public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
         {
             string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.HackathonAdmin, name);
@@ -368,8 +394,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
                 }, false, cancellationToken);
-        }
-
+        } 
         #endregion
     }
 }

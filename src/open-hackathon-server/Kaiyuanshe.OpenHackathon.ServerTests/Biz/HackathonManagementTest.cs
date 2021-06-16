@@ -38,8 +38,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             EnrollmentEntity partInserted = null;
 
             // mock
-            var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken))
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken))
                 .Callback<HackathonEntity, CancellationToken>((h, c) => { hackInserted = h; });
 
             var enrollmentTable = new Mock<IEnrollmentTable>();
@@ -47,19 +47,26 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 .Callback<EnrollmentEntity, CancellationToken>((h, c) => { partInserted = h; });
 
             var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
             storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
 
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove(HackathonManagement.cacheKeyForAllHackathon));
+
             // test
-            var hackathonManager = new HackathonManagement(null);
-            hackathonManager.StorageContext = storageContext.Object;
+            var hackathonManager = new HackathonManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
             var result = await hackathonManager.CreateHackathonAsync(request, CancellationToken.None);
 
             // verify
-            Mock.VerifyAll(hackathonTableMock, enrollmentTable, storageContext);
-            hackathonTableMock.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonTable, enrollmentTable, storageContext, cache);
+            hackathonTable.VerifyNoOtherCalls();
             enrollmentTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
 
             Assert.AreEqual("loc", result.Location);
             Assert.AreEqual("test", result.PartitionKey);
@@ -113,15 +120,21 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
 
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove(HackathonManagement.cacheKeyForAllHackathon));
+
+            // test
             var hackathonManagement = new HackathonManagement(null)
             {
-                StorageContext = storageContext.Object
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             var updated = await hackathonManagement.UpdateHackathonStatusAsync(hackathonEntity, target, cancellationToken);
 
-            Mock.VerifyAll(storageContext, hackathonTable);
+            Mock.VerifyAll(storageContext, hackathonTable, cache);
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
 
             Assert.AreEqual(target, captured.Status);
             Assert.AreEqual(target, updated.Status);
@@ -136,20 +149,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Location = "loc"
             };
 
-            var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
                 .ReturnsAsync(entity);
 
             var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
 
             var hackathonManager = new HackathonManagement(null);
             hackathonManager.StorageContext = storageContext.Object;
             var result = await hackathonManager.GetHackathonEntityByNameAsync(name, CancellationToken.None);
 
             Mock.VerifyAll();
-            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
-            hackathonTableMock.VerifyNoOtherCalls();
+            hackathonTable.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
+            hackathonTable.VerifyNoOtherCalls();
 
             storageContext.VerifyGet(p => p.HackathonTable, Times.Once);
             storageContext.VerifyNoOtherCalls();
@@ -287,23 +300,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 name = name,
             };
 
-            var hackathonTableMock = new Mock<IHackathonTable>();
-            hackathonTableMock.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None))
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None))
                 .ReturnsAsync(default(TableResult));
-            hackathonTableMock.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
+            hackathonTable.Setup(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None))
                 .ReturnsAsync(entity);
 
             var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTableMock.Object);
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
 
-            var hackathonManager = new HackathonManagement(null);
-            hackathonManager.StorageContext = storageContext.Object;
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove(HackathonManagement.cacheKeyForAllHackathon));
+
+            // test
+            var hackathonManager = new HackathonManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
             var result = await hackathonManager.UpdateHackathonAsync(request, CancellationToken.None);
 
-            Mock.VerifyAll();
-            hackathonTableMock.Verify(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None), Times.Once);
-            hackathonTableMock.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
-            hackathonTableMock.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonTable, storageContext, cache);
+            hackathonTable.Verify(p => p.RetrieveAndMergeAsync(name, string.Empty, It.IsAny<Action<HackathonEntity>>(), CancellationToken.None), Times.Once);
+            hackathonTable.Verify(p => p.RetrieveAsync(name, string.Empty, CancellationToken.None), Times.Once);
+            hackathonTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
 
             storageContext.VerifyGet(p => p.HackathonTable, Times.Exactly(2));
             storageContext.VerifyNoOtherCalls();
