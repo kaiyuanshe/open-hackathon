@@ -25,6 +25,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// List paginated online hackathons.
         /// </summary>
         /// <param name="cancellationToken"></param>
+        /// <param name="search">keyword to search in name, display name or details</param>
+        /// <param name="orderby">order by. Default to createdAt.</param>
         /// <returns>A list of hackathon.</returns>
         /// <response code="200">Success. The response describes a list of hackathon.</response>
         [HttpGet]
@@ -32,21 +34,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathons")]
         public async Task<object> ListHackathon(
             [FromQuery] Pagination pagination,
+            [FromQuery] string search,
+            [FromQuery] HackathonOrderBy? orderby,
             CancellationToken cancellationToken)
         {
             var hackathonQueryOptions = new HackathonQueryOptions
             {
                 TableContinuationToken = pagination.ToContinuationToken(),
+                OrderBy = orderby,
+                Search = search,
                 Top = pagination.top
             };
-            var segment = await HackathonManagement.ListPaginatedHackathonsAsync(hackathonQueryOptions, cancellationToken);
+            var entities = await HackathonManagement.ListPaginatedHackathonsAsync(hackathonQueryOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
                 routeValues.Add(nameof(pagination.top), pagination.top.Value);
             }
-            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
-            return Ok(ResponseBuilder.BuildHackathonList(segment, nextLink));
+            routeValues.Add(nameof(search), search);
+            if (orderby.HasValue)
+            {
+                routeValues.Add(nameof(orderby), orderby.Value);
+            }
+
+            var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);
+            return Ok(ResponseBuilder.BuildHackathonList(entities, nextLink));
         }
 
         #region CheckNameAvailability

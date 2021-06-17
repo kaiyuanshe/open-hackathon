@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
+        Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List all hackathons
@@ -235,24 +235,51 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region ListPaginatedHackathonsAsync
-        public async Task<TableQuerySegment<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        private IEnumerable<HackathonEntity> OrderByDescending(IEnumerable<HackathonEntity> entities, HackathonOrderBy? orderBy)
         {
-            var filter = TableQuery.GenerateFilterConditionForInt(
-                          nameof(HackathonEntity.Status),
-                          QueryComparisons.Equal,
-                          (int)HackathonStatus.online);
-
-            int top = 100;
-            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            var ob = orderBy.GetValueOrDefault(HackathonOrderBy.createdAt);
+            switch (ob)
             {
-                top = options.Top.Value;
+                case HackathonOrderBy.updatedAt:
+                    return entities.OrderByDescending(h => h.Timestamp);
+                default:
+                    return entities.OrderByDescending(h => h.CreatedAt);
             }
-            TableQuery<HackathonEntity> query = new TableQuery<HackathonEntity>()
-                .Where(filter)
-                .Take(top);
+        }
 
-            TableContinuationToken continuationToken = options?.TableContinuationToken;
-            return await StorageContext.HackathonTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+        public async Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
+
+            // filter
+            hackathons = hackathons.Where(h => h.Status == HackathonStatus.online);
+            if (!string.IsNullOrWhiteSpace(options.Search))
+            {
+                hackathons = hackathons.Where(h => h.Name.Contains(options.Search, StringComparison.OrdinalIgnoreCase)
+                                                || (h.DisplayName?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false)
+                                                || (h.Detail?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false));
+            }
+
+            // ordering
+            hackathons = OrderByDescending(hackathons, options.OrderBy);
+
+            // paging
+            int np = 0;
+            int.TryParse(options.TableContinuationToken?.NextPartitionKey, out np);
+            int top = options.Top.GetValueOrDefault(100);
+            hackathons = hackathons.Skip(np).Take(top);
+
+            // next paging
+            options.Next = null;
+            if (hackathons.Count() >= top)
+            {
+                options.Next = new TableContinuationToken
+                {
+                    NextPartitionKey = (np + top).ToString(),
+                    NextRowKey = "nr"
+                };
+            }
+            return hackathons;
         }
         #endregion
 
@@ -394,7 +421,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
                 }, false, cancellationToken);
-        } 
+        }
         #endregion
     }
 }

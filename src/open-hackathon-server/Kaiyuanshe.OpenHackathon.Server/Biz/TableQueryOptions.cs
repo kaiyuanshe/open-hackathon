@@ -11,11 +11,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
         public TableContinuationToken TableContinuationToken { get; set; }
         public int? Top { get; set; }
+        public TableContinuationToken Next { get; set; }
     }
 
     public class HackathonQueryOptions : TableQueryOptions
     {
-        public HackathonStatus? Status { get; set; }
+        /// <summary>
+        /// search in name/display name/desc
+        /// </summary>
+        public string Search { get; set; }
+
+        /// <summary>
+        /// Ordering. default to createdAt.
+        /// </summary>
+        public HackathonOrderBy? OrderBy { get; set; }
     }
 
     public class EnrollmentQueryOptions : TableQueryOptions
