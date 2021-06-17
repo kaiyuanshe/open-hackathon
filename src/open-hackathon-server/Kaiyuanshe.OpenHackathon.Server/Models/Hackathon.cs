@@ -209,4 +209,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         offline
     }
+
+    /// <summary>
+    /// ordering while list hackathons
+    /// </summary>
+    public enum HackathonOrderBy
+    {
+        /// <summary>
+        /// order by createdAt
+        /// </summary>
+        createdAt,
+        /// <summary>
+        /// order by updatedAt
+        /// </summary>
+        updatedAt,
+    }
 }
