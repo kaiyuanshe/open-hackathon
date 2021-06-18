@@ -19,6 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
     [TestFixture]
     public class HackathonManagementTest
     {
+        #region CreateHackathonAsyncTest
         [Test]
         public async Task CreateHackathonAsyncTest()
         {
@@ -29,58 +30,65 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 location = "loc",
                 eventStartedAt = DateTime.UtcNow,
                 tags = new string[] { "a", "b", "c" },
-                banners = new PictureInfo[] { new PictureInfo { Name = "pn", Description = "pd", Uri = "pu" } }
+                banners = new PictureInfo[] { new PictureInfo { Name = "pn", Description = "pd", Uri = "pu" } },
+                creatorId = "uid"
             };
             CancellationToken cancellationToken = CancellationToken.None;
 
             // capture
             HackathonEntity hackInserted = null;
-            EnrollmentEntity partInserted = null;
+            HackathonAdmin adminCaptured = null;
 
             // mock
             var hackathonTable = new Mock<IHackathonTable>();
             hackathonTable.Setup(p => p.InsertAsync(It.IsAny<HackathonEntity>(), cancellationToken))
                 .Callback<HackathonEntity, CancellationToken>((h, c) => { hackInserted = h; });
-
-            var enrollmentTable = new Mock<IEnrollmentTable>();
-            enrollmentTable.Setup(p => p.InsertAsync(It.IsAny<EnrollmentEntity>(), cancellationToken))
-                .Callback<EnrollmentEntity, CancellationToken>((h, c) => { partInserted = h; });
-
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
-            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
-
             var cache = new Mock<ICacheProvider>();
             cache.Setup(c => c.Remove(HackathonManagement.cacheKeyForAllHackathon));
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(a => a.CreateAdminAsync(It.IsAny<HackathonAdmin>(), cancellationToken))
+                .Callback<HackathonAdmin, CancellationToken>((a, ct) =>
+                {
+                    adminCaptured = a;
+                });
 
             // test
             var hackathonManager = new HackathonManagement(null)
             {
                 StorageContext = storageContext.Object,
+                HackathonAdminManagement = hackathonAdminManagement.Object,
                 Cache = cache.Object,
             };
             var result = await hackathonManager.CreateHackathonAsync(request, CancellationToken.None);
 
             // verify
-            Mock.VerifyAll(hackathonTable, enrollmentTable, storageContext, cache);
+            Mock.VerifyAll(hackathonTable, hackathonAdminManagement, storageContext, cache);
             hackathonTable.VerifyNoOtherCalls();
-            enrollmentTable.VerifyNoOtherCalls();
+            hackathonAdminManagement.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             cache.VerifyNoOtherCalls();
 
             Assert.AreEqual("loc", result.Location);
             Assert.AreEqual("test", result.PartitionKey);
+            Assert.AreEqual("uid", result.CreatorId);
             Assert.AreEqual(string.Empty, result.RowKey);
             Assert.IsTrue(result.EventStartedAt.HasValue);
             Assert.IsFalse(result.EventEndedAt.HasValue);
+
             Assert.AreEqual("loc", hackInserted.Location);
+            Assert.AreEqual("uid", hackInserted.CreatorId);
             Assert.AreEqual(new string[] { "a", "b", "c" }, hackInserted.Tags);
             Assert.AreEqual(1, hackInserted.Banners.Length);
             Assert.AreEqual("pn", hackInserted.Banners[0].Name);
             Assert.AreEqual("pd", hackInserted.Banners[0].Description);
             Assert.AreEqual("pu", hackInserted.Banners[0].Uri);
-            Assert.AreEqual("test", partInserted.PartitionKey);
+            
+            Assert.AreEqual("test", adminCaptured.hackathonName);
+            Assert.AreEqual("uid", adminCaptured.userId);
         }
+        #endregion
 
         [TestCase(HackathonStatus.planning, HackathonStatus.planning)]
         [TestCase(HackathonStatus.pendingApproval, HackathonStatus.pendingApproval)]

@@ -59,7 +59,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// List all hackathons
         /// </summary>
-        /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default);
@@ -117,6 +116,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         private readonly ILogger logger;
         internal static string cacheKeyForAllHackathon = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
 
+        public IHackathonAdminManagement HackathonAdminManagement { get; set; }
+
         public HackathonManagement(ILogger<HackathonManagement> logger)
         {
             this.logger = logger;
@@ -164,13 +165,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             #endregion
 
             #region Add creator as Admin
-            EnrollmentEntity participant = new EnrollmentEntity
+            await HackathonAdminManagement.CreateAdminAsync(new HackathonAdmin
             {
-                PartitionKey = request.name,
-                RowKey = request.creatorId,
-                CreatedAt = DateTime.UtcNow,
-            };
-            await StorageContext.EnrollmentTable.InsertAsync(participant, cancellationToken);
+                hackathonName = request.name,
+                userId = request.creatorId,
+            }, cancellationToken);
             #endregion
 
             return entity;
