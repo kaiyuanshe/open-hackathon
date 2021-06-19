@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 {
     [TestFixture]
-    public class LoginControllerTests
+    public class UserControllerTests
     {
+        #region AuthingTestWithInvalidToken
         [Test]
         public async Task AuthingTestWithInvalidToken()
         {
@@ -26,9 +27,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             loginManagerMoq.Setup(p => p.ValidateTokenRemotelyAsync("pool", "token", cancellationToken)).ReturnsAsync(jwtTokenStatus);
 
             // test
-            var controller = new LoginController
+            var controller = new UserController
             {
-                userManagement = loginManagerMoq.Object,
+                UserManagement = loginManagerMoq.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var resp = await controller.Authing(parameter, cancellationToken);
@@ -42,5 +43,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Assert.IsTrue(p.Detail.Contains("Some Message"));
             });
         }
+        #endregion
+
+        #region GetUserById
+        [Test]
+        public async Task GetUserById()
+        {
+            string userId = "uid";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserInfo userInfo = new UserInfo { };
+
+            // mock
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync(userId, cancellationToken))
+                .ReturnsAsync(userInfo);
+
+            // test
+            var controller = new UserController
+            {
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.GetUserById(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(userManagement);
+            userManagement.VerifyNoOtherCalls();
+            var resp = AssertHelper.AssertOKResult<UserInfo>(result);
+            Assert.AreEqual(resp, userInfo);
+        }
+
+        #endregion
     }
 }
