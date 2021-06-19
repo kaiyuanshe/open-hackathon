@@ -25,6 +25,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task AuthingAsync(UserInfo loginInfo, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Get User info from local table
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<UserInfo> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Get User remotely from Authing
         /// </summary>
         /// <param name="userPoolId"></param>
@@ -186,5 +194,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return null;
         }
+
+        #region GetCurrentUserAsync
+        public async Task<UserInfo> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            return await StorageContext.UserTable.GetUserByIdAsync(userId, cancellationToken);
+        }
+        #endregion
     }
 }

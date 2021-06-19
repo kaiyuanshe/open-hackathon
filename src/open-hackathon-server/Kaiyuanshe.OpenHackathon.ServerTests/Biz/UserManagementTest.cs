@@ -383,5 +383,34 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(AuthConstant.Issuer.Default, claim.Issuer);
 
         }
+
+        #region GetCurrentUserAsync
+        [Test]
+        public async Task GetCurrentUserAsync()
+        {
+            string userId = "uid";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserInfo userInfo = new UserInfo { };
+
+            // moc
+            var storageContext = new Mock<IStorageContext>();
+            var userTable = new Mock<IUserTable>();
+            storageContext.SetupGet(s => s.UserTable).Returns(userTable.Object);
+            userTable.Setup(u => u.GetUserByIdAsync(userId, cancellationToken)).ReturnsAsync(userInfo);
+
+            // test
+            var userManagement = new UserManagement
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await userManagement.GetUserByIdAsync(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(storageContext, userTable);
+            storageContext.VerifyNoOtherCalls();
+            userTable.VerifyNoOtherCalls();
+            Assert.AreEqual(result, userInfo);
+        }
+        #endregion
     }
 }
