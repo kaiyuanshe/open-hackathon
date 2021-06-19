@@ -9,6 +9,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -84,7 +85,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("pn", hackInserted.Banners[0].Name);
             Assert.AreEqual("pd", hackInserted.Banners[0].Description);
             Assert.AreEqual("pu", hackInserted.Banners[0].Uri);
-            
+
             Assert.AreEqual("test", adminCaptured.hackathonName);
             Assert.AreEqual("uid", adminCaptured.userId);
         }
@@ -179,58 +180,243 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
 
         #region ListPaginatedHackathonsAsync
-        //[TestCase(5, 5)]
-        //[TestCase(-1, 100)]
-        //public async Task ListPaginatedHackathonsAsync_Options(int topInPara, int expectedTop)
-        //{
-        //    HackathonQueryOptions options = new HackathonQueryOptions
-        //    {
-        //        TableContinuationToken = new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" },
-        //        Top = topInPara,
-        //    };
-        //    CancellationToken cancellationToken = CancellationToken.None;
-        //    var entities = MockHelper.CreateTableQuerySegment<HackathonEntity>(
-        //         new List<HackathonEntity>
-        //         {
-        //             new HackathonEntity{  PartitionKey="pk" }
-        //         },
-        //         new TableContinuationToken { NextPartitionKey = "np2", NextRowKey = "nr2" }
-        //        );
+        private static IEnumerable ListPaginatedHackathonsAsyncTestData()
+        {
+            var offline = new HackathonEntity { Status = HackathonStatus.offline };
+            var planning = new HackathonEntity { Status = HackathonStatus.planning };
+            var pendingApproval = new HackathonEntity { Status = HackathonStatus.pendingApproval };
 
-        //    TableQuery<HackathonEntity> tableQueryCaptured = null;
-        //    TableContinuationToken tableContinuationTokenCapatured = null;
+            var h1 = new HackathonEntity
+            {
+                Status = HackathonStatus.online,
+                PartitionKey = "h1 search",
+                CreatedAt = DateTime.Now.AddDays(1),
+                Timestamp = DateTimeOffset.Now.AddDays(1),
+            };
+            var h2 = new HackathonEntity
+            {
+                Status = HackathonStatus.online,
+                PartitionKey = "h2",
+                DisplayName = "asearch DisplayName",
+                CreatedAt = DateTime.Now.AddDays(2),
+                Timestamp = DateTimeOffset.Now.AddDays(-1),
+            };
+            var h3 = new HackathonEntity
+            {
+                Status = HackathonStatus.online,
+                PartitionKey = "h3",
+                Detail = "search Detail",
+                CreatedAt = DateTime.Now.AddDays(3),
+                Timestamp = DateTimeOffset.Now.AddDays(2),
+            };
+            var h4 = new HackathonEntity
+            {
+                Status = HackathonStatus.online,
+                PartitionKey = "searc h4",
+                CreatedAt = DateTime.Now.AddDays(4),
+                Timestamp = DateTimeOffset.Now.AddDays(-2),
+            };
 
-        //    var logger = new Mock<ILogger<HackathonManagement>>();
-        //    var hackathonTable = new Mock<IHackathonTable>();
-        //    hackathonTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<HackathonEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
-        //        .Callback<TableQuery<HackathonEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
-        //        {
-        //            tableQueryCaptured = query;
-        //            tableContinuationTokenCapatured = c;
-        //        })
-        //        .ReturnsAsync(entities);
-        //    var storageContext = new Mock<IStorageContext>();
-        //    storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+            // arg0: all hackathons
+            // arg1: options
+            // arg2: expected result
+            // arg3: expected next
 
-        //    var hackathonManagement = new HackathonManagement(logger.Object)
-        //    {
-        //        StorageContext = storageContext.Object
-        //    };
-        //    var segment = await hackathonManagement.ListPaginatedHackathonsAsync(options, cancellationToken);
+            // empty
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "planning", planning},
+                    { "pendingApproval", pendingApproval }
+                },
+                new HackathonQueryOptions { },
+                new List<HackathonEntity>
+                {
+                },
+                null
+                );
 
-        //    Mock.VerifyAll(hackathonTable, storageContext);
-        //    hackathonTable.VerifyNoOtherCalls();
-        //    storageContext.VerifyNoOtherCalls();
+            // search and default ordering
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions { Search = "search" },
+                new List<HackathonEntity>
+                {
+                    h3, h2, h1
+                },
+                null
+                );
 
-        //    Assert.AreEqual(1, segment.Count());
-        //    Assert.AreEqual("pk", segment.First().Name);
-        //    Assert.AreEqual("np2", segment.ContinuationToken.NextPartitionKey);
-        //    Assert.AreEqual("nr2", segment.ContinuationToken.NextRowKey);
-        //    Assert.AreEqual("np", tableContinuationTokenCapatured.NextPartitionKey);
-        //    Assert.AreEqual("nr", tableContinuationTokenCapatured.NextRowKey);
-        //    Assert.AreEqual("Status eq 2", tableQueryCaptured.FilterString);
-        //    Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
-        //}
+            // ordering by updateBy
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions { OrderBy = HackathonOrderBy.updatedAt },
+                new List<HackathonEntity>
+                {
+                    h3, h1, h2, h4
+                },
+                null
+                );
+
+            // paging
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions
+                {
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "3"
+                    }
+                },
+                new List<HackathonEntity>
+                {
+                    h1
+                },
+                null
+                );
+
+            // unknown paging para
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions
+                {
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "not an int"
+                    }
+                },
+                new List<HackathonEntity>
+                {
+                    h4, h3, h2, h1
+                },
+                null
+                );
+
+            // top
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions
+                {
+                    Top = 3
+                },
+                new List<HackathonEntity>
+                {
+                    h4, h3, h2
+                },
+                new TableContinuationToken
+                {
+                    NextPartitionKey = "3",
+                    NextRowKey = "nr"
+                }
+                );
+
+            // top + paging
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions
+                {
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "1"
+                    },
+                    Top = 2
+                },
+                new List<HackathonEntity>
+                {
+                    h3, h2
+                },
+                new TableContinuationToken
+                {
+                    NextPartitionKey = "3",
+                    NextRowKey = "nr"
+                }
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData))]
+        public async Task ListPaginatedHackathonsAsync_Options(
+            Dictionary<string, HackathonEntity> allHackathons,
+            HackathonQueryOptions options,
+            List<HackathonEntity> expectedResult,
+            TableContinuationToken expectedNext)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<Dictionary<string, HackathonEntity>>>(), cancellationToken))
+                .ReturnsAsync(allHackathons);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await hackathonManagement.ListPaginatedHackathonsAsync(options, cancellationToken);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            if (expectedNext == null)
+                Assert.IsNull(options.Next);
+            else
+            {
+                Assert.AreEqual(options.Next.NextPartitionKey, expectedNext.NextPartitionKey);
+                Assert.AreEqual(options.Next.NextRowKey, expectedNext.NextRowKey);
+            }
+            Assert.AreEqual(result.Count(), expectedResult.Count());
+            for (int i = 0; i < result.Count(); i++)
+            {
+                Assert.AreEqual(result.ElementAt(i).Name, expectedResult[i].Name);
+                Assert.AreEqual(result.ElementAt(i).DisplayName, expectedResult[i].DisplayName);
+                Assert.AreEqual(result.ElementAt(i).Detail, expectedResult[i].Detail);
+                Assert.AreEqual(result.ElementAt(i).CreatedAt, expectedResult[i].CreatedAt);
+                Assert.AreEqual(result.ElementAt(i).Timestamp, expectedResult[i].Timestamp);
+                Assert.AreEqual(result.ElementAt(i).Status, expectedResult[i].Status);
+            }
+        }
         #endregion
 
         #region ListAllHackathonsAsync
