@@ -1,7 +1,9 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +18,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<HackathonAdminEntity> CreateAdminAsync(HackathonAdmin admin, CancellationToken cancellationToken = default);
+      
+        /// <summary>
+        /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
+        /// </summary>
+        /// <param name="name">name of Hackathon</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
     }
 
     public class HackathonAdminManagement : ManagementClientBase, IHackathonAdminManagement
@@ -38,6 +48,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             };
             await StorageContext.HackathonAdminTable.InsertAsync(entity, cancellationToken);
             return entity;
+        }
+        #endregion
+
+        #region ListHackathonAdminAsync
+        public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
+        {
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.HackathonAdmin, name);
+            return await Cache.GetOrAddAsync(cacheKey,
+                CachePolicies.ExpireIn10M,
+                (token) =>
+                {
+                    return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
+                }, false, cancellationToken);
         }
         #endregion
     }

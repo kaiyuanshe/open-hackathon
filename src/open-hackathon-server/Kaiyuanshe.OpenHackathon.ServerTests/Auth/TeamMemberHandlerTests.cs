@@ -27,17 +27,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { };
-            var hackathonManagement = new Mock<IHackathonManagement>();
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
             var teamManagement = new Mock<ITeamManagement>();
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonAdminManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
-            Mock.VerifyAll(hackathonManagement, teamManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonAdminManagement, teamManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
         }
 
@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { };
-            var hackathonManagement = new Mock<IHackathonManagement>();
+            var hackathonManagement = new Mock<IHackathonAdminManagement>();
             var teamManagement = new Mock<ITeamManagement>();
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
@@ -88,19 +88,19 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { PartitionKey = "hack" };
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonAdminManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
-            Mock.VerifyAll(hackathonManagement, teamManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonAdminManagement, teamManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
         }
 
@@ -132,8 +132,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { PartitionKey = "hack", RowKey = "tid" };
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
             teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
@@ -141,12 +141,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonAdminManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
-            Mock.VerifyAll(hackathonManagement, teamManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonAdminManagement, teamManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
         }
 
@@ -193,8 +193,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { PartitionKey = "hack", RowKey = "tid" };
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
             teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
@@ -202,12 +202,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamAdministratorHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamAdministratorHandler(hackathonAdminManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsFalse(context.HasSucceeded);
-            Mock.VerifyAll(hackathonManagement, teamManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonAdminManagement, teamManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
         }
 
@@ -254,8 +254,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             TeamEntity teamEntity = new TeamEntity { PartitionKey = "hack", RowKey = "tid" };
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
             teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
@@ -263,12 +263,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
             // test
-            var handler = new TeamMemberHandler(hackathonManagement.Object, teamManagement.Object);
+            var handler = new TeamMemberHandler(hackathonAdminManagement.Object, teamManagement.Object);
             await handler.HandleAsync(context);
 
             Assert.IsTrue(context.HasSucceeded);
-            Mock.VerifyAll(hackathonManagement, teamManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(hackathonAdminManagement, teamManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
         }
     }

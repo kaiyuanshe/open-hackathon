@@ -1,8 +1,6 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,14 +17,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
     public abstract class TeamMemberBaseHandler<TRequirement> : AuthorizationHandler<TRequirement, TeamEntity>
         where TRequirement : IAuthorizationRequirement
     {
-        IHackathonManagement HackathonManagement { get; set; }
+        IHackathonAdminManagement HackathonAdminManagement { get; set; }
         ITeamManagement TeamManagement { get; set; }
 
         protected abstract Task HandleTeamRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement, TeamEntity resource, TeamMemberEntity teamMember);
 
-        public TeamMemberBaseHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
+        public TeamMemberBaseHandler(IHackathonAdminManagement hackathonAdminManagement, ITeamManagement teamManagement)
         {
-            HackathonManagement = hackathonManagement;
+            HackathonAdminManagement = hackathonAdminManagement;
             TeamManagement = teamManagement;
         }
 
@@ -45,7 +43,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
                 return;
             }
 
-            var hackathonAdmins = await HackathonManagement.ListHackathonAdminAsync(resource.HackathonName);
+            var hackathonAdmins = await HackathonAdminManagement.ListHackathonAdminAsync(resource.HackathonName);
             if (hackathonAdmins.Any(a => a.UserId == userId))
             {
                 context.Succeed(requirement);
@@ -63,8 +61,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
     public class TeamAdministratorHandler : TeamMemberBaseHandler<TeamAdministratorRequirement>
     {
-        public TeamAdministratorHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
-            : base(hackathonManagement, teamManagement)
+        public TeamAdministratorHandler(IHackathonAdminManagement hackathonAdminManagement, ITeamManagement teamManagement)
+            : base(hackathonAdminManagement, teamManagement)
         {
         }
 
@@ -81,8 +79,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
     public class TeamMemberHandler : TeamMemberBaseHandler<TeamMemberRequirement>
     {
-        public TeamMemberHandler(IHackathonManagement hackathonManagement, ITeamManagement teamManagement)
-            : base(hackathonManagement, teamManagement)
+        public TeamMemberHandler(IHackathonAdminManagement hackathonAdminManagement, ITeamManagement teamManagement)
+            : base(hackathonAdminManagement, teamManagement)
         {
         }
 

@@ -73,16 +73,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         #endregion
 
-        #region Admin
-        /// <summary>
-        /// List all Administrators of a Hackathon. PlatformAdministrator is not included.
-        /// </summary>
-        /// <param name="name">name of Hackathon</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default);
-        #endregion
-
         #region Enrollment
         /// <summary>
         /// Register a hackathon event as contestant
@@ -300,7 +290,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
             else
             {
-                var admins = await ListHackathonAdminAsync(hackathonName, cancellationToken);
+                var admins = await HackathonAdminManagement.ListHackathonAdminAsync(hackathonName, cancellationToken);
                 isAdmin = admins.Any(a => a.UserId == userId);
             }
 
@@ -407,19 +397,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.EnrollmentTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
-        }
-        #endregion
-
-        #region ListHackathonAdminAsync
-        public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
-        {
-            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.HackathonAdmin, name);
-            return await Cache.GetOrAddAsync(cacheKey,
-                CachePolicies.ExpireIn10M,
-                (token) =>
-                {
-                    return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
-                }, false, cancellationToken);
         }
         #endregion
     }
