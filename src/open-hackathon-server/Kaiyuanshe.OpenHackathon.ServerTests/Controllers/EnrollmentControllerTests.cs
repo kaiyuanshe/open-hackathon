@@ -642,13 +642,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 new HackathonAdminEntity{ RowKey = "anotherid" }
             };
 
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+
             var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            hackathonManagement.Object.HackathonAdminManagement = hackathonAdminManagement.Object;
             hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
             var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement);
+            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement);
             hackathonManagement.VerifyNoOtherCalls();
+            hackathonAdminManagement.VerifyNoOtherCalls();
+
             Assert.IsNotNull(role);
             Assert.IsFalse(role.isAdmin);
             Assert.IsFalse(role.isEnrolled);
@@ -669,13 +674,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 new HackathonAdminEntity{ RowKey = "uid" }
             };
 
-            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+
+            var hackathonManagement = new Mock<HackathonManagement>(null)
+            {
+                CallBase = true,
+            };
+            hackathonManagement.Object.HackathonAdminManagement = hackathonAdminManagement.Object;
             hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
-            hackathonManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
             var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement);
+            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement);
             hackathonManagement.VerifyNoOtherCalls();
+            hackathonAdminManagement.VerifyNoOtherCalls();
             Assert.IsNotNull(role);
             Assert.IsTrue(role.isAdmin);
             Assert.IsFalse(role.isEnrolled);

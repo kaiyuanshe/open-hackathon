@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -6,9 +7,8 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,6 +51,40 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("uid", captured.UserId);
             Assert.AreEqual("hack", result.HackathonName);
             Assert.AreEqual("uid", result.UserId);
+        }
+        #endregion
+
+        #region ListHackathonAdminAsyncTest
+        [Test]
+        public async Task ListHackathonAdminAsyncTest()
+        {
+            string name = "hack";
+            CancellationToken cancellationToken = CancellationToken.None;
+            var data = new List<HackathonAdminEntity>()
+            {
+                new HackathonAdminEntity{ PartitionKey="pk1", },
+                new HackathonAdminEntity{ PartitionKey="pk2", },
+            };
+
+            var storageContext = new Mock<IStorageContext>();
+            var hackAdminTable = new Mock<IHackathonAdminTable>();
+            storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackAdminTable.Object);
+            hackAdminTable.Setup(p => p.ListByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
+            var cache = new DefaultCacheProvider(null);
+
+            var hackathonAdminManagement = new HackathonAdminManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache,
+            };
+            var results = await hackathonAdminManagement.ListHackathonAdminAsync(name, cancellationToken);
+
+            Mock.VerifyAll(storageContext, hackAdminTable);
+            hackAdminTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual(2, results.Count());
+            Assert.AreEqual("pk1", results.First().HackathonName);
+            Assert.AreEqual("pk2", results.Last().HackathonName);
         }
         #endregion
     }

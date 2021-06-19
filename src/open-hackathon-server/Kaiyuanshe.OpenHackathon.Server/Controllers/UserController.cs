@@ -48,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region GetUserById
         /// <summary>
-        /// Get user info by user id
+        /// Get user info by user id. The info is synced from Authing during login.
         /// </summary>
         /// <param name="userId" example="1">unique id of the user</param>
         /// <param name="cancellationToken"></param>

@@ -450,38 +450,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         #endregion
 
         [Test]
-        public async Task ListHackathonAdminAsyncTest()
-        {
-            string name = "hack";
-            CancellationToken cancellationToken = CancellationToken.None;
-            var data = new List<HackathonAdminEntity>()
-            {
-                new HackathonAdminEntity{ PartitionKey="pk1", },
-                new HackathonAdminEntity{ PartitionKey="pk2", },
-            };
-
-            var storageContext = new Mock<IStorageContext>();
-            var hackAdminTable = new Mock<IHackathonAdminTable>();
-            storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackAdminTable.Object);
-            hackAdminTable.Setup(p => p.ListByHackathonAsync(name, cancellationToken)).ReturnsAsync(data);
-            var cache = new DefaultCacheProvider(null);
-
-            var hackathonManagement = new HackathonManagement(null)
-            {
-                StorageContext = storageContext.Object,
-                Cache = cache,
-            };
-            var results = await hackathonManagement.ListHackathonAdminAsync(name, cancellationToken);
-
-            Mock.VerifyAll(storageContext, hackAdminTable);
-            hackAdminTable.VerifyNoOtherCalls();
-            storageContext.VerifyNoOtherCalls();
-            Assert.AreEqual(2, results.Count());
-            Assert.AreEqual("pk1", results.First().HackathonName);
-            Assert.AreEqual("pk2", results.Last().HackathonName);
-        }
-
-        [Test]
         public async Task UpdateHackathonAsyncTest()
         {
             string name = "test";

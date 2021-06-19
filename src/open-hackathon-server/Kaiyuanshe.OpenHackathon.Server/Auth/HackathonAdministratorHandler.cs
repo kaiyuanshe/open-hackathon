@@ -13,10 +13,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
 
     public class HackathonAdministratorHandler : AuthorizationHandler<HackathonAdministratorRequirement, HackathonEntity>
     {
-        IHackathonManagement hackathonManagement { get; set; }
-        public HackathonAdministratorHandler(IHackathonManagement hackathonManagement)
+        IHackathonAdminManagement HackathonAdminManagement { get; set; }
+        public HackathonAdministratorHandler(IHackathonAdminManagement hackathonAdminManagement)
         {
-            this.hackathonManagement = hackathonManagement;
+            HackathonAdminManagement = hackathonAdminManagement;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HackathonAdministratorRequirement requirement, HackathonEntity resource)
@@ -34,7 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
                 return;
             }
 
-            var hackathonAdmins = await hackathonManagement.ListHackathonAdminAsync(resource.Name);
+            var hackathonAdmins = await HackathonAdminManagement.ListHackathonAdminAsync(resource.Name);
             if (hackathonAdmins.Any(a => a.UserId == userId))
             {
                 context.Succeed(requirement);
