@@ -400,101 +400,94 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         #region ListHackathon
-        //private static IEnumerable ListHackathonTestData()
-        //{
-        //    // arg0: pagination
-        //    // arg1: mocked TableCotinuationToken
-        //    // arg2: expected options
-        //    // arg3: expected nextlink
+        private static IEnumerable ListHackathonTestData()
+        {
+            // arg0: pagination
+            // arg1: search
+            // arg2: order by
+            // arg3: next token
+            // arg4: expected nextlink
 
-        //    // no pagination, no filter, no top
-        //    yield return new TestCaseData(
-        //            new Pagination { },
-        //            null,
-        //            new HackathonQueryOptions { },
-        //            null
-        //        );
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null,
+                    null,
+                    null
+                );
 
-        //    // with pagination and filters
-        //    yield return new TestCaseData(
-        //            new Pagination { top = 10, np = "np", nr = "nr" },
-        //            null,
-        //            new HackathonQueryOptions
-        //            {
-        //                Top = 10,
-        //                TableContinuationToken = new TableContinuationToken
-        //                {
-        //                    NextPartitionKey = "np",
-        //                    NextRowKey = "nr"
-        //                },
-        //            },
-        //            null
-        //        );
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    "search",
+                    HackathonOrderBy.updatedAt,
+                    null,
+                    null
+                );
 
-        //    // next link
-        //    yield return new TestCaseData(
-        //            new Pagination { },
-        //            new TableContinuationToken
-        //            {
-        //                NextPartitionKey = "np",
-        //                NextRowKey = "nr"
-        //            },
-        //            new HackathonQueryOptions { },
-        //            "&np=np&nr=nr"
-        //        );
-        //}
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10 },
+                    "search",
+                    HackathonOrderBy.updatedAt,
+                    new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" },
+                    "&top=10&search=search&orderby=updatedAt&np=np&nr=nr"
+                );
+        }
 
-        //[Test, TestCaseSource(nameof(ListHackathonTestData))]
-        //public async Task ListHackathon(
-        //    Pagination pagination,
-        //    TableContinuationToken continuationToken,
-        //    HackathonQueryOptions expectedOptions,
-        //    string expectedLink)
-        //{
-        //    // input
-        //    var cancellationToken = CancellationToken.None;
-        //    var hackathons = new List<HackathonEntity>
-        //    {
-        //        new HackathonEntity
-        //        {
-        //            PartitionKey = "pk",
-        //            RowKey = "rk",
-        //            Status = HackathonStatus.online,
-        //        }
-        //    };
-        //    var segment = MockHelper.CreateTableQuerySegment(hackathons, continuationToken);
+        [Test, TestCaseSource(nameof(ListHackathonTestData))]
+        public async Task ListHackathon(
+            Pagination pagination,
+            string search,
+            HackathonOrderBy? orderBy,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            var cancellationToken = CancellationToken.None;
+            var hackathons = new List<HackathonEntity>
+            {
+                new HackathonEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                    Status = HackathonStatus.online,
+                }
+            };
 
-        //    // mock and capture
-        //    var hackathonManagement = new Mock<IHackathonManagement>();
-        //    HackathonQueryOptions optionsCaptured = null;
-        //    hackathonManagement.Setup(p => p.ListPaginatedHackathonsAsync(It.IsAny<HackathonQueryOptions>(), cancellationToken))
-        //        .Callback<HackathonQueryOptions, CancellationToken>((o, t) =>
-        //        {
-        //            optionsCaptured = o;
-        //        })
-        //        .ReturnsAsync(segment);
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            HackathonQueryOptions optionsCaptured = null;
+            hackathonManagement.Setup(p => p.ListPaginatedHackathonsAsync(It.IsAny<HackathonQueryOptions>(), cancellationToken))
+                .Callback<HackathonQueryOptions, CancellationToken>((o, t) =>
+                {
+                    optionsCaptured = o;
+                    optionsCaptured.Next = next;
+                })
+                .ReturnsAsync(hackathons);
 
-        //    // run
-        //    var controller = new HackathonController
-        //    {
-        //        ResponseBuilder = new DefaultResponseBuilder(),
-        //        HackathonManagement = hackathonManagement.Object,
-        //    };
-        //    var result = await controller.ListHackathon(pagination, cancellationToken);
+            // run
+            var controller = new HackathonController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+            };
+            var result = await controller.ListHackathon(pagination, search, orderBy, cancellationToken);
 
-        //    // verify
-        //    Mock.VerifyAll(hackathonManagement);
-        //    hackathonManagement.VerifyNoOtherCalls();
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
 
-        //    var list = AssertHelper.AssertOKResult<HackathonList>(result);
-        //    Assert.AreEqual(expectedLink, list.nextLink);
-        //    Assert.AreEqual(1, list.value.Length);
-        //    Assert.AreEqual("pk", list.value[0].name);
-        //    Assert.AreEqual(HackathonStatus.online, list.value[0].status);
-        //    Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
-        //    Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
-        //    Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
-        //}
+            var list = AssertHelper.AssertOKResult<HackathonList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].name);
+            Assert.AreEqual(HackathonStatus.online, list.value[0].status);
+            Assert.AreEqual(pagination.top, optionsCaptured.Top);
+            Assert.AreEqual(pagination.np, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(pagination.nr, optionsCaptured.TableContinuationToken?.NextRowKey);
+        }
         #endregion
 
         [Test]
