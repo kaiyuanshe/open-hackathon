@@ -81,6 +81,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get the upload token.
+        /// </summary>
+        /// <returns></returns>
+        string GetUploadToken();
     }
 
     /// <inheritdoc cref="IUserManagement"/>
@@ -201,5 +207,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await StorageContext.UserTable.GetUserByIdAsync(userId, cancellationToken);
         }
         #endregion
+
+        public string GetUploadToken()
+        {
+            return StorageContext.UserBlobContainer.CreateSasToken();
+        }
     }
 }

@@ -1,7 +1,9 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -65,5 +67,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(userInfo);
         }
         #endregion
+
+        #region GetUploadToken
+        /// <summary>
+        /// Get file upload token
+        /// </summary>
+        /// <returns>The team</returns>
+        /// <response code="200">Success. The response return a token.</response>
+        [HttpPut]
+        [ProducesResponseType(typeof(Team), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("user/storageToken")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> GetUploadToken()
+        {
+            var token = UserManagement.GetUploadToken();
+            return Ok(token);
+        }
+        #endregion
+
     }
 }
