@@ -49,4 +49,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Storage\BlobContainers\" />
+  </ItemGroup>
 </Project>
