@@ -133,7 +133,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         public static Task<TValue> GetOrAddAsync<TValue>(
             this ICacheProvider cache,
             string cacheKey,
-            CacheItemPolicy policy,
+            TimeSpan slidingExpiration,
             Func<CancellationToken, Task<TValue>> supplyVaule,
             bool autoRefresh = false,
             CancellationToken cancellationToken = default)
@@ -141,7 +141,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
             if (cache == null)
                 return null;
 
-            var entry = new CacheEntry<TValue>(cacheKey, policy, supplyVaule, autoRefresh);
+            var entry = new CacheEntry<TValue>(cacheKey, slidingExpiration, supplyVaule, autoRefresh);
             return cache.GetOrAddAsync(entry, cancellationToken);
         }
     }

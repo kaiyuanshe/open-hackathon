@@ -231,7 +231,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             };
 
             string cacheKey = $"team_members_{teamId}";
-            return await Cache.GetOrAddAsync(cacheKey, CachePolicies.ExpireIn1M, supplyValue, false, cancellationToken);
+            return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromMinutes(1), supplyValue, false, cancellationToken);
         }
 
         public async Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default)

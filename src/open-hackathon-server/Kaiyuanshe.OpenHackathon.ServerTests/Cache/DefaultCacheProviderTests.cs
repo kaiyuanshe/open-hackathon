@@ -16,7 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                 "GetOrAddAsync",
-                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+                TimeSpan.FromDays(1),
                 (token) => { return Task.FromResult("second"); },
                 false
                 );
@@ -34,21 +34,21 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
             // not autofresh
             CacheEntry<string> first = new CacheEntry<string>(
                 "first",
-                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+                TimeSpan.FromDays(1),
                 (token) => { return Task.FromResult("first"); },
                 false
                 );
             // existing in cache
             CacheEntry<string> second = new CacheEntry<string>(
                 "second",
-                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+                TimeSpan.FromDays(1),
                 (token) => { return Task.FromResult("second"); },
                 true
                 );
             // refreshed
             CacheEntry<string> third = new CacheEntry<string>(
                 "third",
-                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+                TimeSpan.FromDays(1),
                 (token) => { return Task.FromResult("third"); },
                 true
                 );
@@ -77,7 +77,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                 "RefreshAsync",
-                new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+                TimeSpan.FromDays(1),
                 (token) => { return Task.FromResult("t3"); },
                 false
                 );
@@ -100,7 +100,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Cache
         {
             CacheEntry<string> entry = new CacheEntry<string>(
                "internal",
-               new CacheItemPolicy { AbsoluteExpiration = DateTime.Now.AddDays(1) },
+               TimeSpan.FromDays(1),
                (token) =>
                {
                    return Task.FromResult("first");
