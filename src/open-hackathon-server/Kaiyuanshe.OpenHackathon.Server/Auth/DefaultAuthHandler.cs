@@ -78,7 +78,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.Token, DigestHelper.SHA512Digest(token));
             var claims = await cache.GetOrAddAsync(
                 cacheKey,
-                CachePolicies.ExpireIn10M,
+                TimeSpan.FromMinutes(10),
                 (cancellationToken) => userManagement.GetUserBasicClaimsAsync(token, cancellationToken));
             var identity = new ClaimsIdentity(claims, AuthConstant.AuthType.Token);
             var claimsPrincipal = new ClaimsPrincipal(identity);

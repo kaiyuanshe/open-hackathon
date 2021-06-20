@@ -14,13 +14,27 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         /// </summary>
         public string CacheKey { get; protected set; }
 
-        public CacheItemPolicy CachePolicy { get; protected set; }
+        /// <summary>
+        /// A span of time within which a cache entry must be accessed before the cache entry
+        /// is evicted from the cache. The default is System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
+        /// meaning that the item should not be expired based on a time span.
+        /// </summary>
+        public TimeSpan SlidingExpiration { get; protected set; }
+
+        public CacheItemPolicy CachePolicy
+        {
+            get
+            {
+                return new CacheItemPolicy
+                {
+                    SlidingExpiration = SlidingExpiration
+                };
+            }
+        }
 
         public abstract bool AutoRefresh { get; }
 
         public abstract Task<object> SupplyValueAsync(CancellationToken cancellationToken);
-
-
     }
 
     public class CacheEntry<TValue> : CacheEntry
@@ -31,18 +45,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         private Func<CancellationToken, Task<TValue>> supplyValueAsync;
         private bool autoRefresh;
 
-        public CacheEntry(string cacheKey, CacheItemPolicy policy, Func<CancellationToken, Task<TValue>> supplyValue, bool autoRefresh)
+        public CacheEntry(string cacheKey, TimeSpan slidingExpiration, Func<CancellationToken, Task<TValue>> supplyValue, bool autoRefresh)
         {
             if (cacheKey == null)
                 throw new ArgumentNullException(nameof(cacheKey));
-            if (policy == null)
-                throw new ArgumentNullException(nameof(policy));
+            if (slidingExpiration == null)
+                throw new ArgumentNullException(nameof(slidingExpiration));
             if (supplyValue == null && !EnvHelper.IsRunningInTests())
                 throw new ArgumentNullException(nameof(supplyValue));
 
             CacheKey = cacheKey;
             this.autoRefresh = autoRefresh;
-            CachePolicy = policy;
+            SlidingExpiration = slidingExpiration;
             supplyValueAsync = supplyValue;
         }
 

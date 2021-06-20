@@ -52,15 +52,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region ListHackathonAdminAsync
-        public virtual async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string name, CancellationToken cancellationToken = default)
         {
             string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.HackathonAdmin, name);
             return await Cache.GetOrAddAsync(cacheKey,
-                CachePolicies.ExpireIn10M,
+                TimeSpan.FromHours(1),
                 (token) =>
                 {
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(name, token);
-                }, false, cancellationToken);
+                }, true, cancellationToken);
         }
         #endregion
     }

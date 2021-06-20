@@ -17,7 +17,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IHackathonManagement
     {
-        #region Hackathon
         /// <summary>
         /// Create a new hackathon
         /// </summary>
@@ -49,12 +48,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Search hackathon
+        /// Search paginated hackathon
         /// </summary>
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// list paginated hackathons with admin access
+        /// </summary>
+        /// <param name="user">Login user</param>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<HackathonEntity>> ListPaginatedMyManagableHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List all hackathons
@@ -70,8 +78,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="user"></param>
         /// <returns></returns>
         Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
-
-        #endregion
 
         #region Enrollment
         /// <summary>
@@ -313,7 +319,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public async Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default)
         {
             return await Cache.GetOrAddAsync(cacheKeyForAllHackathon,
-                CachePolicies.ExpireIn1H,
+                TimeSpan.FromHours(1),
                 (token) =>
                 {
                     return StorageContext.HackathonTable.ListAllHackathonsAsync(token);
@@ -321,7 +327,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region Enrollment
         public virtual async Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
         {
             if (hackathonName == null || userId == null)
@@ -397,6 +402,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.EnrollmentTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+        }
+
+        #region ListPaginatedMyManagableHackathonsAsync
+        public async Task<IEnumerable<HackathonEntity>> ListPaginatedMyManagableHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            if (user == null)
+                return new List<HackathonEntity>();
+
+            IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
+            // filter by admin. PlatformAdmin can access every hackathon
+            if (!ClaimsHelper.IsPlatformAdministrator(user))
+            {
+                //hackathons = hackathons.Where(h =>
+                //{
+                //    var admins = aw
+                //});
+            }
+
+            return null;
         }
         #endregion
     }
