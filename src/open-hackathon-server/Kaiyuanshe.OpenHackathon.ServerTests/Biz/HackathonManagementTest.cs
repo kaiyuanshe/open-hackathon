@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
@@ -12,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -415,6 +417,154 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(result.ElementAt(i).CreatedAt, expectedResult[i].CreatedAt);
                 Assert.AreEqual(result.ElementAt(i).Timestamp, expectedResult[i].Timestamp);
                 Assert.AreEqual(result.ElementAt(i).Status, expectedResult[i].Status);
+            }
+        }
+        #endregion
+
+        #region ListPaginatedMyManagableHackathonsAsync
+        private static IEnumerable ListPaginatedMyManagableHackathonsAsyncTestData()
+        {
+            var h1 = new HackathonEntity
+            {
+                PartitionKey = "h1",
+                CreatedAt = DateTime.Now.AddDays(1),
+            };
+            var h2 = new HackathonEntity
+            {
+                PartitionKey = "h2",
+                CreatedAt = DateTime.Now.AddDays(2),
+            };
+            var h3 = new HackathonEntity
+            {
+                PartitionKey = "h3",
+                CreatedAt = DateTime.Now.AddDays(3),
+            };
+            var h4 = new HackathonEntity
+            {
+                PartitionKey = "h4",
+                CreatedAt = DateTime.Now.AddDays(4),
+            };
+
+            var a0 = new HackathonAdminEntity { RowKey = "uid" };
+            var a1 = new HackathonAdminEntity { RowKey = "a1" };
+            var a2 = new HackathonAdminEntity { RowKey = "a2" };
+
+            // arg0: user
+            // arg1: all hackathons
+            // arg2: admins
+            // arg3: expected result
+
+            // empty user
+            yield return new TestCaseData(
+                null,
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                null,
+                new List<HackathonEntity>()
+                );
+
+            // Platform Admin
+            yield return new TestCaseData(
+                new ClaimsPrincipal(
+                    new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(AuthConstant.ClaimType.PlatformAdministrator, "foo")
+                    })
+                ),
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                null,
+                new List<HackathonEntity>
+                {
+                    h4, h3, h2, h1
+                }
+                );
+
+            // normal user
+            yield return new TestCaseData(
+                new ClaimsPrincipal(
+                    new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(AuthConstant.ClaimType.UserId, "uid")
+                    })
+                ),
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new Dictionary<string, List<HackathonAdminEntity>>
+                {
+                    { "h1", new List<HackathonAdminEntity> { } },
+                    { "h2", new List<HackathonAdminEntity> { a0 } },
+                    { "h3", new List<HackathonAdminEntity> { a1, a2 } },
+                    { "h4", new List<HackathonAdminEntity> { a0, a1 } }
+                },
+                new List<HackathonEntity>
+                {
+                    h4, h2
+                }
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedMyManagableHackathonsAsyncTestData))]
+        public async Task ListPaginatedMyManagableHackathonsAsync(
+            ClaimsPrincipal user,
+            Dictionary<string, HackathonEntity> allHackathons,
+            Dictionary<string, List<HackathonAdminEntity>> admins,
+            List<HackathonEntity> expectedResult)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            var options = new HackathonQueryOptions
+            {
+                OrderBy = HackathonOrderBy.createdAt,
+            };
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            if (user != null)
+            {
+                cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<Dictionary<string, HackathonEntity>>>(), cancellationToken))
+                    .ReturnsAsync(allHackathons);
+            }
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            if (admins != null)
+            {
+                foreach (var item in admins)
+                {
+                    hackathonAdminManagement.Setup(p => p.ListHackathonAdminAsync(item.Key, cancellationToken))
+                        .ReturnsAsync(item.Value);
+                }
+            }
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                Cache = cache.Object,
+                HackathonAdminManagement = hackathonAdminManagement.Object,
+            };
+            var result = await hackathonManagement.ListPaginatedMyManagableHackathonsAsync(user, options, cancellationToken);
+
+            Mock.VerifyAll(cache, hackathonAdminManagement);
+            cache.VerifyNoOtherCalls();
+            hackathonAdminManagement.VerifyNoOtherCalls();
+
+            Assert.AreEqual(result.Count(), expectedResult.Count());
+            for (int i = 0; i < result.Count(); i++)
+            {
+                Assert.AreEqual(result.ElementAt(i).Name, expectedResult[i].Name);
+                Assert.AreEqual(result.ElementAt(i).CreatedAt, expectedResult[i].CreatedAt);
             }
         }
         #endregion
