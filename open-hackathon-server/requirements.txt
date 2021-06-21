@@ -60,7 +60,7 @@ rsa==4.1
 six==1.14.0
 subprocess32==3.5.4
 tzlocal==2.0.0
-urllib3==1.25.8
+urllib3==1.26.5
 validictory==1.0.0
 wcwidth==0.1.8
 websocket-client==0.57.0
