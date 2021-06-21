@@ -137,13 +137,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
+
             EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
-
-            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(enrollment, status);
+            
+            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, status);
             return Ok(ResponseBuilder.BuildEnrollment(enrollment));
         }
 

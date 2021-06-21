@@ -43,10 +43,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// Id of User who creates this hackathon. PartitionKey of Users table
         /// </summary>
         public string CreatorId { get; set; }
+
+        /// <summary>
+        /// current enrollment
+        /// </summary>
+        public int Enrollment { get; set; } = 0;
+
         /// <summary>
         /// Maximum allowed participant
         /// </summary>
         public int MaxEnrollment { get; set; }
+
         /// <summary>
         /// whether or not user registration needs admin's manual approval
         /// </summary>

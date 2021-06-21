@@ -21,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Location = "loc",
                 JudgeStartedAt = DateTime.UtcNow,
                 Status = HackathonStatus.online,
+                Enrollment = 100,
             };
 
             var roles = new HackathonRoles
@@ -40,6 +41,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("abc", hack.creatorId);
             Assert.IsTrue(hack.judgeStartedAt.HasValue);
             Assert.IsFalse(hack.judgeEndedAt.HasValue);
+            Assert.AreEqual(100, hack.enrollment);
             Assert.IsTrue(hack.roles.isAdmin);
             Assert.IsTrue(hack.roles.isEnrolled);
             Assert.IsTrue(hack.roles.isJudge);
