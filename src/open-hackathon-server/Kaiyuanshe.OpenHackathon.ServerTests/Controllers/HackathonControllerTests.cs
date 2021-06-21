@@ -490,6 +490,92 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
         #endregion
 
+        #region ListManagableHackathon
+        private static IEnumerable ListManagableHackathonTestData()
+        {
+            // arg0: pagination
+            // arg1: order by
+            // arg2: next token
+            // arg3: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    HackathonOrderBy.updatedAt,
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10 },
+                    HackathonOrderBy.updatedAt,
+                    new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" },
+                    "&top=10&orderby=updatedAt&np=np&nr=nr"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListManagableHackathonTestData))]
+        public async Task ListManagableHackathon(
+            Pagination pagination,
+            HackathonOrderBy? orderBy,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            var cancellationToken = CancellationToken.None;
+            var hackathons = new List<HackathonEntity>
+            {
+                new HackathonEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                    Status = HackathonStatus.online,
+                }
+            };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            HackathonQueryOptions optionsCaptured = null;
+            hackathonManagement.Setup(p => p.ListPaginatedMyManagableHackathonsAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<HackathonQueryOptions>(), cancellationToken))
+                .Callback<ClaimsPrincipal, HackathonQueryOptions, CancellationToken>((u, o, t) =>
+                {
+                    optionsCaptured = o;
+                    optionsCaptured.Next = next;
+                })
+                .ReturnsAsync(hackathons);
+
+            // run
+            var controller = new HackathonController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+            };
+            var result = await controller.ListManagableHackathon(pagination, orderBy, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<HackathonList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].name);
+            Assert.AreEqual(HackathonStatus.online, list.value[0].status);
+            Assert.AreEqual(pagination.top, optionsCaptured.Top);
+            Assert.AreEqual(pagination.np, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(pagination.nr, optionsCaptured.TableContinuationToken?.NextRowKey);
+        }
+        #endregion
+
         [Test]
         public async Task DeleteTest_NotExist()
         {

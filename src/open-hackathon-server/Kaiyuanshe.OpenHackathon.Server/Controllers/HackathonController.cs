@@ -21,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public IHackathonManagement HackathonManagement { get; set; }
 
+        #region ListHackathon
         /// <summary>
         /// List paginated online hackathons.
         /// </summary>
@@ -28,7 +29,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="search">keyword to search in name, display name or details</param>
         /// <param name="orderby">order by. Default to createdAt.</param>
         /// <returns>A list of hackathon.</returns>
-        /// <response code="200">Success. The response describes a list of hackathon.</response>
+        /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>
         [HttpGet]
         [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
@@ -60,6 +61,44 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);
             return Ok(ResponseBuilder.BuildHackathonList(entities, nextLink));
         }
+
+        /// <summary>
+        /// List paginated online hackathons which I have admin access.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="orderby">order by. Default to createdAt.</param>
+        /// <returns>A list of hackathon.</returns>
+        /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(HackathonList), 200)]
+        [Route("hackathons/managable")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> ListManagableHackathon(
+            [FromQuery] Pagination pagination,
+            [FromQuery] HackathonOrderBy? orderby,
+            CancellationToken cancellationToken)
+        {
+            var hackathonQueryOptions = new HackathonQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                OrderBy = orderby,
+                Top = pagination.top
+            };
+            var entities = await HackathonManagement.ListPaginatedMyManagableHackathonsAsync(User, hackathonQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            if (orderby.HasValue)
+            {
+                routeValues.Add(nameof(orderby), orderby.Value);
+            }
+
+            var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);
+            return Ok(ResponseBuilder.BuildHackathonList(entities, nextLink));
+        }
+        #endregion
 
         #region CheckNameAvailability
         /// <summary>
@@ -155,7 +194,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var entity = await HackathonManagement.GetHackathonEntityByNameAsync(nameLowercase, cancellationToken);
             return await UpdateInternal(entity, parameter, cancellationToken);
         }
-        #endregion
 
         private async Task<object> UpdateInternal(HackathonEntity entity, Hackathon parameter, CancellationToken cancellationToken)
         {
@@ -173,6 +211,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var roles = await HackathonManagement.GetHackathonRolesAsync(parameter.name, User, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathon(updated, roles));
         }
+        #endregion
 
         #region Get
         /// <summary>
