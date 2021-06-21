@@ -680,6 +680,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 PartitionKey = "hack",
                 AutoApprove = autoApprove,
+                Enrollment = 5,
             };
             string userId = "uid";
             EnrollmentEntity participant = null;
@@ -694,7 +695,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     participant = p;
                 });
             var storageContext = new Mock<IStorageContext>();
+            var hackathonTable = new Mock<IHackathonTable>();
             storageContext.SetupGet(p => p.EnrollmentTable).Returns(participantTable.Object);
+            if (autoApprove)
+            {
+                hackathonTable.Setup(h => h.MergeAsync(hackathon, cancellation));
+                storageContext.SetupGet(s => s.HackathonTable).Returns(hackathonTable.Object);
+            }
 
             var hackathonManagement = new HackathonManagement(logger.Object)
             {
@@ -702,20 +709,27 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
             await hackathonManagement.EnrollAsync(hackathon, userId, cancellation);
 
-            Mock.VerifyAll(storageContext, participantTable);
+            Mock.VerifyAll(storageContext, participantTable, hackathonTable);
             participantTable.VerifyNoOtherCalls();
+            if (autoApprove)
+            {
+                hackathonTable.Verify(h => h.MergeAsync(It.Is<HackathonEntity>(h => h.Enrollment == 6), cancellation), Times.Once);
+            }
+            hackathonTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
             Assert.AreEqual(targetStatus, participant.Status);
         }
 
         [Test]
         public async Task EnrollUpdateStatusAsyncTest_Null()
         {
+            HackathonEntity hackathon = null;
             EnrollmentEntity participant = null;
             CancellationToken cancellation = CancellationToken.None;
             var logger = new Mock<ILogger<HackathonManagement>>();
 
             var hackathonManagement = new HackathonManagement(logger.Object);
-            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, EnrollmentStatus.approved, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(hackathon, participant, EnrollmentStatus.approved, cancellation);
 
             Mock.VerifyAll(logger);
             logger.VerifyNoOtherCalls();
@@ -726,7 +740,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [TestCase(EnrollmentStatus.rejected)]
         public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus parameter)
         {
-            EnrollmentEntity participant = new EnrollmentEntity();
+            HackathonEntity hackathon = new HackathonEntity { Enrollment = 5 };
+            EnrollmentEntity participant = new EnrollmentEntity
+            {
+                Status = parameter == EnrollmentStatus.approved ? EnrollmentStatus.pendingApproval : EnrollmentStatus.approved
+            };
             CancellationToken cancellation = CancellationToken.None;
             var logger = new Mock<ILogger<HackathonManagement>>();
 
@@ -737,18 +755,24 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 {
                     captured = p;
                 });
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(h => h.MergeAsync(hackathon, cancellation));
 
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
 
             var hackathonManagement = new HackathonManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
             };
-            await hackathonManagement.UpdateEnrollmentStatusAsync(participant, parameter, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(hackathon, participant, parameter, cancellation);
 
-            Mock.VerifyAll(storageContext, enrollmentTable, logger);
+            Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable, logger);
             enrollmentTable.VerifyNoOtherCalls();
+            int expected = parameter == EnrollmentStatus.approved ? 6 : 4;
+            hackathonTable.Verify(h => h.MergeAsync(It.Is<HackathonEntity>(h => h.Enrollment == expected), cancellation));
+            hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             Assert.IsNotNull(captured);
             Assert.AreEqual(parameter, captured.Status);

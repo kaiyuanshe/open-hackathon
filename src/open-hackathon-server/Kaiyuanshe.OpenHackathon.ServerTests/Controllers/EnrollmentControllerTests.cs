@@ -338,8 +338,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(hackathonEntity);
             hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(participant);
-            hackathonManagement.Setup(p => p.UpdateEnrollmentStatusAsync(It.IsAny<EnrollmentEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
-                            .Callback<EnrollmentEntity, EnrollmentStatus, CancellationToken>((p, e, c) =>
+            hackathonManagement.Setup(p => p.UpdateEnrollmentStatusAsync(hackathonEntity, It.IsAny<EnrollmentEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
+                            .Callback<HackathonEntity, EnrollmentEntity, EnrollmentStatus, CancellationToken>((h, p, e, c) =>
                             {
                                 p.Status = e;
                             })

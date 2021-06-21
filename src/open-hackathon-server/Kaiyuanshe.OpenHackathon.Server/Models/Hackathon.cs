@@ -73,7 +73,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string creatorId { get; internal set; }
 
         /// <summary>
-        /// Maximum uses allowed to enroll this hackathon. 0 means unlimited. default value: 0.
+        /// Number of enrolled users. Only approved enrollments are counted.
+        /// </summary>
+        /// <example>100</example>
+        public int enrollment { get; set; }
+
+        /// <summary>
+        /// Maximum users allowed to enroll this hackathon. 0 means unlimited. default value: 0.
         /// </summary>
         /// <example>1000</example>
         [Range(0, 100_000)]
