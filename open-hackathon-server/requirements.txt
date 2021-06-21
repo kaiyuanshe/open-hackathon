@@ -56,7 +56,7 @@ pytz==2015.6
 PyYAML==5.4
 requests==2.23.0
 requests-oauthlib==1.3.0
-rsa==4.1
+rsa==4.7
 six==1.14.0
 subprocess32==3.5.4
 tzlocal==2.0.0
