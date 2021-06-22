@@ -72,7 +72,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         [Test]
         public void BuildEnrollmentTest()
         {
-            EnrollmentEntity participant = new EnrollmentEntity
+            EnrollmentEntity entity = new EnrollmentEntity
             {
                 PartitionKey = "hack",
                 RowKey = "uid",
@@ -80,15 +80,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now,
             };
+            UserInfo userInfo = new UserInfo
+            {
+                Name = "name"
+            };
 
             var respBuilder = new DefaultResponseBuilder();
-            var enrollment = respBuilder.BuildEnrollment(participant);
+            var enrollment = respBuilder.BuildEnrollment(entity, userInfo);
 
             Assert.AreEqual("hack", enrollment.hackathonName);
             Assert.AreEqual("uid", enrollment.userId);
             Assert.AreEqual(EnrollmentStatus.approved, enrollment.status);
-            Assert.AreEqual(participant.CreatedAt, enrollment.createdAt);
-            Assert.AreEqual(participant.Timestamp.DateTime, enrollment.updatedAt);
+            Assert.AreEqual(entity.CreatedAt, enrollment.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, enrollment.updatedAt);
+            Assert.AreEqual("name", enrollment.user.Name);
         }
 
         [Test]
@@ -151,24 +156,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         public void BuildResourceListTest()
         {
             string nextLink = "nextlink";
-            List<EnrollmentEntity> enrollments = new List<EnrollmentEntity>
+            List<Tuple<EnrollmentEntity, UserInfo>> enrollments = new List<Tuple<EnrollmentEntity, UserInfo>>
             {
-                new EnrollmentEntity
+                Tuple.Create(new EnrollmentEntity
                 {
                     PartitionKey = "pk1",
                     RowKey = "rk1",
                     Status = EnrollmentStatus.approved,
                 },
-                new EnrollmentEntity
+                new UserInfo
+                {
+                    Id = "uid"
+                }),
+                Tuple.Create(new EnrollmentEntity
                 {
                     PartitionKey = "pk2",
                     RowKey = "rk2",
                     Status = EnrollmentStatus.rejected,
-                }
+                },
+                new UserInfo{
+                    Email = "email"
+                })
             };
 
             var builder = new DefaultResponseBuilder();
-            var result = builder.BuildResourceList<EnrollmentEntity, Enrollment, EnrollmentList>(
+            var result = builder.BuildResourceList<EnrollmentEntity, UserInfo, Enrollment, EnrollmentList>(
                     enrollments,
                     builder.BuildEnrollment,
                     nextLink);
@@ -178,10 +190,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("pk1", result.value[0].hackathonName);
             Assert.AreEqual("rk1", result.value[0].userId);
             Assert.AreEqual(EnrollmentStatus.approved, result.value[0].status);
+            Assert.AreEqual("uid", result.value[0].user.Id);
             Assert.AreEqual("pk2", result.value[1].hackathonName);
             Assert.AreEqual("rk2", result.value[1].userId);
             Assert.AreEqual(EnrollmentStatus.rejected, result.value[1].status);
-
+            Assert.AreEqual("email", result.value[1].user.Email);
         }
     }
 }

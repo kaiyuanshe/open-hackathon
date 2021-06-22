@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +23,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public IHackathonManagement HackathonManagement { get; set; }
 
+        public IUserManagement UserManagement { get; set; }
+
+        #region Enroll
         /// <summary>
         /// Enroll a hackathon.
         /// </summary>
@@ -52,11 +57,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
-            var participant = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
-            return Ok(ResponseBuilder.BuildEnrollment(participant));
+            var enrollment = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
+            var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
+        #endregion
 
 
+        #region Get
         /// <summary>
         /// Get a hackathon enrollement for current user.
         /// </summary>
@@ -69,17 +77,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/enrollment")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> Get([FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName)
+        public async Task<object> Get(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            CancellationToken cancellationToken)
         {
-            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId);
+            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, CurrentUserId, hackathonName));
             }
-
-            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
+            var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
+        #endregion
 
+        #region Approve && Reject
         /// <summary>
         /// Approve a hackathon enrollement.
         /// </summary>
@@ -97,9 +109,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> Approve(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required] string userId,
-            [FromBody] Enrollment parameter)
+            [FromBody] Enrollment parameter,
+            CancellationToken cancellationToken)
         {
-            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.approved);
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.approved, cancellationToken);
         }
 
         /// <summary>
@@ -119,12 +132,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> Reject(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required] string userId,
-            [FromBody] Enrollment parameter)
+            [FromBody] Enrollment parameter,
+            CancellationToken cancellationToken)
         {
-            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.rejected);
+            return await UpdateEnrollmentStatus(hackathonName.ToLower(), userId.ToLower(), EnrollmentStatus.rejected, cancellationToken);
         }
 
-        private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status)
+        private async Task<object> UpdateEnrollmentStatus(string hackathonName, string userId, EnrollmentStatus status, CancellationToken cancellationToken)
         {
             HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName);
             var options = new ValidateHackathonOptions
@@ -143,11 +157,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
-            
-            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, status);
-            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
-        }
 
+            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, status);
+            var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
+        }
+        #endregion
+
+        #region GetById
         /// <summary>
         /// Get a hackathon enrollement of any enrolled user.
         /// </summary>
@@ -162,10 +179,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{hackathonName}/enrollment/{userId}")]
         public async Task<object> GetById(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required] string userId)
+            [FromRoute, Required] string userId,
+            CancellationToken cancellationToken)
         {
             var hackName = hackathonName.ToLower();
-            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName, cancellationToken);
             var options = new ValidateHackathonOptions
             {
                 HackathonName = hackathonName,
@@ -176,13 +194,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
-            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackName, userId.ToLower());
+            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackName, userId.ToLower(), cancellationToken);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
-            return Ok(ResponseBuilder.BuildEnrollment(enrollment));
+            var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+            return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
+        #endregion
 
         /// <summary>
         /// List paginated enrollements of a hackathon.
@@ -203,7 +223,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             CancellationToken cancellationToken)
         {
             var hackName = hackathonName.ToLower();
-            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName);
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackName, cancellationToken);
             var options = new ValidateHackathonOptions
             {
                 HackathonName = hackathonName,
@@ -230,8 +250,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 routeValues.Add(nameof(status), status.Value);
             }
             var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
-            return Ok(ResponseBuilder.BuildResourceList<EnrollmentEntity, Enrollment, EnrollmentList>(
-                    segment,
+
+            List<Tuple<EnrollmentEntity, UserInfo>> list = new List<Tuple<EnrollmentEntity, UserInfo>>();
+            foreach (var enrollment in segment)
+            {
+                var user = await UserManagement.GetUserByIdAsync(enrollment.UserId, cancellationToken);
+                list.Add(Tuple.Create(enrollment, user));
+            }
+
+            return Ok(ResponseBuilder.BuildResourceList<EnrollmentEntity, UserInfo, Enrollment, EnrollmentList>(
+                    list,
                     ResponseBuilder.BuildEnrollment,
                     nextLink));
         }

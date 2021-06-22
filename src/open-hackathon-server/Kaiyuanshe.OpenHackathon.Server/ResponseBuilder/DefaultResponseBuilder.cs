@@ -12,7 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         HackathonList BuildHackathonList(IEnumerable<HackathonEntity> hackathonEntities, string nextLink);
 
-        Enrollment BuildEnrollment(EnrollmentEntity participant);
+        Enrollment BuildEnrollment(EnrollmentEntity enrollmentEntity, UserInfo userInfo);
 
         Team BuildTeam(TeamEntity teamEntity);
 
@@ -22,6 +22,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
             where TResult : IResourceList<TResultItem>, new();
+
+        TResult BuildResourceList<TSrcItem1, TSrcItem2, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2>> items,
+            Func<TSrcItem1, TSrcItem2, TResultItem> converter,
+            string nextLink)
+           where TResult : IResourceList<TResultItem>, new();
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -44,11 +50,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             };
         }
 
-        public Enrollment BuildEnrollment(EnrollmentEntity participant)
+        public Enrollment BuildEnrollment(EnrollmentEntity enrollment, UserInfo userInfo)
         {
-            return participant.As<Enrollment>(p =>
+            return enrollment.As<Enrollment>(p =>
             {
-                p.updatedAt = participant.Timestamp.DateTime;
+                p.updatedAt = enrollment.Timestamp.DateTime;
+                p.user = userInfo;
             });
         }
 
@@ -74,6 +81,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             return new TResult
             {
                 value = items.Select(p => converter(p)).ToArray(),
+                nextLink = nextLink,
+            };
+        }
+
+        public TResult BuildResourceList<TSrcItem1, TSrcItem2, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2>> items,
+            Func<TSrcItem1, TSrcItem2, TResultItem> converter,
+            string nextLink)
+           where TResult : IResourceList<TResultItem>, new()
+        {
+            return new TResult
+            {
+                value = items.Select(p => converter(p.Item1, p.Item2)).ToArray(),
                 nextLink = nextLink,
             };
         }
