@@ -402,6 +402,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var userManagement = new UserManagement
             {
                 StorageContext = storageContext.Object,
+                Cache = new DefaultCacheProvider(null),
             };
             var result = await userManagement.GetUserByIdAsync(userId, cancellationToken);
 
