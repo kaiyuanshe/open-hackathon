@@ -736,47 +736,61 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.IsNull(participant);
         }
 
-        [TestCase(EnrollmentStatus.approved)]
-        [TestCase(EnrollmentStatus.rejected)]
-        public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus parameter)
+        [TestCase(EnrollmentStatus.none, EnrollmentStatus.approved, 1)]
+        [TestCase(EnrollmentStatus.pendingApproval, EnrollmentStatus.approved, 1)]
+        [TestCase(EnrollmentStatus.approved, EnrollmentStatus.approved, 0)]
+        [TestCase(EnrollmentStatus.rejected, EnrollmentStatus.approved, 1)]
+        [TestCase(EnrollmentStatus.none, EnrollmentStatus.rejected, 0)]
+        [TestCase(EnrollmentStatus.pendingApproval, EnrollmentStatus.rejected, 0)]
+        [TestCase(EnrollmentStatus.approved, EnrollmentStatus.rejected, -1)]
+        [TestCase(EnrollmentStatus.rejected, EnrollmentStatus.rejected, 0)]
+        public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus currentStatus, EnrollmentStatus targetStatus, int expectedIncreasement)
         {
+            // data
             HackathonEntity hackathon = new HackathonEntity { Enrollment = 5 };
-            EnrollmentEntity participant = new EnrollmentEntity
+            EnrollmentEntity enrollment = new EnrollmentEntity
             {
-                Status = parameter == EnrollmentStatus.approved ? EnrollmentStatus.pendingApproval : EnrollmentStatus.approved
+                Status = currentStatus
             };
             CancellationToken cancellation = CancellationToken.None;
+
+            // setup
             var logger = new Mock<ILogger<HackathonManagement>>();
-
-            EnrollmentEntity captured = null;
-            var enrollmentTable = new Mock<IEnrollmentTable>();
-            enrollmentTable.Setup(p => p.MergeAsync(It.IsAny<EnrollmentEntity>(), cancellation))
-                .Callback<EnrollmentEntity, CancellationToken>((p, c) =>
-                {
-                    captured = p;
-                });
-            var hackathonTable = new Mock<IHackathonTable>();
-            hackathonTable.Setup(h => h.MergeAsync(hackathon, cancellation));
-
             var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
-            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+            var enrollmentTable = new Mock<IEnrollmentTable>();
+            if (currentStatus != targetStatus)
+            {
+                storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
+                enrollmentTable.Setup(p => p.MergeAsync(It.IsAny<EnrollmentEntity>(), cancellation));
+            }
+            var hackathonTable = new Mock<IHackathonTable>();
+            if (expectedIncreasement != 0)
+            {
+                storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+                hackathonTable.Setup(h => h.MergeAsync(hackathon, cancellation));
+            }
 
+            // test
             var hackathonManagement = new HackathonManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
             };
-            await hackathonManagement.UpdateEnrollmentStatusAsync(hackathon, participant, parameter, cancellation);
+            await hackathonManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, targetStatus, cancellation);
 
+            // verify
             Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable, logger);
+            if (currentStatus != targetStatus)
+            {
+                enrollmentTable.Verify(p => p.MergeAsync(It.Is<EnrollmentEntity>(p => p.Status == targetStatus), cancellation), Times.Once);
+            }
             enrollmentTable.VerifyNoOtherCalls();
-            int expected = parameter == EnrollmentStatus.approved ? 6 : 4;
-            hackathonTable.Verify(h => h.MergeAsync(It.Is<HackathonEntity>(h => h.Enrollment == expected), cancellation));
+            if (expectedIncreasement != 0)
+            {
+                int expected = 5 + expectedIncreasement;
+                hackathonTable.Verify(h => h.MergeAsync(It.Is<HackathonEntity>(h => h.Enrollment == expected), cancellation));
+            }
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
-            Assert.IsNotNull(captured);
-            Assert.AreEqual(parameter, captured.Status);
-            Assert.AreEqual(parameter, participant.Status);
         }
 
         [TestCase(null, null)]

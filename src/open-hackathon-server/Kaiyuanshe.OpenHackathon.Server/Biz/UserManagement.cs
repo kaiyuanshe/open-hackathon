@@ -198,7 +198,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #region GetCurrentUserAsync
         public async Task<UserInfo> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
-            return await StorageContext.UserTable.GetUserByIdAsync(userId, cancellationToken);
+            if (string.IsNullOrWhiteSpace(userId))
+                return null;
+
+            return await Cache.GetOrAddAsync(
+                CacheKeys.GetCacheKey(CacheEntryType.User, userId),
+                TimeSpan.FromHours(6),
+                ct => StorageContext.UserTable.GetUserByIdAsync(userId, ct),
+                true,
+                cancellationToken);
         }
         #endregion
     }

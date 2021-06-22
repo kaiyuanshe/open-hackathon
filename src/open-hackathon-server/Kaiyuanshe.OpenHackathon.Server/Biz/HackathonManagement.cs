@@ -407,26 +407,29 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (enrollment == null || hackathon == null)
                 return enrollment;
 
+            if (enrollment.Status == status)
+                return enrollment;
+
             // update hackathon.enrollment
             int enrollmentIncreasement = 0;
-            if (enrollment.Status != EnrollmentStatus.approved && status == EnrollmentStatus.approved)
+            if (status == EnrollmentStatus.approved)
             {
                 enrollmentIncreasement += 1;
             }
-            if (enrollment.Status == EnrollmentStatus.approved && status != EnrollmentStatus.approved && hackathon.Enrollment >= 1)
+            if (enrollment.Status == EnrollmentStatus.approved && hackathon.Enrollment >= 1)
             {
                 enrollmentIncreasement -= 1;
-            }
-            if (enrollmentIncreasement != 0)
-            {
-                hackathon.Enrollment += enrollmentIncreasement;
             }
 
             enrollment.Status = status;
             await StorageContext.EnrollmentTable.MergeAsync(enrollment, cancellationToken);
-            await StorageContext.HackathonTable.MergeAsync(hackathon, cancellationToken);
+            if (enrollmentIncreasement != 0)
+            {
+                hackathon.Enrollment += enrollmentIncreasement;
+                await StorageContext.HackathonTable.MergeAsync(hackathon, cancellationToken);
+            }
             logger.TraceInformation($"Pariticipant {enrollment.HackathonName}/{enrollment.UserId} stastus updated to: {status} ");
-            
+
             return enrollment;
         }
 
