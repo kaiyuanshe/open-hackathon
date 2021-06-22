@@ -37,16 +37,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 });
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackathonAdminTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("HackathonAdmin-hack"));
 
             var management = new HackathonAdminManagement(logger.Object)
             {
-                StorageContext = storageContext.Object
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             var result = await management.CreateAdminAsync(admin, cancellationToken);
 
-            Mock.VerifyAll(hackathonAdminTable, storageContext);
+            Mock.VerifyAll(hackathonAdminTable, storageContext, cache);
             hackathonAdminTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
             Assert.AreEqual("hack", captured.HackathonName);
             Assert.AreEqual("uid", captured.UserId);
             Assert.AreEqual("hack", result.HackathonName);

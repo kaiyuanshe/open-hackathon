@@ -19,12 +19,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class EnrollmentController : HackathonControllerBase
     {
-        public IResponseBuilder ResponseBuilder { get; set; }
-
-        public IHackathonManagement HackathonManagement { get; set; }
-
-        public IUserManagement UserManagement { get; set; }
-
         #region Enroll
         /// <summary>
         /// Enroll a hackathon.
@@ -57,7 +51,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
-            var enrollment = await HackathonManagement.EnrollAsync(hackathon, CurrentUserId);
+            var enrollment = await EnrollmentManagement.EnrollAsync(hackathon, CurrentUserId);
             var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
             return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
@@ -81,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             CancellationToken cancellationToken)
         {
-            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, CurrentUserId, hackathonName));
@@ -152,13 +146,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
 
-            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName, userId);
+            EnrollmentEntity enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName, userId);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
             }
 
-            enrollment = await HackathonManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, status);
+            enrollment = await EnrollmentManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, status);
             var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
             return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
@@ -194,7 +188,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
-            EnrollmentEntity enrollment = await HackathonManagement.GetEnrollmentAsync(hackName, userId.ToLower(), cancellationToken);
+            EnrollmentEntity enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackName, userId.ToLower(), cancellationToken);
             if (enrollment == null)
             {
                 return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
@@ -239,7 +233,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 Status = status,
                 Top = pagination.top
             };
-            var segment = await HackathonManagement.ListPaginatedEnrollmentsAsync(hackName, enrollmentOptions, cancellationToken);
+            var segment = await EnrollmentManagement.ListPaginatedEnrollmentsAsync(hackName, enrollmentOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {

@@ -20,12 +20,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     /// </summary>
     public class TeamController : HackathonControllerBase
     {
-        public IResponseBuilder ResponseBuilder { get; set; }
-
-        public IHackathonManagement HackathonManagement { get; set; }
-
-        public ITeamManagement TeamManagement { get; set; }
-
         #region CreateTeam
         /// <summary>
         /// Create a new team
@@ -59,7 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // validate enrollment
-            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             var enrollmentOptions = new ValidateEnrollmentOptions
             {
                 ApprovedRequired = true,
@@ -330,7 +324,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // validate enrollment
-            var enrollment = await HackathonManagement.GetEnrollmentAsync(hackathonName.ToLower(), userId, cancellationToken);
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName.ToLower(), userId, cancellationToken);
             var enrollmentOptions = new ValidateEnrollmentOptions
             {
                 ApprovedRequired = true,

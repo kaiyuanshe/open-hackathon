@@ -145,7 +145,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.EnrollAsync(hackathonEntity, string.Empty, It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.EnrollAsync(hackathonEntity, string.Empty, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(enrollment);
             var userManagement = new Mock<IUserManagement>();
             userManagement.Setup(p => p.GetUserByIdAsync(It.IsAny<string>(), cancellationToken))
@@ -155,14 +156,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 HackathonManagement = hackathonManagement.Object,
                 UserManagement = userManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Enroll(hackathonName, null, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement, userManagement);
+            Mock.VerifyAll(hackathonManagement, userManagement, enrollmentManagement);
             hackathonManagement.VerifyNoOtherCalls();
             userManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Enrollment en = (Enrollment)objectResult.Value;
@@ -177,20 +180,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             EnrollmentEntity enrollment = null;
             CancellationToken cancellationToken = default;
 
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(enrollment);
 
             var controller = new EnrollmentController
             {
-                HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Get(hackathonName, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(enrollmentManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
             AssertHelper.AssertObjectResult(result, 404);
         }
 
@@ -202,8 +205,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             CancellationToken cancellationToken = default;
             UserInfo userInfo = new UserInfo();
 
-            var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", string.Empty, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(enrollment);
             var userManagement = new Mock<IUserManagement>();
             userManagement.Setup(p => p.GetUserByIdAsync(It.IsAny<string>(), cancellationToken))
@@ -211,15 +214,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var controller = new EnrollmentController
             {
-                HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 UserManagement = userManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.Get(hackathonName, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement, userManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            Mock.VerifyAll(enrollmentManagement, userManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
             userManagement.VerifyNoOtherCalls();
 
             Assert.IsTrue(result is OkObjectResult);
@@ -317,7 +320,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(participant);
 
             var authorizationService = new Mock<IAuthorizationService>();
@@ -327,6 +331,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var controller = new EnrollmentController
             {
                 HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
                 AuthorizationService = authorizationService.Object,
@@ -356,9 +361,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(participant);
-            hackathonManagement.Setup(p => p.UpdateEnrollmentStatusAsync(hackathonEntity, It.IsAny<EnrollmentEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
+            enrollmentManagement.Setup(p => p.UpdateEnrollmentStatusAsync(hackathonEntity, It.IsAny<EnrollmentEntity>(), It.IsAny<EnrollmentStatus>(), It.IsAny<CancellationToken>()))
                             .Callback<HackathonEntity, EnrollmentEntity, EnrollmentStatus, CancellationToken>((h, p, e, c) =>
                             {
                                 p.Status = e;
@@ -375,6 +381,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var controller = new EnrollmentController
             {
                 HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 UserManagement = userManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
@@ -383,9 +390,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var func = GetTargetMethod(controller, status);
             var result = await func(hack, userId, null, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement);
+            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, enrollmentManagement);
             hackathonManagement.VerifyNoOtherCalls();
             userManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
             Assert.IsTrue(result is OkObjectResult);
             OkObjectResult objectResult = (OkObjectResult)result;
             Enrollment enrollment = (Enrollment)objectResult.Value;
@@ -431,12 +439,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(enrollment);
 
             var controller = new EnrollmentController
             {
                 HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
@@ -464,7 +474,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", "uid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(participant);
             var userManagement = new Mock<IUserManagement>();
             userManagement.Setup(p => p.GetUserByIdAsync(It.IsAny<string>(), cancellationToken))
@@ -473,6 +484,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var controller = new EnrollmentController
             {
                 HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 UserManagement = userManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
@@ -592,7 +604,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             EnrollmentQueryOptions optionsCaptured = null;
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
-            hackathonManagement.Setup(p => p.ListPaginatedEnrollmentsAsync("hack", It.IsAny<EnrollmentQueryOptions>(), cancellationToken))
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.ListPaginatedEnrollmentsAsync("hack", It.IsAny<EnrollmentQueryOptions>(), cancellationToken))
                 .Callback<string, EnrollmentQueryOptions, CancellationToken>((n, o, t) =>
                 {
                     optionsCaptured = o;
@@ -607,6 +620,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             {
                 ResponseBuilder = new DefaultResponseBuilder(),
                 HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
                 UserManagement = userManagement.Object,
             };
             var result = await controller.ListEnrollments(hackName, pagination, status, cancellationToken);
@@ -656,12 +670,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             CancellationToken cancellationToken = CancellationToken.None;
             EnrollmentEntity enrollment = null;
 
-            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
-            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
-            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
 
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            var hackathonManagement = new HackathonManagement(null)
+            {
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var role = await hackathonManagement.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(enrollmentManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
             Assert.IsNotNull(role);
             Assert.IsTrue(role.isAdmin);
             Assert.IsFalse(role.isEnrolled);
@@ -684,15 +703,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
             hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
 
             var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
             hackathonManagement.Object.HackathonAdminManagement = hackathonAdminManagement.Object;
-            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            hackathonManagement.Object.EnrollmentManagement = enrollmentManagement.Object;
             var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement);
+            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement, enrollmentManagement);
             hackathonManagement.VerifyNoOtherCalls();
             hackathonAdminManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
 
             Assert.IsNotNull(role);
             Assert.IsFalse(role.isAdmin);
@@ -716,18 +738,22 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
             hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackName, cancellationToken)).ReturnsAsync(admins);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
 
             var hackathonManagement = new Mock<HackathonManagement>(null)
             {
                 CallBase = true,
             };
             hackathonManagement.Object.HackathonAdminManagement = hackathonAdminManagement.Object;
-            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
+            hackathonManagement.Object.EnrollmentManagement = enrollmentManagement.Object;
             var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
 
-            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement);
+            Mock.VerifyAll(hackathonManagement, hackathonAdminManagement, enrollmentManagement);
             hackathonManagement.VerifyNoOtherCalls();
             hackathonAdminManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+
             Assert.IsNotNull(role);
             Assert.IsTrue(role.isAdmin);
             Assert.IsFalse(role.isEnrolled);
@@ -746,12 +772,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             CancellationToken cancellationToken = CancellationToken.None;
             EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.pendingApproval };
 
-            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
-            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
-            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
 
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            var hackathonManagement = new HackathonManagement(null)
+            {
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var role = await hackathonManagement.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(enrollmentManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
+
             Assert.IsNotNull(role);
             Assert.IsTrue(role.isAdmin);
             Assert.IsFalse(role.isEnrolled);
@@ -770,12 +802,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             CancellationToken cancellationToken = CancellationToken.None;
             EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.approved };
 
-            var hackathonManagement = new Mock<HackathonManagement>(null) { CallBase = true };
-            hackathonManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
-            var role = await hackathonManagement.Object.GetHackathonRolesAsync(hackName, user, cancellationToken);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.GetEnrollmentAsync("hack", "uid", cancellationToken)).ReturnsAsync(enrollment);
 
-            Mock.VerifyAll(hackathonManagement);
-            hackathonManagement.VerifyNoOtherCalls();
+            var hackathonManagement = new HackathonManagement(null)
+            {
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var role = await hackathonManagement.GetHackathonRolesAsync(hackName, user, cancellationToken);
+
+            Mock.VerifyAll(enrollmentManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
+
             Assert.IsNotNull(role);
             Assert.IsTrue(role.isAdmin);
             Assert.IsTrue(role.isEnrolled);

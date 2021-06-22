@@ -1,5 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
     public abstract class HackathonControllerBase : ControllerBase
     {
         public IAuthorizationService AuthorizationService { get; set; }
+
+        public IResponseBuilder ResponseBuilder { get; set; }
+
+        public IHackathonManagement HackathonManagement { get; set; }
+
+        public IUserManagement UserManagement { get; set; }
+
+        public IEnrollmentManagement EnrollmentManagement { get; set; }
+
+        public IAwardManagement AwardManagement { get; set; }
+
+        public ITeamManagement TeamManagement { get; set; }
 
         /// <summary>
         /// Id of current User. Return string.Empty if token is not required or invalid.

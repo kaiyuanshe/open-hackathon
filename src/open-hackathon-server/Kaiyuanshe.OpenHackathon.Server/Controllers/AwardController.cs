@@ -16,12 +16,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class AwardController : HackathonControllerBase
     {
-        public IResponseBuilder ResponseBuilder { get; set; }
-
-        public IHackathonManagement HackathonManagement { get; set; }
-
-        public IAwardManagement AwardManagement { get; set; }
-
         #region CreateAward
         /// <summary>
         /// Create a new award

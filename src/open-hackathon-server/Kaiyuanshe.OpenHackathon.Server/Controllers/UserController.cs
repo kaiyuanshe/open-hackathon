@@ -12,10 +12,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class UserController : HackathonControllerBase
     {
-        public IUserManagement UserManagement { get; set; }
-
-        public IResponseBuilder ResponseBuilder { get; set; }
-
         #region Authing
         /// <summary>
         /// Post the data from Authing after completing the Login process. Open hackathon API
