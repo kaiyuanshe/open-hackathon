@@ -124,7 +124,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             foreach (var property in model.GetType().GetProperties())
             {
-                if (!tableEntity.Properties.ContainsKey(property.Name))
+                if (tableEntity == null || !tableEntity.Properties.ContainsKey(property.Name))
                     continue;
 
                 if (property.PropertyType == typeof(string))

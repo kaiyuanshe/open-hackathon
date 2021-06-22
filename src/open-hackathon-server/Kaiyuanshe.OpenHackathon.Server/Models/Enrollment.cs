@@ -20,6 +20,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string userId { get; internal set; }
 
         /// <summary>
+        /// detailed info of the enrolled user. The info is from Authing.
+        /// </summary>
+        public UserInfo user { get; internal set; }
+
+        /// <summary>
         /// Status of enrollment.
         /// </summary>
         /// <example>approved</example>
