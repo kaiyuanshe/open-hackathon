@@ -19,6 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
 
             //Biz
             builder.RegisterType<HackathonManagement>().As<IHackathonManagement>().PropertiesAutowired().SingleInstance();
+            builder.RegisterType<EnrollmentManagement>().As<IEnrollmentManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<HackathonAdminManagement>().As<IHackathonAdminManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<UserManagement>().As<IUserManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<TeamManagement>().As<ITeamManagement>().PropertiesAutowired().SingleInstance();

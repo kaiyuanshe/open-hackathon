@@ -79,31 +79,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
 
-        #region Enrollment
-        /// <summary>
-        /// Register a hackathon event as contestant
-        /// </summary>
-        Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Update status of enrollment.
-        /// </summary>
-        Task<EnrollmentEntity> UpdateEnrollmentStatusAsync(HackathonEntity hackathon, EnrollmentEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Get an enrollment.
-        /// </summary>
-        Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// List paged enrollments of hackathon
-        /// </summary>
-        /// <param name="hackathonName">name of hackathon</param>
-        /// <param name="options">options for query</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<TableQuerySegment<EnrollmentEntity>> ListPaginatedEnrollmentsAsync(string hackathonName, EnrollmentQueryOptions options, CancellationToken cancellationToken = default);
-        #endregion
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>
@@ -113,6 +88,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         internal static string cacheKeyForAllHackathon = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
 
         public IHackathonAdminManagement HackathonAdminManagement { get; set; }
+
+        public IEnrollmentManagement EnrollmentManagement { get; set; }
 
         public HackathonManagement(ILogger<HackathonManagement> logger)
         {
@@ -331,7 +308,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             // enrollment
-            var enrollment = await GetEnrollmentAsync(hackathonName, userId, cancellationToken);
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName, userId, cancellationToken);
             isEnrolled = (enrollment != null && enrollment.Status == EnrollmentStatus.approved);
 
             // todo judge
@@ -356,110 +333,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 }, true, cancellationToken);
         }
         #endregion
-
-        public virtual async Task<EnrollmentEntity> GetEnrollmentAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
-        {
-            if (hackathonName == null || userId == null)
-                return null;
-            return await StorageContext.EnrollmentTable.RetrieveAsync(hackathonName.ToLower(), userId.ToLower(), cancellationToken);
-        }
-
-        #region EnrollAsync
-        public async Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
-        {
-            string hackathonName = hackathon.Name;
-            var entity = await StorageContext.EnrollmentTable.RetrieveAsync(hackathonName, userId, cancellationToken);
-
-            if (entity != null)
-            {
-                logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
-                return entity;
-            }
-            else
-            {
-                entity = new EnrollmentEntity
-                {
-                    PartitionKey = hackathonName,
-                    RowKey = userId,
-                    Status = EnrollmentStatus.pendingApproval,
-                    CreatedAt = DateTime.UtcNow,
-                };
-                if (hackathon.AutoApprove)
-                {
-                    entity.Status = EnrollmentStatus.approved;
-                }
-                await StorageContext.EnrollmentTable.InsertAsync(entity, cancellationToken);
-            }
-            logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
-
-            if (entity.Status == EnrollmentStatus.approved)
-            {
-                hackathon.Enrollment += 1;
-                await StorageContext.HackathonTable.MergeAsync(hackathon, cancellationToken);
-            }
-
-            return entity;
-        }
-        #endregion
-
-        public async Task<EnrollmentEntity> UpdateEnrollmentStatusAsync(HackathonEntity hackathon, EnrollmentEntity enrollment, EnrollmentStatus status, CancellationToken cancellationToken = default)
-        {
-            if (enrollment == null || hackathon == null)
-                return enrollment;
-
-            if (enrollment.Status == status)
-                return enrollment;
-
-            // update hackathon.enrollment
-            int enrollmentIncreasement = 0;
-            if (status == EnrollmentStatus.approved)
-            {
-                enrollmentIncreasement += 1;
-            }
-            if (enrollment.Status == EnrollmentStatus.approved && hackathon.Enrollment >= 1)
-            {
-                enrollmentIncreasement -= 1;
-            }
-
-            enrollment.Status = status;
-            await StorageContext.EnrollmentTable.MergeAsync(enrollment, cancellationToken);
-            if (enrollmentIncreasement != 0)
-            {
-                hackathon.Enrollment += enrollmentIncreasement;
-                await StorageContext.HackathonTable.MergeAsync(hackathon, cancellationToken);
-            }
-            logger.TraceInformation($"Pariticipant {enrollment.HackathonName}/{enrollment.UserId} stastus updated to: {status} ");
-
-            return enrollment;
-        }
-
-        public async Task<TableQuerySegment<EnrollmentEntity>> ListPaginatedEnrollmentsAsync(string hackathonName, EnrollmentQueryOptions options, CancellationToken cancellationToken = default)
-        {
-            var filter = TableQuery.GenerateFilterCondition(
-                           nameof(EnrollmentEntity.PartitionKey),
-                           QueryComparisons.Equal,
-                           hackathonName);
-
-            if (options != null && options.Status.HasValue)
-            {
-                var statusFilter = TableQuery.GenerateFilterConditionForInt(
-                    nameof(EnrollmentEntity.Status),
-                    QueryComparisons.Equal,
-                    (int)options.Status.Value);
-                filter = TableQueryHelper.And(filter, statusFilter);
-            }
-
-            int top = 100;
-            if (options != null && options.Top.HasValue && options.Top.Value > 0)
-            {
-                top = options.Top.Value;
-            }
-            TableQuery<EnrollmentEntity> query = new TableQuery<EnrollmentEntity>()
-                .Where(filter)
-                .Take(top);
-
-            TableContinuationToken continuationToken = options?.TableContinuationToken;
-            return await StorageContext.EnrollmentTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
-        }
     }
 }

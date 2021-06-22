@@ -17,10 +17,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 {
     public class HackathonController : HackathonControllerBase
     {
-        public IResponseBuilder ResponseBuilder { get; set; }
-
-        public IHackathonManagement HackathonManagement { get; set; }
-
         #region ListHackathon
         /// <summary>
         /// List paginated online hackathons.
