@@ -53,16 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// list paginated hackathons with admin access
-        /// </summary>
-        /// <param name="user">Login user</param>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<IEnumerable<HackathonEntity>> ListPaginatedMyManagableHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default);
+        Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List all hackathons
@@ -206,7 +197,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region List Paginated Hackathons
-        private IEnumerable<HackathonEntity> ListInternal(HackathonQueryOptions options, IEnumerable<HackathonEntity> candidtes)
+        private IEnumerable<HackathonEntity> OrderAndPaging(HackathonQueryOptions options, IEnumerable<HackathonEntity> candidtes)
         {
             // ordering
             IEnumerable<HackathonEntity> hackathons = candidtes;
@@ -241,28 +232,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return hackathons;
         }
 
-        public async Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<HackathonEntity>> ListOnlineHackathons(HackathonQueryOptions options, CancellationToken cancellationToken)
         {
             IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
 
-            // filter
             hackathons = hackathons.Where(h => h.Status == HackathonStatus.online);
-            if (!string.IsNullOrWhiteSpace(options.Search))
-            {
-                hackathons = hackathons.Where(h => h.Name.Contains(options.Search, StringComparison.OrdinalIgnoreCase)
-                                                || (h.DisplayName?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false)
-                                                || (h.Detail?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false));
-            }
-
-            // ordering and paging
-            return ListInternal(options, hackathons);
+            return hackathons;
         }
 
-        public async Task<IEnumerable<HackathonEntity>> ListPaginatedMyManagableHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<HackathonEntity>> ListAdminHackathons(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken)
         {
             if (user == null)
+            {
                 return new List<HackathonEntity>();
+            }
             string userId = ClaimsHelper.GetUserId(user);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return new List<HackathonEntity>();
+            }
 
             IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
             // filter by admin. PlatformAdmin can access every hackathon
@@ -279,8 +267,36 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 }
                 hackathons = filtered;
             }
+            return hackathons;
+        }
 
-            return ListInternal(options, hackathons);
+        public async Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<HackathonEntity> hackathons = new List<HackathonEntity>();
+            // get candidates
+            HackathonListType listType = options.ListType.GetValueOrDefault(HackathonListType.online);
+            switch (listType)
+            {
+                case HackathonListType.online:
+                    hackathons = await ListOnlineHackathons(options, cancellationToken);
+                    break;
+                case HackathonListType.admin:
+                    hackathons = await ListAdminHackathons(user, options, cancellationToken);
+                    break;
+                default:
+                    break;
+            }
+
+            // search
+            if (!string.IsNullOrWhiteSpace(options.Search))
+            {
+                hackathons = hackathons.Where(h => h.Name.Contains(options.Search, StringComparison.OrdinalIgnoreCase)
+                                                || (h.DisplayName?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false)
+                                                || (h.Detail?.Contains(options.Search, StringComparison.OrdinalIgnoreCase)).GetValueOrDefault(false));
+            }
+
+            // ordering and paging
+            return OrderAndPaging(options, hackathons);
         }
         #endregion
 

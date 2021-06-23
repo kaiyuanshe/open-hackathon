@@ -25,6 +25,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// Ordering. default to createdAt.
         /// </summary>
         public HackathonOrderBy? OrderBy { get; set; }
+
+        /// <summary>
+        /// type of hackathons. Default to online. 
+        /// </summary>
+        public HackathonListType? ListType { get; set; }
     }
 
     public class EnrollmentQueryOptions : TableQueryOptions

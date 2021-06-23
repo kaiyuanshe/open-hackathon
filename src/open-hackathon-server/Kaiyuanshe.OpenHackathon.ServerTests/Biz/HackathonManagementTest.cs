@@ -182,7 +182,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
 
         #region ListPaginatedHackathonsAsync
-        private static IEnumerable ListPaginatedHackathonsAsyncTestData()
+        private static IEnumerable ListPaginatedHackathonsAsyncTestData_online()
         {
             var offline = new HackathonEntity { Status = HackathonStatus.offline };
             var planning = new HackathonEntity { Status = HackathonStatus.planning };
@@ -378,8 +378,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 );
         }
 
-        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData))]
-        public async Task ListPaginatedHackathonsAsync_Options(
+        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData_online))]
+        public async Task ListPaginatedHackathonsAsync_Online(
             Dictionary<string, HackathonEntity> allHackathons,
             HackathonQueryOptions options,
             List<HackathonEntity> expectedResult,
@@ -396,7 +396,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 Cache = cache.Object,
             };
-            var result = await hackathonManagement.ListPaginatedHackathonsAsync(options, cancellationToken);
+            var result = await hackathonManagement.ListPaginatedHackathonsAsync(null, options, cancellationToken);
 
             Mock.VerifyAll(cache);
             cache.VerifyNoOtherCalls();
@@ -419,10 +419,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(result.ElementAt(i).Status, expectedResult[i].Status);
             }
         }
-        #endregion
 
-        #region ListPaginatedMyManagableHackathonsAsync
-        private static IEnumerable ListPaginatedMyManagableHackathonsAsyncTestData()
+        private static IEnumerable ListPaginatedHackathonsAsyncTestData_admin()
         {
             var h1 = new HackathonEntity
             {
@@ -473,7 +471,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 new ClaimsPrincipal(
                     new ClaimsIdentity(new List<Claim>
                     {
-                        new Claim(AuthConstant.ClaimType.PlatformAdministrator, "foo")
+                        new Claim(AuthConstant.ClaimType.PlatformAdministrator, "foo"),
+                        new Claim(AuthConstant.ClaimType.UserId, "uid")
                     })
                 ),
                 new Dictionary<string, HackathonEntity>
@@ -519,8 +518,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 );
         }
 
-        [Test, TestCaseSource(nameof(ListPaginatedMyManagableHackathonsAsyncTestData))]
-        public async Task ListPaginatedMyManagableHackathonsAsync(
+        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData_admin))]
+        public async Task ListPaginatedHackathonsAsync_admin(
             ClaimsPrincipal user,
             Dictionary<string, HackathonEntity> allHackathons,
             Dictionary<string, List<HackathonAdminEntity>> admins,
@@ -530,6 +529,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var options = new HackathonQueryOptions
             {
                 OrderBy = HackathonOrderBy.createdAt,
+                ListType = HackathonListType.admin,
             };
 
             var logger = new Mock<ILogger<HackathonManagement>>();
@@ -554,7 +554,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Cache = cache.Object,
                 HackathonAdminManagement = hackathonAdminManagement.Object,
             };
-            var result = await hackathonManagement.ListPaginatedMyManagableHackathonsAsync(user, options, cancellationToken);
+            var result = await hackathonManagement.ListPaginatedHackathonsAsync(user, options, cancellationToken);
 
             Mock.VerifyAll(cache, hackathonAdminManagement);
             cache.VerifyNoOtherCalls();
@@ -644,7 +644,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
 
             Assert.AreEqual("loc", result.Location);
-        } 
+        }
         #endregion
     }
 }
