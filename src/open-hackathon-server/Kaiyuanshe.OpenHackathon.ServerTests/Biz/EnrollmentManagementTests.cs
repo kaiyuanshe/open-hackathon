@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -55,41 +57,45 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Enrollment = 5,
             };
             string userId = "uid";
-            EnrollmentEntity participant = null;
+            EnrollmentEntity enrollment = null;
             CancellationToken cancellation = CancellationToken.None;
             var logger = new Mock<ILogger<EnrollmentManagement>>();
 
-            var participantTable = new Mock<IEnrollmentTable>();
-            participantTable.Setup(p => p.RetrieveAsync("hack", userId, cancellation)).ReturnsAsync(participant);
-            participantTable.Setup(p => p.InsertAsync(It.IsAny<EnrollmentEntity>(), cancellation))
+            var enrollmentTable = new Mock<IEnrollmentTable>();
+            enrollmentTable.Setup(p => p.RetrieveAsync("hack", userId, cancellation)).ReturnsAsync(enrollment);
+            enrollmentTable.Setup(p => p.InsertAsync(It.IsAny<EnrollmentEntity>(), cancellation))
                 .Callback<EnrollmentEntity, CancellationToken>((p, c) =>
                 {
-                    participant = p;
+                    enrollment = p;
                 });
             var storageContext = new Mock<IStorageContext>();
             var hackathonTable = new Mock<IHackathonTable>();
-            storageContext.SetupGet(p => p.EnrollmentTable).Returns(participantTable.Object);
+            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
             if (autoApprove)
             {
                 hackathonTable.Setup(h => h.MergeAsync(hackathon, cancellation));
                 storageContext.SetupGet(s => s.HackathonTable).Returns(hackathonTable.Object);
             }
+            var cache = new Mock<ICacheProvider>();
 
             var enrollmentManagement = new EnrollmentManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             await enrollmentManagement.EnrollAsync(hackathon, userId, cancellation);
 
-            Mock.VerifyAll(storageContext, participantTable, hackathonTable);
-            participantTable.VerifyNoOtherCalls();
+            Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable);
+            enrollmentTable.VerifyNoOtherCalls();
             if (autoApprove)
             {
                 hackathonTable.Verify(h => h.MergeAsync(It.Is<HackathonEntity>(h => h.Enrollment == 6), cancellation), Times.Once);
             }
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
-            Assert.AreEqual(targetStatus, participant.Status);
+            cache.Verify(c => c.Remove("Enrollment-hack"), Times.Once);
+            cache.VerifyNoOtherCalls();
+            Assert.AreEqual(targetStatus, enrollment.Status);
         }
         #endregion
 
@@ -121,7 +127,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         public async Task EnrollUpdateStatusAsyncTest_Updated(EnrollmentStatus currentStatus, EnrollmentStatus targetStatus, int expectedIncreasement)
         {
             // data
-            HackathonEntity hackathon = new HackathonEntity { Enrollment = 5 };
+            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack", Enrollment = 5 };
             EnrollmentEntity enrollment = new EnrollmentEntity
             {
                 Status = currentStatus
@@ -132,10 +138,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var logger = new Mock<ILogger<EnrollmentManagement>>();
             var storageContext = new Mock<IStorageContext>();
             var enrollmentTable = new Mock<IEnrollmentTable>();
+            var cache = new Mock<ICacheProvider>();
             if (currentStatus != targetStatus)
             {
                 storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
                 enrollmentTable.Setup(p => p.MergeAsync(It.IsAny<EnrollmentEntity>(), cancellation));
+                cache.Setup(c => c.Remove("Enrollment-hack"));
             }
             var hackathonTable = new Mock<IHackathonTable>();
             if (expectedIncreasement != 0)
@@ -148,11 +156,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var enrollmentManagement = new EnrollmentManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
+
             };
             await enrollmentManagement.UpdateEnrollmentStatusAsync(hackathon, enrollment, targetStatus, cancellation);
 
             // verify
-            Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable, logger);
+            Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable, logger, cache);
             if (currentStatus != targetStatus)
             {
                 enrollmentTable.Verify(p => p.MergeAsync(It.Is<EnrollmentEntity>(p => p.Status == targetStatus), cancellation), Times.Once);
@@ -165,9 +175,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             }
             hackathonTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
         }
         #endregion
-
 
         #region ListPaginatedEnrollmentsAsync
         [Test]
@@ -302,9 +312,112 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 StorageContext = storageContext.Object,
             };
 
-            var enrollment = await enrollmentManagement.GetEnrollmentAsync("Hack", "UID", cancellation);
+            var enrollment = await enrollmentManagement.GetEnrollmentAsync("Hack", "uid", cancellation);
             Assert.IsNotNull(enrollment);
             Assert.AreEqual(EnrollmentStatus.rejected, enrollment.Status);
+        }
+        #endregion
+
+        #region IsUserEnrolledAsync
+        [TestCase("anotheruser", EnrollmentStatus.approved, false)]
+        [TestCase("uid", EnrollmentStatus.none, false)]
+        [TestCase("uid", EnrollmentStatus.pendingApproval, false)]
+        [TestCase("uid", EnrollmentStatus.rejected, false)]
+        [TestCase("uid", EnrollmentStatus.approved, true)]
+        public async Task IsUserEnrolledAsync_Small(string userId, EnrollmentStatus status, bool expectedResult)
+        {
+            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack", MaxEnrollment = 1000 };
+            CancellationToken cancellationToken = default;
+            IEnumerable<EnrollmentEntity> enrollments = new List<EnrollmentEntity>
+            {
+                new EnrollmentEntity { RowKey = "uid", Status = status }
+            };
+
+            // mock
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<IEnumerable<EnrollmentEntity>>>(), cancellationToken))
+                .ReturnsAsync(enrollments);
+            var storageContext = new Mock<IStorageContext>();
+
+            // test
+            var enrollmentManagement = new EnrollmentManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await enrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
+            Assert.IsFalse(await enrollmentManagement.IsUserEnrolledAsync(null, userId, cancellationToken));
+            Assert.IsFalse(await enrollmentManagement.IsUserEnrolledAsync(hackathon, "", cancellationToken));
+
+            // verify
+            cache.Verify(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<EnrollmentEntity>>>(e => e.AutoRefresh && e.CacheKey == "Enrollment-hack" && e.SlidingExpiration.Hours == 4), cancellationToken), Times.Once);
+            cache.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        private static IEnumerable IsUserEnrolledAsync_Big_TestData()
+        {
+            // arg0: max enrollment
+            // arg1: EnrollmentEntity
+            // arg2: expected result
+
+            // empty
+            yield return new TestCaseData(
+                1001,
+                null,
+                false);
+
+            // unapproved
+            yield return new TestCaseData(
+                -1,
+                new EnrollmentEntity { Status = EnrollmentStatus.none },
+                false);
+            yield return new TestCaseData(
+                -1,
+                new EnrollmentEntity { Status = EnrollmentStatus.pendingApproval },
+                false);
+            yield return new TestCaseData(
+                -1,
+                new EnrollmentEntity { Status = EnrollmentStatus.rejected },
+                false);
+
+            // approved
+            yield return new TestCaseData(
+                10000,
+                new EnrollmentEntity { Status = EnrollmentStatus.approved },
+                true);
+        }
+
+        [Test, TestCaseSource(nameof(IsUserEnrolledAsync_Big_TestData))]
+        public async Task IsUserEnrolledAsync_Big(int maxEnrollment, EnrollmentEntity enrollment, bool expectedResult)
+        {
+            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack", MaxEnrollment = maxEnrollment };
+            string userId = "uid";
+            CancellationToken cancellationToken = default;
+
+            // mock
+            var cache = new Mock<ICacheProvider>();
+            var storageContext = new Mock<IStorageContext>();
+            var enrollmentTable = new Mock<IEnrollmentTable>();
+            enrollmentTable.Setup(p => p.RetrieveAsync("hack", userId, cancellationToken)).ReturnsAsync(enrollment);
+            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
+
+            // test
+            var enrollmentManagement = new EnrollmentManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await enrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(cache, storageContext, enrollmentTable);
+            cache.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            enrollmentTable.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult, result);
         }
         #endregion
     }

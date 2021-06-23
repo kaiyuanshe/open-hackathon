@@ -20,5 +20,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         Token,
         HackathonAdmin,
         User,
+        Enrollment,
     }
 }
