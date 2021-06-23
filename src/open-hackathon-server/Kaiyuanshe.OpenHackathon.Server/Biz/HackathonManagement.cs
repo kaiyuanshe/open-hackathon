@@ -78,7 +78,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="user"></param>
         /// <returns></returns>
         Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
-
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>

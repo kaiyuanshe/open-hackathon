@@ -50,7 +50,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public int Enrollment { get; set; } = 0;
 
         /// <summary>
-        /// Maximum allowed participant
+        /// Maximum allowed participant. <=0 means unlimited.
         /// </summary>
         public int MaxEnrollment { get; set; }
 
