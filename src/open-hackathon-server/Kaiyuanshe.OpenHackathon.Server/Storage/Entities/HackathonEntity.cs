@@ -50,9 +50,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public int Enrollment { get; set; } = 0;
 
         /// <summary>
-        /// Maximum allowed participant. <=0 means unlimited.
+        /// Maximum allowed participant. 0 or negative number means unlimited.
         /// </summary>
-        public int MaxEnrollment { get; set; }
+        public int MaxEnrollment { get; set; } = 0;
 
         /// <summary>
         /// whether or not user registration needs admin's manual approval

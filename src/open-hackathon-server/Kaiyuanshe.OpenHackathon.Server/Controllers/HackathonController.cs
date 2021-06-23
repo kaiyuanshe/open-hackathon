@@ -22,8 +22,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// List paginated online hackathons.
         /// </summary>
         /// <param name="cancellationToken"></param>
-        /// <param name="search">keyword to search in name, display name or details</param>
+        /// <param name="search">keyword to search in name, display name or details. Do case-insensitive substring match only.</param>
         /// <param name="orderby">order by. Default to createdAt.</param>
+        /// <param name="listType">type of list. Default to online. 
+        /// online: list hackathons in online status only; 
+        /// admin: list hackathons in any status where current user has admin access.
+        /// </param>
         /// <returns>A list of hackathon.</returns>
         /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>
         [HttpGet]
@@ -33,6 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromQuery] Pagination pagination,
             [FromQuery] string search,
             [FromQuery] HackathonOrderBy? orderby,
+            [FromQuery] HackathonListType? listType,
             CancellationToken cancellationToken)
         {
             var hackathonQueryOptions = new HackathonQueryOptions
@@ -40,9 +45,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 TableContinuationToken = pagination.ToContinuationToken(),
                 OrderBy = orderby,
                 Search = search,
+                ListType = listType,
                 Top = pagination.top
             };
-            var entities = await HackathonManagement.ListPaginatedHackathonsAsync(hackathonQueryOptions, cancellationToken);
+            var entities = await HackathonManagement.ListPaginatedHackathonsAsync(User, hackathonQueryOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
@@ -53,42 +59,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 routeValues.Add(nameof(orderby), orderby.Value);
             }
-
-            var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);
-            return Ok(ResponseBuilder.BuildHackathonList(entities, nextLink));
-        }
-
-        /// <summary>
-        /// List paginated online hackathons which I have admin access.
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="orderby">order by. Default to createdAt.</param>
-        /// <returns>A list of hackathon.</returns>
-        /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>
-        [HttpGet]
-        [ProducesResponseType(typeof(HackathonList), 200)]
-        [Route("hackathons/managable")]
-        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> ListManagableHackathon(
-            [FromQuery] Pagination pagination,
-            [FromQuery] HackathonOrderBy? orderby,
-            CancellationToken cancellationToken)
-        {
-            var hackathonQueryOptions = new HackathonQueryOptions
+            if (listType.HasValue)
             {
-                TableContinuationToken = pagination.ToContinuationToken(),
-                OrderBy = orderby,
-                Top = pagination.top
-            };
-            var entities = await HackathonManagement.ListPaginatedMyManagableHackathonsAsync(User, hackathonQueryOptions, cancellationToken);
-            var routeValues = new RouteValueDictionary();
-            if (pagination.top.HasValue)
-            {
-                routeValues.Add(nameof(pagination.top), pagination.top.Value);
-            }
-            if (orderby.HasValue)
-            {
-                routeValues.Add(nameof(orderby), orderby.Value);
+                routeValues.Add(nameof(listType), listType.Value);
             }
 
             var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);

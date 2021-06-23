@@ -230,4 +230,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         updatedAt,
     }
+
+    /// <summary>
+    /// type to list hackathons
+    /// </summary>
+    public enum HackathonListType
+    {
+        /// <summary>
+        /// online hackathons.
+        /// </summary>
+        online,
+        /// <summary>
+        /// hackathons with admin access
+        /// </summary>
+        admin,
+        ///// <summary>
+        ///// enrolled hackathons
+        ///// </summary>
+        //enrolled,
+    }
 }
