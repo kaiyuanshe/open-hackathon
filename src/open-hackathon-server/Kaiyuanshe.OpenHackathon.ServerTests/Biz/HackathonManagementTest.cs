@@ -646,5 +646,57 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("loc", result.Location);
         }
         #endregion
+
+        #region ListHackathonRolesAsync
+        [Test]
+        public async Task ListHackathonRolesAsync()
+        {
+            var hackathons = new List<HackathonEntity>
+            {
+                new HackathonEntity{ PartitionKey = "hack1", },
+                new HackathonEntity{ PartitionKey = "hack2", },
+            };
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.UserId, "uid")
+            }));
+            var admins1 = new List<HackathonAdminEntity>
+            {
+                new HackathonAdminEntity{ RowKey = "other" }
+            };
+            var admins2 = new List<HackathonAdminEntity>
+            {
+                new HackathonAdminEntity{ RowKey = "uid" }
+            };
+
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            hackathonAdminManagement.Setup(a => a.ListHackathonAdminAsync("hack1", default))
+                .ReturnsAsync(admins1);
+            hackathonAdminManagement.Setup(a => a.ListHackathonAdminAsync("hack2", default))
+               .ReturnsAsync(admins2);
+
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(hackathons.ElementAt(0), "uid", default)).ReturnsAsync(false);
+            enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(hackathons.ElementAt(1), "uid", default)).ReturnsAsync(true);
+
+            var hackathonManagement = new HackathonManagement(null)
+            {
+                HackathonAdminManagement = hackathonAdminManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+
+            var result = await hackathonManagement.ListHackathonRolesAsync(hackathons, user, default);
+
+            Mock.VerifyAll(hackathonAdminManagement, enrollmentManagement);
+            hackathonAdminManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+            Assert.IsFalse(result.ElementAt(0).Item2.isAdmin);
+            Assert.IsFalse(result.ElementAt(0).Item2.isEnrolled);
+            Assert.IsFalse(result.ElementAt(0).Item2.isJudge);
+            Assert.IsTrue(result.ElementAt(1).Item2.isAdmin);
+            Assert.IsTrue(result.ElementAt(1).Item2.isEnrolled);
+            Assert.IsFalse(result.ElementAt(1).Item2.isJudge);
+        }
+        #endregion
     }
 }

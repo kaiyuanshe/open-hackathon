@@ -65,10 +65,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Get roles of a user on a specified hackathon
         /// </summary>
-        /// <param name="hackathonName"></param>
+        /// <param name="hackathon"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
+        Task<HackathonRoles> GetHackathonRolesAsync(HackathonEntity hackathon, ClaimsPrincipal user, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get roles of a user on a list of hackathon
+        /// </summary>
+        /// <param name="hackathons"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Tuple<HackathonEntity, HackathonRoles>>> ListHackathonRolesAsync(IEnumerable<HackathonEntity> hackathons, ClaimsPrincipal user, CancellationToken cancellationToken = default);
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>
@@ -301,10 +309,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region GetHackathonRolesAsync
-        public async Task<HackathonRoles> GetHackathonRolesAsync(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+        public async Task<HackathonRoles> GetHackathonRolesAsync(HackathonEntity hackathon, ClaimsPrincipal user, CancellationToken cancellationToken = default)
         {
             string userId = ClaimsHelper.GetUserId(user);
-            if (string.IsNullOrEmpty(userId))
+            if (hackathon == null || string.IsNullOrEmpty(userId))
             {
                 // no roles for anonymous user
                 return null;
@@ -318,13 +326,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
             else
             {
-                var admins = await HackathonAdminManagement.ListHackathonAdminAsync(hackathonName, cancellationToken);
+                var admins = await HackathonAdminManagement.ListHackathonAdminAsync(hackathon.Name, cancellationToken);
                 isAdmin = admins.Any(a => a.UserId == userId);
             }
 
             // enrollment
-            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName, userId, cancellationToken);
-            isEnrolled = (enrollment != null && enrollment.Status == EnrollmentStatus.approved);
+            isEnrolled = await EnrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
 
             // todo judge
 
@@ -346,6 +353,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     return StorageContext.HackathonTable.ListAllHackathonsAsync(token);
                 }, true, cancellationToken);
+        }
+        #endregion
+
+        #region ListHackathonRolesAsync
+        public async Task<IEnumerable<Tuple<HackathonEntity, HackathonRoles>>> ListHackathonRolesAsync(IEnumerable<HackathonEntity> hackathons, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+        {
+            List<Tuple<HackathonEntity, HackathonRoles>> tuples = new List<Tuple<HackathonEntity, HackathonRoles>>();
+            foreach (var hackathon in hackathons)
+            {
+                var roles = await GetHackathonRolesAsync(hackathon, user, cancellationToken);
+                tuples.Add(Tuple.Create(hackathon, roles));
+            }
+
+            return tuples;
         }
         #endregion
     }

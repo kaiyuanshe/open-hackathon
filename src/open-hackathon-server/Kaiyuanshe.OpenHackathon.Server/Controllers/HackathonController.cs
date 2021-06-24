@@ -49,6 +49,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 Top = pagination.top
             };
             var entities = await HackathonManagement.ListPaginatedHackathonsAsync(User, hackathonQueryOptions, cancellationToken);
+            var entityWithRoles = await HackathonManagement.ListHackathonRolesAsync(entities, User, cancellationToken);
+
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
@@ -63,9 +65,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 routeValues.Add(nameof(listType), listType.Value);
             }
-
             var nextLink = BuildNextLinkUrl(routeValues, hackathonQueryOptions.Next);
-            return Ok(ResponseBuilder.BuildHackathonList(entities, nextLink));
+
+            return Ok(ResponseBuilder.BuildResourceList<HackathonEntity, HackathonRoles, Hackathon, HackathonList>(
+                    entityWithRoles, ResponseBuilder.BuildHackathon, nextLink));
         }
         #endregion
 
@@ -132,7 +135,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 parameter.creatorId = CurrentUserId;
                 var created = await HackathonManagement.CreateHackathonAsync(parameter, cancellationToken);
-                var roles = await HackathonManagement.GetHackathonRolesAsync(nameLowercase, User, cancellationToken);
+                var roles = await HackathonManagement.GetHackathonRolesAsync(created, User, cancellationToken);
                 return Ok(ResponseBuilder.BuildHackathon(created, roles));
             }
         }
@@ -177,7 +180,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             var updated = await HackathonManagement.UpdateHackathonAsync(parameter, cancellationToken);
-            var roles = await HackathonManagement.GetHackathonRolesAsync(parameter.name, User, cancellationToken);
+            var roles = await HackathonManagement.GetHackathonRolesAsync(entity, User, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathon(updated, roles));
         }
         #endregion
@@ -204,7 +207,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
             }
 
-            var role = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
+            var role = await HackathonManagement.GetHackathonRolesAsync(entity, User, cancellationToken);
             if (!entity.IsOnline() && (role == null || !role.isAdmin))
             {
                 return NotFound(string.Format(Resources.Hackathon_NotFound, hackathonName));
@@ -280,7 +283,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             hackathon = await HackathonManagement.UpdateHackathonStatusAsync(hackathon, HackathonStatus.pendingApproval, cancellationToken);
 
             // resp
-            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
+            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathon, User, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
         }
         #endregion
@@ -318,7 +321,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             hackathon = await HackathonManagement.UpdateHackathonStatusAsync(hackathon, HackathonStatus.online, cancellationToken);
 
             // resp
-            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathonName.ToLower(), User, cancellationToken);
+            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathon, User, cancellationToken);
             return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
         }
         #endregion
