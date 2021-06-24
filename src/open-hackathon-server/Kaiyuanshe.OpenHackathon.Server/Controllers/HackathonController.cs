@@ -1,7 +1,6 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
-using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// online: list hackathons in online status only; 
         /// admin: list hackathons in any status where current user has admin access.
         /// enrolled: list enrolled hackathons.
+        /// fresh: hackathons that are about to start.
         /// </param>
         /// <returns>A list of hackathon.</returns>
         /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>

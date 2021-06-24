@@ -182,6 +182,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
 
         #region ListPaginatedHackathonsAsync
+
+        #region online, paging, ordering
         private static IEnumerable ListPaginatedHackathonsAsyncTestData_online()
         {
             var offline = new HackathonEntity { Status = HackathonStatus.offline };
@@ -442,6 +444,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             }
         }
 
+        #endregion
+
+        #region admin
         private static IEnumerable ListPaginatedHackathonsAsyncTestData_admin()
         {
             var h1 = new HackathonEntity
@@ -589,7 +594,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(expectedResult[i].CreatedAt, result.ElementAt(i).CreatedAt);
             }
         }
+        #endregion
 
+        #region enrolled
         private static IEnumerable ListPaginatedHackathonsAsyncTestData_enrolled()
         {
             var h1 = new HackathonEntity
@@ -727,6 +734,96 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(expectedResult[i].CreatedAt, result.ElementAt(i).CreatedAt);
             }
         }
+        #endregion
+
+        #region fresh
+        private static IEnumerable ListPaginatedHackathonsAsyncTestData_fresh()
+        {
+            //  EventStartedAt = null
+            var h1 = new HackathonEntity
+            {
+                PartitionKey = "h1",
+                CreatedAt = DateTime.Now.AddDays(1),
+            };
+            // status != online
+            var h2 = new HackathonEntity
+            {
+                PartitionKey = "h2",
+                CreatedAt = DateTime.Now.AddDays(2),
+                EventStartedAt = DateTime.Now.AddDays(2),
+            };
+            // already started
+            var h3 = new HackathonEntity
+            {
+                PartitionKey = "h3",
+                CreatedAt = DateTime.Now.AddDays(3),
+                Status = HackathonStatus.online,
+                EventStartedAt = DateTime.Now.AddDays(-3),
+            };
+            // qualified
+            var h4 = new HackathonEntity
+            {
+                PartitionKey = "h4",
+                CreatedAt = DateTime.Now.AddDays(4),
+                Status = HackathonStatus.online,
+                EventStartedAt = DateTime.Now.AddDays(1),
+            };
+
+            // arg0: user
+            // arg1: all hackathons
+            // arg2: enrolled
+            // arg3: expected result
+
+            // normal user
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new List<HackathonEntity>
+                {
+                    h4
+                });
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData_fresh))]
+        public async Task ListPaginatedHackathonsAsync_fresh(
+            Dictionary<string, HackathonEntity> allHackathons,
+            List<HackathonEntity> expectedResult)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            var options = new HackathonQueryOptions
+            {
+                OrderBy = HackathonOrderBy.createdAt,
+                ListType = HackathonListType.fresh,
+            };
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<Dictionary<string, HackathonEntity>>>(), cancellationToken))
+                .ReturnsAsync(allHackathons);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await hackathonManagement.ListPaginatedHackathonsAsync(null, options, cancellationToken);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult.Count(), result.Count());
+            for (int i = 0; i < result.Count(); i++)
+            {
+                Assert.AreEqual(expectedResult[i].Name, result.ElementAt(i).Name);
+                Assert.AreEqual(expectedResult[i].CreatedAt, result.ElementAt(i).CreatedAt);
+            }
+        }
+        #endregion
+
         #endregion
 
         #region ListAllHackathonsAsync
