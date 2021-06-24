@@ -27,6 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="listType">type of list. Default to online. 
         /// online: list hackathons in online status only; 
         /// admin: list hackathons in any status where current user has admin access.
+        /// enrolled: list enrolled hackathons.
         /// </param>
         /// <returns>A list of hackathon.</returns>
         /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>

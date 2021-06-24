@@ -278,6 +278,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return hackathons;
         }
 
+        private async Task<IEnumerable<HackathonEntity>> ListEnrolledHackathons(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken)
+        {
+            var result = new List<HackathonEntity>();
+
+            string userId = ClaimsHelper.GetUserId(user);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return result;
+            }
+
+            IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
+            foreach (var hackathon in hackathons)
+            {
+                var enrolled = await EnrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
+                if (enrolled)
+                {
+                    result.Add(hackathon);
+                }
+            }
+            return result;
+        }
+
         public async Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default)
         {
             IEnumerable<HackathonEntity> hackathons = new List<HackathonEntity>();
@@ -290,6 +312,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     break;
                 case HackathonListType.admin:
                     hackathons = await ListAdminHackathons(user, options, cancellationToken);
+                    break;
+                case HackathonListType.enrolled:
+                    hackathons = await ListEnrolledHackathons(user, options, cancellationToken);
                     break;
                 default:
                     break;

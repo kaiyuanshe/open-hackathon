@@ -247,6 +247,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         ///// <summary>
         ///// enrolled hackathons
         ///// </summary>
-        //enrolled,
+        enrolled,
     }
 }

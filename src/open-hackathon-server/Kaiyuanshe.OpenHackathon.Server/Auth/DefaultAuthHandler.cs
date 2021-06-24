@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -89,8 +90,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
         {
             Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             Response.ContentType = MediaTypeNames.Application.Json;
+
             var problemDetail = problemDetailsFactory.CreateProblemDetails(Context, 401, detail: Resources.Auth_Unauthorized);
-            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail), CancellationToken.None);
+            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail, GetJsonSerializerSettings()), CancellationToken.None);
         }
 
         protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
@@ -99,7 +101,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             Response.ContentType = MediaTypeNames.Application.Json;
 
             var problemDetail = problemDetailsFactory.CreateProblemDetails(Context, 403, detail: Resources.Auth_Forbidden);
-            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail), CancellationToken.None);
+            await writeToResponse(Response, JsonConvert.SerializeObject(problemDetail, GetJsonSerializerSettings()), CancellationToken.None);
+        }
+
+        private static JsonSerializerSettings GetJsonSerializerSettings()
+        {
+            return new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            };
         }
     }
 }
