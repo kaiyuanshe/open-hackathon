@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,7 +110,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(default(HackathonEntity));
             hackathonManagement.Setup(p => p.CreateHackathonAsync(hack, cancellationToken))
                 .ReturnsAsync(inserted);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test1", null, cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(inserted, null, cancellationToken))
                 .ReturnsAsync(role);
 
             var controller = new HackathonController();
@@ -175,7 +177,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(entity);
             hackathonManagement.Setup(p => p.UpdateHackathonAsync(hack, cancellationToken))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("test1", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, It.IsAny<ClaimsPrincipal>(), cancellationToken))
                .ReturnsAsync(role);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
@@ -267,7 +269,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(entity);
             hackathonManagement.Setup(p => p.UpdateHackathonAsync(parameter, cancellationToken))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, It.IsAny<ClaimsPrincipal>(), cancellationToken))
                .ReturnsAsync(role);
             var authorizationServiceMock = new Mock<IAuthorizationService>();
             authorizationServiceMock.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
@@ -326,7 +328,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, It.IsAny<ClaimsPrincipal>(), cancellationToken))
               .ReturnsAsync(role);
 
             var controller = new HackathonController
@@ -353,7 +355,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, It.IsAny<ClaimsPrincipal>(), cancellationToken))
               .ReturnsAsync(role);
 
             var controller = new HackathonController
@@ -380,7 +382,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", CancellationToken.None))
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", It.IsAny<ClaimsPrincipal>(), cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, It.IsAny<ClaimsPrincipal>(), cancellationToken))
               .ReturnsAsync(role);
 
             var controller = new HackathonController
@@ -467,6 +469,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     RowKey = "rk",
                 }
             };
+            var hackWithRoles = new List<Tuple<HackathonEntity, HackathonRoles>>()
+            {
+                Tuple.Create(hackathons.First(), new HackathonRoles{})
+            };
             ClaimsPrincipal user = null;
 
             // mock and capture
@@ -479,6 +485,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                      optionsCaptured.Next = next;
                  })
                 .ReturnsAsync(hackathons);
+            hackathonManagement.Setup(h => h.ListHackathonRolesAsync(hackathons, user, cancellationToken))
+                .ReturnsAsync(hackWithRoles);
 
             // run
             var controller = new HackathonController
@@ -644,7 +652,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     e.Status = s;
                 })
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", null, cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, null, cancellationToken))
                .ReturnsAsync(role);
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), entity, AuthConstant.Policy.HackathonAdministrator))
@@ -686,7 +694,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     e.Status = s;
                 })
                 .ReturnsAsync(entity);
-            hackathonManagement.Setup(h => h.GetHackathonRolesAsync("foo", null, cancellationToken))
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, null, cancellationToken))
                .ReturnsAsync(role);
 
             var controller = new HackathonController
