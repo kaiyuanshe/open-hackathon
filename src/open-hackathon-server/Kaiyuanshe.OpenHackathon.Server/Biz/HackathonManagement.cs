@@ -215,6 +215,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 case HackathonOrderBy.updatedAt:
                     hackathons = hackathons.OrderByDescending(h => h.Timestamp);
                     break;
+                case HackathonOrderBy.hot:
+                    hackathons = hackathons.OrderByDescending(h => h.Enrollment);
+                    break;
                 default:
                     hackathons = hackathons.OrderByDescending(h => h.CreatedAt);
                     break;
