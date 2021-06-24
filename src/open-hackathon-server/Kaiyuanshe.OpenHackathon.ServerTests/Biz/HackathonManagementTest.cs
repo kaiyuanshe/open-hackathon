@@ -560,11 +560,149 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             cache.VerifyNoOtherCalls();
             hackathonAdminManagement.VerifyNoOtherCalls();
 
-            Assert.AreEqual(result.Count(), expectedResult.Count());
+            Assert.AreEqual(expectedResult.Count(), result.Count());
             for (int i = 0; i < result.Count(); i++)
             {
-                Assert.AreEqual(result.ElementAt(i).Name, expectedResult[i].Name);
-                Assert.AreEqual(result.ElementAt(i).CreatedAt, expectedResult[i].CreatedAt);
+                Assert.AreEqual(expectedResult[i].Name, result.ElementAt(i).Name);
+                Assert.AreEqual(expectedResult[i].CreatedAt, result.ElementAt(i).CreatedAt);
+            }
+        }
+
+        private static IEnumerable ListPaginatedHackathonsAsyncTestData_enrolled()
+        {
+            var h1 = new HackathonEntity
+            {
+                PartitionKey = "h1",
+                CreatedAt = DateTime.Now.AddDays(1),
+            };
+            var h2 = new HackathonEntity
+            {
+                PartitionKey = "h2",
+                CreatedAt = DateTime.Now.AddDays(2),
+            };
+            var h3 = new HackathonEntity
+            {
+                PartitionKey = "h3",
+                CreatedAt = DateTime.Now.AddDays(3),
+            };
+            var h4 = new HackathonEntity
+            {
+                PartitionKey = "h4",
+                CreatedAt = DateTime.Now.AddDays(4),
+            };
+
+            // arg0: user
+            // arg1: all hackathons
+            // arg2: enrolled
+            // arg3: expected result
+
+            // empty user
+            yield return new TestCaseData(
+                null,
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                null,
+                new List<HackathonEntity>()
+                );
+
+            // no userId
+            yield return new TestCaseData(
+                new ClaimsPrincipal(
+                    new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(AuthConstant.ClaimType.PlatformAdministrator, "foo"),
+                    })
+                ),
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                null,
+                new List<HackathonEntity>()
+                );
+
+            // normal user
+            yield return new TestCaseData(
+                new ClaimsPrincipal(
+                    new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(AuthConstant.ClaimType.UserId, "uid")
+                    })
+                ),
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new Dictionary<string, bool>
+                {
+                    { "h1", true },
+                    { "h2", false },
+                    { "h3", true },
+                    { "h4", false }
+                },
+                new List<HackathonEntity>
+                {
+                    h3, h1
+                });
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedHackathonsAsyncTestData_enrolled))]
+        public async Task ListPaginatedHackathonsAsync_enrolled(
+            ClaimsPrincipal user,
+            Dictionary<string, HackathonEntity> allHackathons,
+            Dictionary<string, bool> enrolled,
+            List<HackathonEntity> expectedResult)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            var options = new HackathonQueryOptions
+            {
+                OrderBy = HackathonOrderBy.createdAt,
+                ListType = HackathonListType.enrolled,
+            };
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+
+            string userId = ClaimsHelper.GetUserId(user);
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<Dictionary<string, HackathonEntity>>>(), cancellationToken))
+                    .ReturnsAsync(allHackathons);
+
+                foreach (var h in allHackathons.Values)
+                {
+                    enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(h, userId, cancellationToken)).ReturnsAsync(enrolled[h.Name]);
+                }
+            }
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                Cache = cache.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var result = await hackathonManagement.ListPaginatedHackathonsAsync(user, options, cancellationToken);
+
+            Mock.VerifyAll(cache, enrollmentManagement);
+            cache.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult.Count(), result.Count());
+            for (int i = 0; i < result.Count(); i++)
+            {
+                Assert.AreEqual(expectedResult[i].Name, result.ElementAt(i).Name);
+                Assert.AreEqual(expectedResult[i].CreatedAt, result.ElementAt(i).CreatedAt);
             }
         }
         #endregion
