@@ -229,6 +229,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// order by updatedAt
         /// </summary>
         updatedAt,
+        /// <summary>
+        /// order by hot
+        /// </summary>
+        hot,
     }
 
     /// <summary>

@@ -194,6 +194,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 PartitionKey = "h1 search",
                 CreatedAt = DateTime.Now.AddDays(1),
                 Timestamp = DateTimeOffset.Now.AddDays(1),
+                Enrollment = 2,
             };
             var h2 = new HackathonEntity
             {
@@ -202,6 +203,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 DisplayName = "asearch DisplayName",
                 CreatedAt = DateTime.Now.AddDays(2),
                 Timestamp = DateTimeOffset.Now.AddDays(-1),
+                Enrollment = 5,
             };
             var h3 = new HackathonEntity
             {
@@ -210,6 +212,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Detail = "search Detail",
                 CreatedAt = DateTime.Now.AddDays(3),
                 Timestamp = DateTimeOffset.Now.AddDays(2),
+                Enrollment = 1,
             };
             var h4 = new HackathonEntity
             {
@@ -217,6 +220,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 PartitionKey = "searc h4",
                 CreatedAt = DateTime.Now.AddDays(4),
                 Timestamp = DateTimeOffset.Now.AddDays(-2),
+                Enrollment = 4,
             };
 
             // arg0: all hackathons
@@ -271,6 +275,24 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 new List<HackathonEntity>
                 {
                     h3, h1, h2, h4
+                },
+                null
+                );
+
+            // ordering by hot
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "offline", offline },
+                    { "h1", h1 },
+                    { "h2", h2 },
+                    { "h3", h3 },
+                    { "h4", h4 }
+                },
+                new HackathonQueryOptions { OrderBy = HackathonOrderBy.hot },
+                new List<HackathonEntity>
+                {
+                    h2, h4, h1, h3
                 },
                 null
                 );
