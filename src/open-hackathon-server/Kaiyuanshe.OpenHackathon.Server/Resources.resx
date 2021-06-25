@@ -135,6 +135,9 @@
   <data name="Enrollment_Ended" xml:space="preserve">
     <value>Enrollment already ended at {0}</value>
   </data>
+  <data name="Enrollment_Full" xml:space="preserve">
+    <value>Enrollment cannot be fullfilled since it has reached the quota.</value>
+  </data>
   <data name="Enrollment_NotApproved" xml:space="preserve">
     <value>Enrollment not approved yet. Please contact the hackathon admistrators for approval.</value>
   </data>

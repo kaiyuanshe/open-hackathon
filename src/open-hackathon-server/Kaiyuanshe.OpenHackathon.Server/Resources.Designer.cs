@@ -115,6 +115,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enrollment cannot be fullfilled since it has reached the quota..
+        /// </summary>
+        internal static string Enrollment_Full {
+            get {
+                return ResourceManager.GetString("Enrollment_Full", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enrollment not approved yet. Please contact the hackathon admistrators for approval..
         /// </summary>
         internal static string Enrollment_NotApproved {

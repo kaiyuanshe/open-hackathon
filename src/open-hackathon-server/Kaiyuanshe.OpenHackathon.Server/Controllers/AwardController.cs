@@ -200,6 +200,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [HttpDelete]
         [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/award/{awardId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> DeleteAward(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
@@ -209,6 +210,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
             var options = new ValidateHackathonOptions
             {
+                HackAdminRequird = true,
                 HackathonName = hackathonName,
             };
             if (await ValidateHackathon(hackathon, options, cancellationToken) == false)

@@ -22,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string np { get; set; }
 
         /// <summary>
-        /// conbined with "np"t o query more results. Used by server-side paging only. Don't set it manually. You should request the "nextLink" in result to request more.
+        /// conbined with "np" to query more results. Used by server-side paging only. Don't set it manually. You should request the "nextLink" in result to request more.
         /// </summary>
         [MaxLength(128)]
         public string nr { get; set; }
