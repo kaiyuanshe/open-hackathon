@@ -43,6 +43,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValidateHackathonOptions
             {
                 EnrollmentOpenRequired = true,
+                EnrollmentNotFullRequired = true,
                 OnlineRequired = true,
                 HackathonName = hackathonName,
             };
@@ -56,7 +57,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
         #endregion
-
 
         #region Get
         /// <summary>
@@ -198,6 +198,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
+        #region ListEnrollments
         /// <summary>
         /// List paginated enrollements of a hackathon.
         /// </summary>
@@ -257,6 +258,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     ResponseBuilder.BuildEnrollment,
                     nextLink));
         }
-
+        #endregion
     }
 }

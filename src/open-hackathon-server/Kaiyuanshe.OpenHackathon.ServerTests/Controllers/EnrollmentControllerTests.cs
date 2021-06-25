@@ -1,3 +1,4 @@
+using Kaiyuanshe.OpenHackathon.Server;
 using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
@@ -21,6 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     [TestFixture]
     public class EnrollmentControllerTests
     {
+        #region Enroll
         [Test]
         public async Task EnrollTest_NotFound()
         {
@@ -129,6 +131,37 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task EnrollTest_PreConditionFailed3()
+        {
+            string hackathonName = "Hack";
+            HackathonEntity hackathonEntity = new HackathonEntity
+            {
+                EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
+                EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
+                Status = HackathonStatus.online,
+                Enrollment = 5,
+                MaxEnrollment = 4,
+            };
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hackathonEntity);
+
+
+            var controller = new EnrollmentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Enroll(hackathonName, null, cancellationToken);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 412, Resources.Enrollment_Full);
+        }
+
+        [Test]
         public async Task EnrollTest_Enrolled()
         {
             string hackathonName = "Hack";
@@ -137,6 +170,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 EnrollmentStartedAt = DateTime.UtcNow.AddDays(-1),
                 EnrollmentEndedAt = DateTime.UtcNow.AddDays(1),
                 Status = HackathonStatus.online,
+                MaxEnrollment = 0,
             };
             EnrollmentEntity enrollment = new EnrollmentEntity { PartitionKey = "pk" };
             UserInfo userInfo = new UserInfo();
@@ -172,6 +206,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsNotNull(en);
             Assert.AreEqual("pk", enrollment.HackathonName);
         }
+        #endregion
 
         [Test]
         public async Task GetTest_NotFound()

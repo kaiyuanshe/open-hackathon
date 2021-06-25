@@ -164,6 +164,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public class ValidateHackathonOptions : ControllerValiationOptions
         {
             public bool EnrollmentOpenRequired { get; set; }
+            public bool EnrollmentNotFullRequired { get; set; }
             public bool HackathonOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
             public bool OnlineRequired { get; set; }
@@ -244,6 +245,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 {
                     // enrollment ended
                     options.ValidateResult = PreconditionFailed(string.Format(Resources.Enrollment_Ended, hackathon.EnrollmentEndedAt.Value));
+                    return false;
+                }
+            }
+
+            if (options.EnrollmentNotFullRequired)
+            {
+                if (hackathon.MaxEnrollment > 0 && hackathon.Enrollment >= hackathon.MaxEnrollment)
+                {
+                    // too many enrollments
+                    options.ValidateResult = PreconditionFailed(Resources.Enrollment_Full);
                     return false;
                 }
             }
