@@ -7,7 +7,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 
     public interface IAzureBlobContainer
     {
-        string CreateSasToken();
+        string CreateSasToken(int expiration);
     }
 
     public class AzureBlobContainer: IAzureBlobContainer
@@ -24,9 +24,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
         static readonly int BlobContaineRetryCount = 5;
 
         /// <summary>
-        /// The default SAS time span in minutes
+        /// The minimum SAS expiration time in minutes
         /// </summary>
-        static readonly int BlobContainerSasTimeSpan = 2; // minutes
+        static readonly int BlobContainerMinSasExpiration = 2; // minutes
+
+        /// <summary>
+        /// The maximum SAS expiration time in minutes
+        /// </summary>
+        static readonly int BlobContainerMaxSasExpiration = 30; // minutes
+
+        /// <summary>
+        /// The default SAS expiration time in minutes
+        /// </summary>
+        static readonly int BlobContainerDefaultSasExpiration = 5; // minutes
         #endregion
 
         /// <summary>
@@ -59,13 +69,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
             blobContainerProxy = this.blobServiceProxy.GetContainerReference(this.blobName);
         }
 
-        public string CreateSasToken()
+        public string CreateSasToken(int expiration)
         {
+            if (expiration > 0)
+            {
+                expiration = Math.Min(expiration, BlobContainerMaxSasExpiration);
+                expiration = Math.Max(expiration, BlobContainerMinSasExpiration);
+            } else
+            {
+                expiration = BlobContainerDefaultSasExpiration;
+            }
+            var leadingTime = BlobContainerMinSasExpiration; // avoid inconsistent timestamp between client and server
             var sasPolicy =
                 new SharedAccessBlobPolicy
                 {
-                    SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(BlobContainerSasTimeSpan * 2),
-                    SharedAccessStartTime = DateTime.UtcNow.Subtract(new TimeSpan(0, BlobContainerSasTimeSpan, 0)),
+                    SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(expiration + leadingTime),
+                    SharedAccessStartTime = DateTime.UtcNow.Subtract(new TimeSpan(0, leadingTime, 0)),
                     Permissions = SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write
                 };
             return blobContainerProxy.GetSharedAccessSignature(sasPolicy);

@@ -11,7 +11,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Token for SAS
         /// </summary>
-        /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWM3OGEyMGY4MjE2ZDRiNGEwYjQ3MjEi...</example>
+        /// <example>reFh8jikl%2B2hOVhJ5SORPkItoFN6Y8bbq%2FeYgKn6QsI%3D</example>
         [Required]
         [MinLength(1)]
         [MaxLength(10240)]

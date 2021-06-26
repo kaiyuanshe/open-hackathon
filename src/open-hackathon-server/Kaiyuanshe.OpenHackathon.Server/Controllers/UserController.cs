@@ -79,9 +79,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [SwaggerErrorResponse(400)]
         [Route("user/storageToken")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> GetUploadToken()
+        public async Task<object> GetUploadToken([FromBody] SasExpiration parameter)
         {
-            var token = UserManagement.GetUploadToken();
+            var token = UserManagement.GetUploadToken(parameter.expiration.Value);
             var sas = new SasToken { token = token };
             return Ok(sas);
         }
