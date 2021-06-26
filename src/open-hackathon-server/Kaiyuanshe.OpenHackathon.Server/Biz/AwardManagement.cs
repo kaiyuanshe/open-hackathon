@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -58,7 +59,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default);
     }
 
-
     public class AwardManagement : ManagementClientBase, IAwardManagement
     {
         private readonly ILogger Logger;
@@ -68,6 +68,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Logger = logger;
         }
 
+        #region Cache
+        private string CacheKeyAwards(string hackathonName)
+        {
+            return CacheKeys.GetCacheKey(CacheEntryType.Award, hackathonName);
+        }
+
+        private void InvalidateAwardsCache(string hackathonName)
+        {
+            Cache.Remove(CacheKeyAwards(hackathonName));
+        }
+        #endregion
+
+        #region CreateAwardAsync
         public async Task<AwardEntity> CreateAwardAsync(string hackathonName, Award award, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(hackathonName) || award == null)
@@ -85,17 +98,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 CreatedAt = DateTime.UtcNow,
             };
             await StorageContext.AwardTable.InsertAsync(awardEnity);
+            InvalidateAwardsCache(hackathonName);
             return awardEnity;
         }
+        #endregion
 
+        #region DeleteAwardAsync
         public async Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
                 return;
 
             await StorageContext.AwardTable.DeleteAsync(entity.PartitionKey, entity.RowKey, cancellationToken);
+            InvalidateAwardsCache(entity.HackathonName);
         }
+        #endregion
 
+        #region GetAwardByIdAsync
         public async Task<AwardEntity> GetAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(awardId))
@@ -103,7 +122,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return await StorageContext.AwardTable.RetrieveAsync(hackathonName.ToLower(), awardId, cancellationToken);
         }
+        #endregion
 
+        #region ListAwardsAsync
+        public async Task<IEnumerable<AwardEntity>> ListAwardsAsync(string hackathonName, CancellationToken cancellationToken = default)
+        {
+            return await Cache.GetOrAddAsync(
+                CacheKeyAwards(hackathonName),
+                TimeSpan.FromHours(4),
+                (ct) => StorageContext.AwardTable.ListAllAwardsAsync(hackathonName, ct),
+                true,
+                cancellationToken);
+        }
+        #endregion
+
+        #region ListPaginatedAwardsAsync
         public async Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default)
         {
             var filter = TableQuery.GenerateFilterCondition(
@@ -123,7 +156,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.AwardTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
         }
+        #endregion
 
+        #region UpdateAwardAsync
         public async Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default)
         {
             if (entity == null || award == null)
@@ -136,7 +171,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (award.target.HasValue) entity.Target = award.target.Value;
 
             await StorageContext.AwardTable.MergeAsync(entity);
+            InvalidateAwardsCache(entity.PartitionKey);
             return entity;
         }
+        #endregion
     }
 }
