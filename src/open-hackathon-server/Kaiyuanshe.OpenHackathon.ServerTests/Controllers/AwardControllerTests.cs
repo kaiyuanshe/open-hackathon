@@ -255,15 +255,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         private static IEnumerable ListAwardsTestData()
         {
             // arg0: pagination
-            // arg1: mocked TableCotinuationToken
-            // arg2: expected options
-            // arg3: expected nextlink
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
 
             // no pagination, no filter, no top
             yield return new TestCaseData(
                     new Pagination { },
                     null,
-                    new AwardQueryOptions { },
                     null
                 );
 
@@ -271,15 +269,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             yield return new TestCaseData(
                     new Pagination { top = 10, np = "np", nr = "nr" },
                     null,
-                    new AwardQueryOptions
-                    {
-                        Top = 10,
-                        TableContinuationToken = new TableContinuationToken
-                        {
-                            NextPartitionKey = "np",
-                            NextRowKey = "nr"
-                        },
-                    },
                     null
                 );
 
@@ -291,16 +280,25 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                         NextPartitionKey = "np",
                         NextRowKey = "nr"
                     },
-                    new AwardQueryOptions { },
                     "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
                 );
         }
 
         [Test, TestCaseSource(nameof(ListAwardsTestData))]
         public async Task ListAwards(
             Pagination pagination,
-            TableContinuationToken continuationToken,
-            AwardQueryOptions expectedOptions,
+            TableContinuationToken next,
             string expectedLink)
         {
             // input
@@ -315,20 +313,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     RowKey = "rk",
                 }
             };
-            var segment = MockHelper.CreateTableQuerySegment(awards, continuationToken);
 
             // mock and capture
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
             var awardManagement = new Mock<IAwardManagement>();
-            AwardQueryOptions optionsCaptured = null;
             awardManagement.Setup(p => p.ListPaginatedAwardsAsync("hack", It.IsAny<AwardQueryOptions>(), cancellationToken))
                 .Callback<string, AwardQueryOptions, CancellationToken>((n, o, t) =>
                 {
-                    optionsCaptured = o;
+                    o.Next = next;
                 })
-                .ReturnsAsync(segment);
+                .ReturnsAsync(awards);
 
             // run
             var controller = new AwardController
@@ -349,9 +345,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(1, list.value.Length);
             Assert.AreEqual("pk", list.value[0].hackathonName);
             Assert.AreEqual("rk", list.value[0].id);
-            Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
-            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
-            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
         #endregion
 

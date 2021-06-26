@@ -48,7 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="options">options for query</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default);
+        Task<IEnumerable<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a new Award. 
@@ -137,24 +137,30 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region ListPaginatedAwardsAsync
-        public async Task<TableQuerySegment<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default)
         {
-            var filter = TableQuery.GenerateFilterCondition(
-                           nameof(AwardEntity.PartitionKey),
-                           QueryComparisons.Equal,
-                           hackathonName);
+            var allAwards = await ListAwardsAsync(hackathonName, cancellationToken);
 
-            int top = 100;
-            if (options != null && options.Top.HasValue && options.Top.Value > 0)
-            {
-                top = options.Top.Value;
-            }
-            TableQuery<AwardEntity> query = new TableQuery<AwardEntity>()
-                .Where(filter)
+            // paging
+            int np = 0;
+            int.TryParse(options.TableContinuationToken?.NextPartitionKey, out np);
+            int top = options.Top.GetValueOrDefault(100);
+            var awards = allAwards.OrderByDescending(a => a.CreatedAt)
+                .Skip(np)
                 .Take(top);
 
-            TableContinuationToken continuationToken = options?.TableContinuationToken;
-            return await StorageContext.AwardTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+            // next paging
+            options.Next = null;
+            if (awards.Count() >= top)
+            {
+                options.Next = new TableContinuationToken
+                {
+                    NextPartitionKey = (np + top).ToString(),
+                    NextRowKey = "nr"
+                };
+            }
+
+            return awards;
         }
         #endregion
 

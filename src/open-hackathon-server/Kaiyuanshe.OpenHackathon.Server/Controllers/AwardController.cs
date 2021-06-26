@@ -175,15 +175,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 TableContinuationToken = pagination.ToContinuationToken(),
                 Top = pagination.top
             };
-            var segment = await AwardManagement.ListPaginatedAwardsAsync(hackathonName.ToLower(), awardQueryOptions, cancellationToken);
+            var awards = await AwardManagement.ListPaginatedAwardsAsync(hackathonName.ToLower(), awardQueryOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
                 routeValues.Add(nameof(pagination.top), pagination.top.Value);
             }
-            var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
+            var nextLink = BuildNextLinkUrl(routeValues, awardQueryOptions.Next);
             return Ok(ResponseBuilder.BuildResourceList<AwardEntity, Award, AwardList>(
-                    segment,
+                    awards,
                     ResponseBuilder.BuildAward,
                     nextLink));
         }
@@ -220,7 +220,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // get award
             var award = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
-            if(award == null)
+            if (award == null)
             {
                 return NoContent();
             }
