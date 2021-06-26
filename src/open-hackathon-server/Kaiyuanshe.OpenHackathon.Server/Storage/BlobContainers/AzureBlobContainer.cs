@@ -67,6 +67,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
             blobServiceProxy.DefaultRequestOptions.RetryPolicy = new Microsoft.WindowsAzure.Storage.RetryPolicies.LinearRetry(
                 TimeSpan.FromSeconds(BlobContainerRetryInterval), BlobContaineRetryCount);
             blobContainerProxy = this.blobServiceProxy.GetContainerReference(this.blobName);
+            blobContainerProxy.CreateIfNotExistsAsync().Wait();
         }
 
         public string CreateSasToken(int expiration)
