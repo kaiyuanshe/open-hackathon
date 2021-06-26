@@ -30,6 +30,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string assignee { get; set; }
 
         /// <summary>
+        /// awared user. It's null if the award is assigned to a team.
+        /// </summary>
+        public UserInfo user { get; set; }
+
+        /// <summary>
+        /// awarded team. It's null if the award is assigned to an individual user.
+        /// </summary>
+        public Team team { get; set; }
+
+        /// <summary>
         /// auto-generated id of the award.
         /// </summary>
         /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
