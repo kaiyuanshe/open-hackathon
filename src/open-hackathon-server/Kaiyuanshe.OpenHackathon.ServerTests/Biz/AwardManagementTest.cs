@@ -317,75 +317,103 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
         private static IEnumerable ListPaginatedAwardsAsyncTestData()
         {
-            // arg0: options
-            // arg1: expected top
-            // arg2: expected query
+            var a1 = new AwardEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            var a2 = new AwardEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(3),
+            };
+            var a3 = new AwardEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(2),
+            };
+            var a4 = new AwardEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(4),
+            };
 
-            // no options
+            // arg0: options
+            // arg1: awards
+            // arg2: expected result
+            // arg3: expected Next
+
+            // minimal
             yield return new TestCaseData(
-                null,
-                100,
-                "PartitionKey eq 'foo'"
+                new AwardQueryOptions { },
+                new List<AwardEntity> { a1, a2, a3, a4 },
+                new List<AwardEntity> { a4, a2, a3, a1 },
+                null
                 );
 
             // top
             yield return new TestCaseData(
-                new AwardQueryOptions { Top = 5 },
-                5,
-                "PartitionKey eq 'foo'"
+                new AwardQueryOptions { Top = 2 },
+                new List<AwardEntity> { a1, a2, a3, a4 },
+                new List<AwardEntity> { a4, a2, },
+                new TableContinuationToken { NextPartitionKey = "2", NextRowKey = "nr" }
                 );
+
+            // paging
             yield return new TestCaseData(
-               new AwardQueryOptions { Top = -1 },
-               100,
-               "PartitionKey eq 'foo'"
-               );
+                new AwardQueryOptions
+                {
+                    Top = 2,
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "1",
+                        NextRowKey = "nr"
+                    }
+                },
+                new List<AwardEntity> { a1, a2, a3, a4 },
+                new List<AwardEntity> { a2, a3, },
+                new TableContinuationToken { NextPartitionKey = "3", NextRowKey = "nr" }
+                );
         }
 
         [Test, TestCaseSource(nameof(ListPaginatedAwardsAsyncTestData))]
-        public async Task ListPaginatedAwardsAsync_Options(AwardQueryOptions options, int expectedTop, string expectedFilter)
+        public async Task ListPaginatedAwardsAsync_Options(
+            AwardQueryOptions options,
+            IEnumerable<AwardEntity> allAwards,
+            IEnumerable<AwardEntity> expectedResult,
+            TableContinuationToken expectedNext)
         {
             string hackName = "foo";
-            CancellationToken cancellationToken = CancellationToken.None;
-            var entities = MockHelper.CreateTableQuerySegment<AwardEntity>(
-                 new List<AwardEntity>
-                 {
-                     new AwardEntity{  PartitionKey="pk" }
-                 },
-                 new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" }
-                );
-
-            TableQuery<AwardEntity> tableQueryCaptured = null;
-            TableContinuationToken tableContinuationTokenCapatured = null;
 
             var logger = new Mock<ILogger<AwardManagement>>();
-            var awardTable = new Mock<IAwardTable>();
-            awardTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.IsAny<TableQuery<AwardEntity>>(), It.IsAny<TableContinuationToken>(), cancellationToken))
-                .Callback<TableQuery<AwardEntity>, TableContinuationToken, CancellationToken>((query, c, _) =>
-                {
-                    tableQueryCaptured = query;
-                    tableContinuationTokenCapatured = c;
-                })
-                .ReturnsAsync(entities);
-            var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.AwardTable).Returns(awardTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardEntity>>>(c => c.CacheKey == "Award-foo"), default))
+                .ReturnsAsync(allAwards);
 
             var awardManagement = new AwardManagement(logger.Object)
             {
-                StorageContext = storageContext.Object
+                Cache = cache.Object,
             };
-            var segment = await awardManagement.ListPaginatedAwardsAsync(hackName, options, cancellationToken);
+            var result = await awardManagement.ListPaginatedAwardsAsync(hackName, options, default);
 
-            Mock.VerifyAll(awardTable, storageContext);
-            awardTable.VerifyNoOtherCalls();
-            storageContext.VerifyNoOtherCalls();
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
 
-            Assert.AreEqual(1, segment.Count());
-            Assert.AreEqual("pk", segment.First().HackathonName);
-            Assert.AreEqual("np", segment.ContinuationToken.NextPartitionKey);
-            Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
-            Assert.IsNull(tableContinuationTokenCapatured);
-            Assert.AreEqual(expectedFilter, tableQueryCaptured.FilterString);
-            Assert.AreEqual(expectedTop, tableQueryCaptured.TakeCount.Value);
+            Assert.AreEqual(expectedResult.Count(), result.Count());
+            for (int i = 0; i < expectedResult.Count(); i++)
+            {
+                Assert.AreEqual(expectedResult.ElementAt(i).Id, result.ElementAt(i).Id);
+            }
+            if (expectedNext == null)
+            {
+                Assert.IsNull(options.Next);
+            }
+            else
+            {
+                Assert.IsNotNull(options.Next);
+                Assert.AreEqual(expectedNext.NextPartitionKey, options.Next.NextPartitionKey);
+                Assert.AreEqual(expectedNext.NextRowKey, options.Next.NextRowKey);
+            }
         }
         #endregion
 
