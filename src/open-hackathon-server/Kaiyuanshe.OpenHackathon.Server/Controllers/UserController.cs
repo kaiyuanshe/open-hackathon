@@ -72,17 +72,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <summary>
         /// Get file upload token
         /// </summary>
-        /// <returns>The team</returns>
-        /// <response code="200">Success. The response return a token.</response>
-        [HttpPut]
-        [ProducesResponseType(typeof(Team), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 404, 412)]
+        /// <returns>the SAS token</returns>
+        /// <response code="200">Success. The response return a SAS token.</response>
+        [HttpPost]
+        [ProducesResponseType(typeof(SasToken), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400)]
         [Route("user/storageToken")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
         public async Task<object> GetUploadToken()
         {
             var token = UserManagement.GetUploadToken();
-            return Ok(token);
+            var sas = new SasToken { token = token };
+            return Ok(sas);
         }
         #endregion
 
