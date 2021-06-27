@@ -26,7 +26,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         {
             var entity = await RetrieveAsync(id.ToLower(), string.Empty, cancellationToken);
             UserInfo resp = new UserInfo();
-            return entity.ToModel(resp);
+            return entity.ToModel(resp, (m) =>
+            {
+                m.updatedAt = entity.Timestamp.UtcDateTime;
+                if (entity.Properties.ContainsKey("SignedUp")
+                && DateTime.TryParse(entity.Properties["SignedUp"].StringValue, out DateTime signedUp))
+                {
+                    m.createdAt = signedUp;
+                }
+            });
         }
 
         public async Task<DynamicTableEntity> SaveUserAsync(UserInfo userInfo, CancellationToken cancellationToken = default)

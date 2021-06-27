@@ -57,6 +57,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default);
+
+        //Task<AwardAssignmentEntity> CreateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default);
     }
 
     public class AwardManagement : ManagementClientBase, IAwardManagement

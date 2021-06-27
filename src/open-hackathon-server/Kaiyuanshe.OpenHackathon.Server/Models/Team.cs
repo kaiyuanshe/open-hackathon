@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Describes a team
     /// </summary>
-    public class Team
+    public class Team : ModelBase
     {
         /// <summary>
         /// name of Hackathon
@@ -50,16 +50,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string creatorId { get; internal set; }
 
         /// <summary>
-        /// datetime when the team is created
+        /// Detailed user info of the creator
         /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the team is updated.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
+        public UserInfo creator { get; internal set; }
     }
 
     /// <summary>
@@ -82,7 +75,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Represent a member in a team
     /// </summary>
-    public class TeamMember
+    public class TeamMember : ModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -120,18 +113,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>approved</example>
         public TeamMemberStatus status { get; internal set; }
-
-        /// <summary>
-        /// datetime when the member joons the team
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the membership updated
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
     }
 
     /// <summary>

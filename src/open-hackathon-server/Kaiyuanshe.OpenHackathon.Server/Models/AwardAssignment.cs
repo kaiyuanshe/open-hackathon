@@ -7,7 +7,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// represents an assignment. An award can be assigned to multiple teams or individuals.
     /// </summary>
-    public class AwardAssignment
+    public class AwardAssignment : ModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -53,17 +53,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>Apple Watch, 3 teams</example>
         [MaxLength(256)]
         public string description { get; set; }
-
-        /// <summary>
-        /// The timestamp when the assignment submitted.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the assignment updated.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
     }
 }

@@ -46,6 +46,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
         }
 
+        protected async Task<UserInfo> GetCurrentUserInfo(CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+                return null;
+
+            return await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+        }
+
         /// <summary>
         /// Get nextLink url for paginated results
         /// </summary>

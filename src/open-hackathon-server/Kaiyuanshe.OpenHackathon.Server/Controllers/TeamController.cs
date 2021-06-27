@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
@@ -68,7 +70,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             parameter.hackathonName = hackathonName.ToLower();
             parameter.creatorId = CurrentUserId;
             var teamEntity = await TeamManagement.CreateTeamAsync(parameter, cancellationToken);
-            return Ok(ResponseBuilder.BuildTeam(teamEntity));
+            var creator = await GetCurrentUserInfo(cancellationToken);
+            return Ok(ResponseBuilder.BuildTeam(teamEntity, creator));
         }
         #endregion
 
@@ -118,8 +121,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             team = await TeamManagement.UpdateTeamAsync(parameter, team, cancellationToken);
-            return Ok(ResponseBuilder.BuildTeam(team));
-        } 
+            var creator = await UserManagement.GetUserByIdAsync(team.CreatorId, cancellationToken);
+            return Ok(ResponseBuilder.BuildTeam(team, creator));
+        }
         #endregion
 
         /// <summary>
@@ -161,7 +165,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return teamOptions.ValidateResult;
             }
 
-            return Ok(ResponseBuilder.BuildTeam(team));
+            var creator = await UserManagement.GetUserByIdAsync(team.CreatorId, cancellationToken);
+            return Ok(ResponseBuilder.BuildTeam(team, creator));
         }
 
         /// <summary>
@@ -203,8 +208,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 routeValues.Add(nameof(pagination.top), pagination.top.Value);
             }
             var nextLink = BuildNextLinkUrl(routeValues, segment.ContinuationToken);
-            return Ok(ResponseBuilder.BuildResourceList<TeamEntity, Team, TeamList>(
-                    segment,
+
+            List<Tuple<TeamEntity, UserInfo>> tuples = new List<Tuple<TeamEntity, UserInfo>>();
+            foreach (var team in segment)
+            {
+                var creator = await UserManagement.GetUserByIdAsync(team.CreatorId, cancellationToken);
+                tuples.Add(Tuple.Create(team, creator));
+            }
+            return Ok(ResponseBuilder.BuildResourceList<TeamEntity, UserInfo, Team, TeamList>(
+                    tuples,
                     ResponseBuilder.BuildTeam,
                     nextLink));
         }
