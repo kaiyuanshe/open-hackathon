@@ -195,7 +195,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return null;
         }
 
-        #region GetCurrentUserAsync
+        #region GetUserByIdAsync
         public async Task<UserInfo> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userId))

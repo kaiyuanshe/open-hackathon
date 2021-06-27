@@ -88,9 +88,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now
             };
+            var userInfo = new UserInfo
+            {
+                Gender = "male"
+            };
 
             var respBuilder = new DefaultResponseBuilder();
-            var team = respBuilder.BuildTeam(entity);
+            var team = respBuilder.BuildTeam(entity, userInfo);
 
             Assert.AreEqual("pk", team.hackathonName);
             Assert.AreEqual("rk", team.id);
@@ -100,6 +104,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("dp", team.displayName);
             Assert.AreEqual(entity.CreatedAt, team.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, team.updatedAt);
+            Assert.AreEqual("male", team.creator.Gender);
         }
 
         [Test]

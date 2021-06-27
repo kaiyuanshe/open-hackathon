@@ -10,7 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// entity for assignment info for an award
     /// 
     /// PK: Hackathon name
-    /// RK: target id. Auto-generated GUID.
+    /// RK: assignment id. Auto-generated GUID.
     /// </summary>
     public class AwardAssignmentEntity : AdvancedTableEntity
     {

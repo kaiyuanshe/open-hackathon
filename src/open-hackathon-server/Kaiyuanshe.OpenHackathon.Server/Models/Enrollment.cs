@@ -5,7 +5,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Status of the enrollment
     /// </summary>
-    public class Enrollment
+    public class Enrollment: ModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -29,18 +29,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>approved</example>
         public EnrollmentStatus status { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the enrollment submitted.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the enrollment updated.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
     }
 
     /// <summary>

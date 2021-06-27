@@ -12,7 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Enrollment BuildEnrollment(EnrollmentEntity enrollmentEntity, UserInfo userInfo);
 
-        Team BuildTeam(TeamEntity teamEntity);
+        Team BuildTeam(TeamEntity teamEntity, UserInfo creator);
 
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity);
 
@@ -48,11 +48,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             });
         }
 
-        public Team BuildTeam(TeamEntity teamEntity)
+        public Team BuildTeam(TeamEntity teamEntity, UserInfo creator)
         {
             return teamEntity.As<Team>(p =>
             {
                 p.updatedAt = teamEntity.Timestamp.DateTime;
+                p.creator = creator;
             });
         }
 

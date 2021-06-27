@@ -11,7 +11,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// User info. Added for better Swagger doc. Exactly the same as <seealso cref="User"/>
     /// </summary>
-    public class UserInfo
+    public class UserInfo : ModelBase
     {
         /// <summary>
         /// name of user. Unique within pool. Required
@@ -165,18 +165,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(64)]
         [JsonProperty("country")]
         public string Country { get; set; }
-
-        /// <summary>
-        /// Account Sign-up date
-        /// </summary>
-        [JsonProperty("createdAt")]
-        public string CreatedAt { get; set; }
-
-        /// <summary>
-        /// Update date
-        /// </summary>
-        [JsonProperty("updatedAt")]
-        public string UpdatedAt { get; set; }
 
         /// <summary>
         /// address where user lives

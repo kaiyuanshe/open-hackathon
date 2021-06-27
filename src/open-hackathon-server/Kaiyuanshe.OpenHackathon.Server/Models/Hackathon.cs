@@ -7,7 +7,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Represents a hackathon
     /// </summary>
-    public class Hackathon
+    public class Hackathon : ModelBase
     {
         /// <summary>
         /// Name of a hackathon. Can only be set when it's created. Readonly afterwards.
@@ -97,18 +97,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>tag1</example>
         [MaxLength(20)]
         public string[] tags { get; set; }
-
-        /// <summary>
-        /// The timestamp when the hackathon is created
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the hackathon is updated
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
 
         /// <summary>
         /// The timestamp when the hackathon starts.

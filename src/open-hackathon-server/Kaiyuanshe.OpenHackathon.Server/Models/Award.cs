@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// represents an award which can be assigned to a team or an individual.
     /// </summary>
-    public class Award
+    public class Award: ModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -57,17 +57,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(50)]
         public PictureInfo[] pictures { get; set; }
 
-        /// <summary>
-        /// The timestamp when the award submitted.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime createdAt { get; internal set; }
-
-        /// <summary>
-        /// The timestamp when the award updated.
-        /// </summary>
-        /// <example>2008-01-14T04:33:35Z</example>
-        public DateTime updatedAt { get; internal set; }
+        
     }
 
     /// <summary>
