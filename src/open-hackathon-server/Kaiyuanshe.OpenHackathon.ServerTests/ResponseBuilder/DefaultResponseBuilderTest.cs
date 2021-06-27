@@ -104,7 +104,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("dp", team.displayName);
             Assert.AreEqual(entity.CreatedAt, team.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, team.updatedAt);
-            Assert.AreEqual("mail", team.creator.Gender);
+            Assert.AreEqual("male", team.creator.Gender);
         }
 
         [Test]

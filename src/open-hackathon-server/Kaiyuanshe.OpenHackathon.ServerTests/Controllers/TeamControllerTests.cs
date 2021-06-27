@@ -369,8 +369,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
             Team parameter = new Team { };
             TeamEntity teamEntity = new TeamEntity { };
-            TeamEntity updated = new TeamEntity { Description = "updated" };
+            TeamEntity updated = new TeamEntity { Description = "updated", CreatorId = "uid" };
             CancellationToken cancellationToken = CancellationToken.None;
+            UserInfo user = new UserInfo();
             var authResult = AuthorizationResult.Success();
 
             // moq
@@ -385,6 +386,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
                 .ReturnsAsync(authResult);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", cancellationToken))
+                .ReturnsAsync(user);
 
             // run
             var controller = new TeamController
@@ -392,15 +396,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 HackathonManagement = hackathonManagement.Object,
                 TeamManagement = teamManagement.Object,
                 AuthorizationService = authorizationService.Object,
+                UserManagement = userManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.UpdateTeam(hackName, teamId, parameter, cancellationToken);
             // verify
-            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
+            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService, userManagement);
             hackathonManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
             authorizationService.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
 
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("updated", output.description);
@@ -470,6 +476,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string teamId = "tid";
             HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
             TeamEntity teamEntity = new TeamEntity { CreatorId = "uid" };
+            UserInfo user = new UserInfo();
             CancellationToken cancellationToken = CancellationToken.None;
 
             // moq
@@ -479,20 +486,25 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var teamManagement = new Mock<ITeamManagement>();
             teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
                 .ReturnsAsync(teamEntity);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", cancellationToken))
+                .ReturnsAsync(user);
 
             // run
             var controller = new TeamController
             {
                 HackathonManagement = hackathonManagement.Object,
                 TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
             var result = await controller.GetTeam(hackName, teamId, cancellationToken);
             // verify
-            Mock.VerifyAll(hackathonManagement, teamManagement);
+            Mock.VerifyAll(hackathonManagement, teamManagement, userManagement);
             hackathonManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
 
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("uid", output.creatorId);
@@ -560,8 +572,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 {
                     PartitionKey = "pk",
                     RowKey = "rk",
+                    CreatorId = "uid",
                 }
             };
+            UserInfo user = new UserInfo();
             var segment = MockHelper.CreateTableQuerySegment(teams, continuationToken);
 
             // mock and capture
@@ -576,20 +590,25 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     optionsCaptured = o;
                 })
                 .ReturnsAsync(segment);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", cancellationToken))
+                .ReturnsAsync(user);
 
             // run
             var controller = new TeamController
             {
                 ResponseBuilder = new DefaultResponseBuilder(),
                 HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
                 TeamManagement = teamManagement.Object,
             };
             var result = await controller.ListTeams(hackName, pagination, cancellationToken);
 
             // verify
-            Mock.VerifyAll(hackathonManagement, teamManagement);
+            Mock.VerifyAll(hackathonManagement, teamManagement, userManagement);
             hackathonManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
 
             var list = AssertHelper.AssertOKResult<TeamList>(result);
             Assert.AreEqual(expectedLink, list.nextLink);
