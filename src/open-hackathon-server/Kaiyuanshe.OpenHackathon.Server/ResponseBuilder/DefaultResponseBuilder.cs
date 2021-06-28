@@ -14,7 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Team BuildTeam(TeamEntity teamEntity, UserInfo creator);
 
-        TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity);
+        TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member);
 
         Award BuildAward(AwardEntity awardEntity);
 
@@ -57,11 +57,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             });
         }
 
-        public TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity)
+        public TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member)
         {
             return teamMemberEntity.As<TeamMember>(p =>
             {
                 p.updatedAt = teamMemberEntity.Timestamp.DateTime;
+                p.user = member;
             });
         }
 
