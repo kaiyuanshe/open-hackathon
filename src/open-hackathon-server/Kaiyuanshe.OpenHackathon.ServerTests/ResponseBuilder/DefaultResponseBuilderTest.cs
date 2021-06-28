@@ -121,9 +121,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatedAt = DateTime.Now,
                 Timestamp = DateTime.Now
             };
+            var user = new UserInfo
+            {
+                City = "city",
+            };
 
             var respBuilder = new DefaultResponseBuilder();
-            var teamMember = respBuilder.BuildTeamMember(entity);
+            var teamMember = respBuilder.BuildTeamMember(entity, user);
 
             Assert.AreEqual("hack", teamMember.hackathonName);
             Assert.AreEqual("pk", teamMember.teamId);
@@ -133,6 +137,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(TeamMemberStatus.pendingApproval, teamMember.status);
             Assert.AreEqual(entity.CreatedAt, teamMember.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, teamMember.updatedAt);
+            Assert.AreEqual("city", teamMember.user.City);
         }
 
         [Test]

@@ -96,6 +96,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string userId { get; internal set; }
 
         /// <summary>
+        /// Detailed user info of the member
+        /// </summary>
+        public UserInfo user { get; internal set; }
+
+        /// <summary>
         /// description of the member.
         /// </summary>
         /// <example>Java expert in team, working on backend.</example>
