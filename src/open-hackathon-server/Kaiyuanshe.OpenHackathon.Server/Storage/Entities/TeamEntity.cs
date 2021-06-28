@@ -57,5 +57,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// the id of user who creates the team
         /// </summary>
         public string CreatorId { get; set; }
+
+        /// <summary>
+        /// Count of members
+        /// </summary>
+        public int MembersCount { get; set; }
     }
 }

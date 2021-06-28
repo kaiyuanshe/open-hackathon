@@ -135,24 +135,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Logger = logger;
         }
 
-        public async Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default)
-        {
-            var entity = new TeamMemberEntity
-            {
-                CreatedAt = DateTime.UtcNow,
-                Description = request.description,
-                HackathonName = request.hackathonName,
-                PartitionKey = request.teamId,
-                RowKey = request.userId,
-                Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
-                Status = request.status,
-            };
+        #region Cache
 
-            await StorageContext.TeamMemberTable.InsertAsync(entity);
+        #endregion
 
-            return entity;
-        }
-
+        #region CreateTeamAsync
         public async Task<TeamEntity> CreateTeamAsync(Team request, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(request.hackathonName)
@@ -171,6 +158,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 DisplayName = request.displayName,
                 CreatorId = request.creatorId,
                 CreatedAt = DateTime.UtcNow,
+                MembersCount = 1,
             };
             if (string.IsNullOrWhiteSpace(request.displayName))
             {
@@ -192,7 +180,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return teamEntity;
         }
+        #endregion
 
+        #region UpdateTeamAsync
+        public async Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default)
+        {
+            if (teamEntity == null || request == null)
+                return teamEntity;
+
+            teamEntity.AutoApprove = request.autoApprove.GetValueOrDefault(teamEntity.AutoApprove);
+            teamEntity.Description = request.description ?? teamEntity.Description;
+            teamEntity.DisplayName = request.displayName ?? teamEntity.DisplayName;
+
+            await StorageContext.TeamTable.MergeAsync(teamEntity, cancellationToken);
+            return teamEntity;
+        }
+        #endregion
+
+        #region UpdateTeamMembersCountAsync
+        public async Task UpdateTeamMembersCountAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
+        {
+            var team = await GetTeamByIdAsync(hackathonName, teamId, cancellationToken);
+            if (team != null)
+            {
+                var count = await StorageContext.TeamMemberTable.GetMemberCountAsync(teamId, cancellationToken);
+                team.MembersCount = count;
+                await StorageContext.TeamTable.MergeAsync(team, cancellationToken);
+            }
+        }
+        #endregion
+
+        #region GetTeamByIdAsync
         public async Task<TeamEntity> GetTeamByIdAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(teamId))
@@ -200,7 +218,73 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return await StorageContext.TeamTable.RetrieveAsync(hackathonName.ToLower(), teamId, cancellationToken);
         }
+        #endregion
 
+        #region ListPaginatedTeamsAsync
+        public async Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQuery.GenerateFilterCondition(
+                           nameof(TeamEntity.PartitionKey),
+                           QueryComparisons.Equal,
+                           hackathonName);
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<TeamEntity> query = new TableQuery<TeamEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.TeamTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+        }
+        #endregion
+
+        #region DeleteTeamAsync
+        public async Task DeleteTeamAsync(TeamEntity team, CancellationToken cancellationToken = default)
+        {
+            if (team == null)
+                return;
+
+            await StorageContext.TeamTable.DeleteAsync(team.PartitionKey, team.RowKey, cancellationToken);
+        }
+        #endregion
+
+        #region CreateTeamMemberAsync
+        public async Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default)
+        {
+            var entity = new TeamMemberEntity
+            {
+                CreatedAt = DateTime.UtcNow,
+                Description = request.description,
+                HackathonName = request.hackathonName,
+                PartitionKey = request.teamId,
+                RowKey = request.userId,
+                Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
+                Status = request.status,
+            };
+
+            await StorageContext.TeamMemberTable.InsertAsync(entity);
+            await UpdateTeamMembersCountAsync(request.hackathonName, request.teamId, cancellationToken);
+            return entity;
+        }
+        #endregion
+
+        #region UpdateTeamMemberAsync
+        public async Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default)
+        {
+            if (member == null || request == null)
+                return member;
+
+            member.Description = request.description ?? member.Description;
+            await StorageContext.TeamMemberTable.MergeAsync(member, cancellationToken);
+            return member;
+        }
+        #endregion
+
+        #region GetTeamMemberAsync
         public async Task<TeamMemberEntity> GetTeamMemberAsync(string teamId, string userId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(userId))
@@ -208,7 +292,52 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return await StorageContext.TeamMemberTable.RetrieveAsync(teamId, userId, cancellationToken);
         }
+        #endregion
 
+        #region UpdateTeamMemberStatusAsync
+        public async Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return member;
+
+            if (member.Status != teamMemberStatus)
+            {
+                member.Status = teamMemberStatus;
+                await StorageContext.TeamMemberTable.MergeAsync(member);
+            }
+
+            return member;
+        }
+        #endregion
+
+        #region DeleteTeamMemberAsync
+        public async Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return;
+
+            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
+            await UpdateTeamMembersCountAsync(member.HackathonName, member.TeamId, cancellationToken);
+        }
+        #endregion
+
+        #region UpdateTeamMemberRoleAsync
+        public async Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return member;
+
+            if (member.Role != teamMemberRole)
+            {
+                member.Role = teamMemberRole;
+                await StorageContext.TeamMemberTable.MergeAsync(member);
+            }
+
+            return member;
+        }
+        #endregion
+
+        #region ListTeamMembersAsync
         public async Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default)
         {
             Func<CancellationToken, Task<IEnumerable<TeamMemberEntity>>> supplyValue = async (ct) =>
@@ -233,94 +362,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             string cacheKey = $"team_members_{teamId}";
             return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromMinutes(1), supplyValue, false, cancellationToken);
         }
+        #endregion
 
-        public async Task<TeamEntity> UpdateTeamAsync(Team request, TeamEntity teamEntity, CancellationToken cancellationToken = default)
-        {
-            if (teamEntity == null || request == null)
-                return teamEntity;
-
-            teamEntity.AutoApprove = request.autoApprove.GetValueOrDefault(teamEntity.AutoApprove);
-            teamEntity.Description = request.description ?? teamEntity.Description;
-            teamEntity.DisplayName = request.displayName ?? teamEntity.DisplayName;
-
-            await StorageContext.TeamTable.MergeAsync(teamEntity, cancellationToken);
-            return teamEntity;
-        }
-
-        public async Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default)
-        {
-            if (member == null || request == null)
-                return member;
-
-            member.Description = request.description ?? member.Description;
-            await StorageContext.TeamMemberTable.MergeAsync(member, cancellationToken);
-            return member;
-        }
-
-        public async Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default)
-        {
-            if (member == null)
-                return member;
-
-            if (member.Status != teamMemberStatus)
-            {
-                member.Status = teamMemberStatus;
-                await StorageContext.TeamMemberTable.MergeAsync(member);
-            }
-
-            return member;
-        }
-
-        public async Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default)
-        {
-            if (member == null)
-                return;
-
-            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
-        }
-
-        public async Task DeleteTeamAsync(TeamEntity team, CancellationToken cancellationToken = default)
-        {
-            if (team == null)
-                return;
-
-            await StorageContext.TeamTable.DeleteAsync(team.PartitionKey, team.RowKey, cancellationToken);
-        }
-
-        public async Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default)
-        {
-            if (member == null)
-                return member;
-
-            if (member.Role != teamMemberRole)
-            {
-                member.Role = teamMemberRole;
-                await StorageContext.TeamMemberTable.MergeAsync(member);
-            }
-
-            return member;
-        }
-
-        public async Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default)
-        {
-            var filter = TableQuery.GenerateFilterCondition(
-                           nameof(TeamEntity.PartitionKey),
-                           QueryComparisons.Equal,
-                           hackathonName);
-
-            int top = 100;
-            if (options != null && options.Top.HasValue && options.Top.Value > 0)
-            {
-                top = options.Top.Value;
-            }
-            TableQuery<TeamEntity> query = new TableQuery<TeamEntity>()
-                .Where(filter)
-                .Take(top);
-
-            TableContinuationToken continuationToken = options?.TableContinuationToken;
-            return await StorageContext.TeamTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
-        }
-
+        #region ListPaginatedTeamMembersAsync
         public async Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default)
         {
             var filter = TableQuery.GenerateFilterCondition(
@@ -361,5 +405,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await StorageContext.TeamMemberTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
 
         }
+        #endregion
     }
 }
