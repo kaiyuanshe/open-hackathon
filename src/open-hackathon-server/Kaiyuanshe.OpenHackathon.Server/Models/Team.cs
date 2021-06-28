@@ -53,6 +53,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Detailed user info of the creator
         /// </summary>
         public UserInfo creator { get; internal set; }
+
+        /// <summary>
+        /// count of members, including members pending approval.
+        /// </summary>
+        public int  membersCount { get; set; }
     }
 
     /// <summary>
