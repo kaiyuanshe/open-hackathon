@@ -85,7 +85,11 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 else if (property.PropertyType == typeof(DateTime)
                     || Nullable.GetUnderlyingType(property.PropertyType) == typeof(DateTime))
                 {
-                    tableEntity.Properties.Add(property.Name, new EntityProperty((DateTime)srcValue));
+                    DateTime srcDate = (DateTime)srcValue;
+                    if (srcDate > new DateTime(1900, 1, 1))
+                    {
+                        tableEntity.Properties.Add(property.Name, new EntityProperty((DateTime)srcValue));
+                    }
                 }
                 else if (property.PropertyType == typeof(long)
                     || Nullable.GetUnderlyingType(property.PropertyType) == typeof(long))
