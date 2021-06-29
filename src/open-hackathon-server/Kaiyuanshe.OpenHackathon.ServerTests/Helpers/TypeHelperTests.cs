@@ -67,6 +67,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
                 Blocked = true,
                 LoginsCount = 32,
                 Identities = identities,
+                createdAt = DateTime.UtcNow,
             };
 
             var tableEntity = user.ToTableEntity("pk", "rk", (t) =>
@@ -79,6 +80,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
             Assert.AreEqual(32, tableEntity.Properties["LoginsCount"].Int32Value);
             Assert.AreEqual(JsonConvert.SerializeObject(identities), tableEntity.Properties["Identities"].StringValue);
             Assert.AreEqual("bar", tableEntity.Properties["foo"].StringValue);
+            Assert.IsTrue(tableEntity.Properties.ContainsKey("createdAt"));
+            Assert.IsFalse(tableEntity.Properties.ContainsKey("updatedAt"));
         }
 
         [Test]
