@@ -33,6 +33,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
                 && DateTime.TryParse(entity.Properties["SignedUp"].StringValue, out DateTime signedUp))
                 {
                     m.createdAt = signedUp;
+                    m.Token = null;
+                    m.Password = null;
                 }
             });
         }
