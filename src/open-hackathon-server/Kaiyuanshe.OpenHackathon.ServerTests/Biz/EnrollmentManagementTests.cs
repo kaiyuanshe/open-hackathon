@@ -18,37 +18,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     public class EnrollmentManagementTests
     {
-        #region EnrollAsync
-        [Test]
-        public async Task EnrollAsyncTest_Enrolled()
-        {
-            HackathonEntity hackathon = new HackathonEntity
-            {
-                PartitionKey = "hack"
-            };
-            string userId = "uid";
-            EnrollmentEntity participant = new EnrollmentEntity();
-            CancellationToken cancellation = CancellationToken.None;
-            var logger = new Mock<ILogger<EnrollmentManagement>>();
-
-            var enrollmentTable = new Mock<IEnrollmentTable>();
-            enrollmentTable.Setup(p => p.RetrieveAsync("hack", userId, cancellation)).ReturnsAsync(participant);
-            var storageContext = new Mock<IStorageContext>();
-            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
-
-            var enrollmentManagement = new EnrollmentManagement(logger.Object)
-            {
-                StorageContext = storageContext.Object,
-            };
-            await enrollmentManagement.EnrollAsync(hackathon, userId, cancellation);
-
-            Mock.VerifyAll(storageContext, enrollmentTable);
-            enrollmentTable.VerifyNoOtherCalls();
-        }
-
+        #region CreateEnrollmentAsync
         [TestCase(false, EnrollmentStatus.pendingApproval)]
         [TestCase(true, EnrollmentStatus.approved)]
-        public async Task EnrollAsyncTest_Insert(bool autoApprove, EnrollmentStatus targetStatus)
+        public async Task CreateEnrollmentAsync(bool autoApprove, EnrollmentStatus targetStatus)
         {
             HackathonEntity hackathon = new HackathonEntity
             {
@@ -56,13 +29,19 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 AutoApprove = autoApprove,
                 Enrollment = 5,
             };
-            string userId = "uid";
+            Enrollment request = new Enrollment
+            {
+                userId = "uid",
+                extensions = new Extension[] 
+                {
+                    new Extension { name = "n1", value = "v1" }
+                }
+            };
             EnrollmentEntity enrollment = null;
             CancellationToken cancellation = CancellationToken.None;
             var logger = new Mock<ILogger<EnrollmentManagement>>();
 
             var enrollmentTable = new Mock<IEnrollmentTable>();
-            enrollmentTable.Setup(p => p.RetrieveAsync("hack", userId, cancellation)).ReturnsAsync(enrollment);
             enrollmentTable.Setup(p => p.InsertAsync(It.IsAny<EnrollmentEntity>(), cancellation))
                 .Callback<EnrollmentEntity, CancellationToken>((p, c) =>
                 {
@@ -83,7 +62,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 StorageContext = storageContext.Object,
                 Cache = cache.Object,
             };
-            await enrollmentManagement.EnrollAsync(hackathon, userId, cancellation);
+            await enrollmentManagement.CreateEnrollmentAsync(hackathon, request, cancellation);
 
             Mock.VerifyAll(storageContext, enrollmentTable, hackathonTable);
             enrollmentTable.VerifyNoOtherCalls();

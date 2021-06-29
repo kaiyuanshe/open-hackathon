@@ -52,7 +52,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
-            var enrollment = await EnrollmentManagement.EnrollAsync(hackathon, CurrentUserId);
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
+            if (enrollment == null)
+            {
+                parameter.userId = CurrentUserId;
+                enrollment = await EnrollmentManagement.CreateEnrollmentAsync(hackathon, parameter, cancellationToken);
+            }
+            else
+            {
+                // update
+            }
             var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
             return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
