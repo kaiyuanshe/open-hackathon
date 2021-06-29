@@ -24,7 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     {
         #region Enroll
         [Test]
-        public async Task EnrollTest_NotFound()
+        public async Task EnrollTest_HackNotFound()
         {
             string hackathonName = "Hack";
             HackathonEntity hackathonEntity = null;
@@ -162,7 +162,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task EnrollTest_Enrolled()
+        public async Task EnrollTest_Insert()
         {
             string hackathonName = "Hack";
             HackathonEntity hackathonEntity = new HackathonEntity
@@ -172,6 +172,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Status = HackathonStatus.online,
                 MaxEnrollment = 0,
             };
+            Enrollment request = new Enrollment();
             EnrollmentEntity enrollment = new EnrollmentEntity { PartitionKey = "pk" };
             UserInfo userInfo = new UserInfo();
             CancellationToken cancellationToken = CancellationToken.None;
@@ -180,7 +181,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hackathonEntity);
             var enrollmentManagement = new Mock<IEnrollmentManagement>();
-            enrollmentManagement.Setup(p => p.EnrollAsync(hackathonEntity, string.Empty, It.IsAny<CancellationToken>()))
+            enrollmentManagement.Setup(e => e.GetEnrollmentAsync("hack", "", cancellationToken)).ReturnsAsync(default(EnrollmentEntity));
+            enrollmentManagement.Setup(p => p.CreateEnrollmentAsync(hackathonEntity, request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(enrollment);
             var userManagement = new Mock<IUserManagement>();
             userManagement.Setup(p => p.GetUserByIdAsync(It.IsAny<string>(), cancellationToken))
@@ -194,7 +196,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.Enroll(hackathonName, null, cancellationToken);
+            var result = await controller.Enroll(hackathonName, request, cancellationToken);
 
             Mock.VerifyAll(hackathonManagement, userManagement, enrollmentManagement);
             hackathonManagement.VerifyNoOtherCalls();

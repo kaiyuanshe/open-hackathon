@@ -17,7 +17,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Register a hackathon event as contestant
         /// </summary>
-        Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken = default);
+        Task<EnrollmentEntity> CreateEnrollmentAsync(HackathonEntity hackathon, Enrollment request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update status of enrollment.
@@ -91,34 +91,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region EnrollAsync
-        public async Task<EnrollmentEntity> EnrollAsync(HackathonEntity hackathon, string userId, CancellationToken cancellationToken)
+        #region CreateEnrollmentAsync
+        public async Task<EnrollmentEntity> CreateEnrollmentAsync(HackathonEntity hackathon, Enrollment request, CancellationToken cancellationToken)
         {
             string hackathonName = hackathon.Name;
-            var entity = await StorageContext.EnrollmentTable.RetrieveAsync(hackathonName, userId, cancellationToken);
-
-            if (entity != null)
+            var entity = new EnrollmentEntity
             {
-                logger.TraceInformation($"Enroll skipped, user with id {userId} alreday enrolled in hackathon {hackathonName}");
-                return entity;
-            }
-            else
+                PartitionKey = hackathonName,
+                RowKey = request.userId,
+                Status = EnrollmentStatus.pendingApproval,
+                CreatedAt = DateTime.UtcNow,
+                Extensions = request.extensions,
+            };
+            if (hackathon.AutoApprove)
             {
-                entity = new EnrollmentEntity
-                {
-                    PartitionKey = hackathonName,
-                    RowKey = userId,
-                    Status = EnrollmentStatus.pendingApproval,
-                    CreatedAt = DateTime.UtcNow,
-                };
-                if (hackathon.AutoApprove)
-                {
-                    entity.Status = EnrollmentStatus.approved;
-                }
-                await StorageContext.EnrollmentTable.InsertAsync(entity, cancellationToken);
-                InvalidateCachedEnrollment(hackathonName);
+                entity.Status = EnrollmentStatus.approved;
             }
-            logger.TraceInformation($"user {userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
+            await StorageContext.EnrollmentTable.InsertAsync(entity, cancellationToken);
+            InvalidateCachedEnrollment(hackathonName);
+            logger.TraceInformation($"user {request.userId} enrolled in hackathon {hackathon}, status: {entity.Status.ToString()}");
 
             if (entity.Status == EnrollmentStatus.approved)
             {

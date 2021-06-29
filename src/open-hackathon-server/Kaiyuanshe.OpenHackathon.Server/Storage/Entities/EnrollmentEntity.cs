@@ -33,5 +33,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         }
 
         public EnrollmentStatus Status { get; set; }
+
+        [ConvertableEntityProperty]
+        public Extension[] Extensions { get; set; }
     }
 }

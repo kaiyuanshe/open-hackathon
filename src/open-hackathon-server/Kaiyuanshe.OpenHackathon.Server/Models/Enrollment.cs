@@ -1,11 +1,13 @@
+using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
     /// Status of the enrollment
     /// </summary>
-    public class Enrollment: ModelBase
+    public class Enrollment : ModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -29,6 +31,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>approved</example>
         public EnrollmentStatus status { get; internal set; }
+
+        /// <summary>
+        /// Extra properties. A maximum of 10 extensions are allowed
+        /// </summary>
+        [MaxLength(10)]
+        public Extension[] extensions { get; set; }
     }
 
     /// <summary>
