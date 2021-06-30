@@ -16,18 +16,18 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Models.Validations.Tests
                 // at least 1
                 yield return new TestCaseData(new PictureInfo[] { }, false);
                 yield return new TestCaseData(new PictureInfo[] {
-                    new PictureInfo{ Uri= "https://foo.com/bar.jpg" }
+                    new PictureInfo{ uri= "https://foo.com/bar.jpg" }
                 }, true);
 
                 List<PictureInfo> images = new List<PictureInfo>();
                 for (int i = 0; i < HackathonBannersPolicyAttribute.MaxBannerCount; i++)
                 {
-                    images.Add(new PictureInfo { Uri = $"http://foo.com/bar{i}.jpg" });
+                    images.Add(new PictureInfo { uri = $"http://foo.com/bar{i}.jpg" });
                 }
                 yield return new TestCaseData(images.ToArray(), true);
 
                 // too many
-                images.Add(new PictureInfo { Uri = "https://foo.com/barx.jpg" });
+                images.Add(new PictureInfo { uri = "https://foo.com/barx.jpg" });
                 yield return new TestCaseData(images.ToArray(), false);
             }
         }

@@ -85,9 +85,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         name = "n",
                         pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
-                            new PictureInfo{ Name="p2", Description="d2", Uri="u2" },
-                            new PictureInfo{ Name="p3", Description="d3", Uri="u3" },
+                            new PictureInfo{ name="p1", description="d1", uri="u1" },
+                            new PictureInfo{ name="p2", description="d2", uri="u2" },
+                            new PictureInfo{ name="p3", description="d3", uri="u3" },
                         }
                     },
                     new AwardEntity
@@ -98,9 +98,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         Name = "n",
                         Pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
-                            new PictureInfo{ Name="p2", Description="d2", Uri="u2" },
-                            new PictureInfo{ Name="p3", Description="d3", Uri="u3" },
+                            new PictureInfo{ name="p1", description="d1", uri="u1" },
+                            new PictureInfo{ name="p2", description="d2", uri="u2" },
+                            new PictureInfo{ name="p3", description="d3", uri="u3" },
                         }
                     }
                 );
@@ -144,9 +144,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(expectedEntity.Pictures?.Length, result.Pictures?.Length);
             for (int i = 0; i < result.Pictures?.Length; i++)
             {
-                Assert.AreEqual(expectedEntity.Pictures[0].Uri, result.Pictures[0].Uri);
-                Assert.AreEqual(expectedEntity.Pictures[0].Name, result.Pictures[0].Name);
-                Assert.AreEqual(expectedEntity.Pictures[0].Description, result.Pictures[0].Description);
+                Assert.AreEqual(expectedEntity.Pictures[0].uri, result.Pictures[0].uri);
+                Assert.AreEqual(expectedEntity.Pictures[0].name, result.Pictures[0].name);
+                Assert.AreEqual(expectedEntity.Pictures[0].description, result.Pictures[0].description);
             }
         }
 
@@ -168,9 +168,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         Name = "n",
                         Pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
-                            new PictureInfo{ Name="p2", Description="d2", Uri="u2" },
-                            new PictureInfo{ Name="p3", Description="d3", Uri="u3" },
+                            new PictureInfo{ name="p1", description="d1", uri="u1" },
+                            new PictureInfo{ name="p2", description="d2", uri="u2" },
+                            new PictureInfo{ name="p3", description="d3", uri="u3" },
                         }
                     },
                     new AwardEntity
@@ -181,9 +181,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         Name = "n",
                         Pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
-                            new PictureInfo{ Name="p2", Description="d2", Uri="u2" },
-                            new PictureInfo{ Name="p3", Description="d3", Uri="u3" },
+                            new PictureInfo{ name="p1", description="d1", uri="u1" },
+                            new PictureInfo{ name="p2", description="d2", uri="u2" },
+                            new PictureInfo{ name="p3", description="d3", uri="u3" },
                         }
                     }
                 );
@@ -198,7 +198,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         target = AwardTarget.team,
                         pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p4", Description="d4", Uri="u4" },
+                            new PictureInfo{ name="p4", description="d4", uri="u4" },
                         }
                     },
                     new AwardEntity
@@ -209,9 +209,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         Name = "n",
                         Pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
-                            new PictureInfo{ Name="p2", Description="d2", Uri="u2" },
-                            new PictureInfo{ Name="p3", Description="d3", Uri="u3" },
+                            new PictureInfo{ name="p1", description="d1", uri="u1" },
+                            new PictureInfo{ name="p2", description="d2", uri="u2" },
+                            new PictureInfo{ name="p3", description="d3", uri="u3" },
                         }
                     },
                     new AwardEntity
@@ -222,7 +222,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                         Name = "n2",
                         Pictures = new PictureInfo[]
                         {
-                            new PictureInfo{ Name="p4", Description="d4", Uri="u4" },
+                            new PictureInfo{ name="p4", description="d4", uri="u4" },
                         }
                     }
                 );
@@ -261,9 +261,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(expectedEntity.Pictures?.Length, result.Pictures?.Length);
             for (int i = 0; i < result.Pictures?.Length; i++)
             {
-                Assert.AreEqual(expectedEntity.Pictures[0].Uri, result.Pictures[0].Uri);
-                Assert.AreEqual(expectedEntity.Pictures[0].Name, result.Pictures[0].Name);
-                Assert.AreEqual(expectedEntity.Pictures[0].Description, result.Pictures[0].Description);
+                Assert.AreEqual(expectedEntity.Pictures[0].uri, result.Pictures[0].uri);
+                Assert.AreEqual(expectedEntity.Pictures[0].name, result.Pictures[0].name);
+                Assert.AreEqual(expectedEntity.Pictures[0].description, result.Pictures[0].description);
             }
         }
 

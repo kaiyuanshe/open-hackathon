@@ -39,7 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Target = AwardTarget.individual,
                 Pictures = new PictureInfo[]
                 {
-                    new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
+                    new PictureInfo{ name="p1", description="d1", uri="u1" },
                 }
             };
             CancellationToken cancellationToken = CancellationToken.None;
@@ -81,9 +81,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(5, resp.quantity);
             Assert.AreEqual(AwardTarget.individual, resp.target);
             Assert.AreEqual(1, resp.pictures.Length);
-            Assert.AreEqual("d1", resp.pictures[0].Description);
-            Assert.AreEqual("u1", resp.pictures[0].Uri);
-            Assert.AreEqual("p1", resp.pictures[0].Name);
+            Assert.AreEqual("d1", resp.pictures[0].description);
+            Assert.AreEqual("u1", resp.pictures[0].uri);
+            Assert.AreEqual("p1", resp.pictures[0].name);
         }
         #endregion
 
@@ -140,7 +140,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Target = AwardTarget.individual,
                 Pictures = new PictureInfo[]
                 {
-                    new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
+                    new PictureInfo{ name="p1", description="d1", uri="u1" },
                 }
             };
             CancellationToken cancellationToken = CancellationToken.None;
@@ -176,9 +176,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(5, resp.quantity);
             Assert.AreEqual(AwardTarget.individual, resp.target);
             Assert.AreEqual(1, resp.pictures.Length);
-            Assert.AreEqual("d1", resp.pictures[0].Description);
-            Assert.AreEqual("u1", resp.pictures[0].Uri);
-            Assert.AreEqual("p1", resp.pictures[0].Name);
+            Assert.AreEqual("d1", resp.pictures[0].description);
+            Assert.AreEqual("u1", resp.pictures[0].uri);
+            Assert.AreEqual("p1", resp.pictures[0].name);
         }
         #endregion
 
@@ -201,7 +201,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Target = AwardTarget.individual,
                 Pictures = new PictureInfo[]
                 {
-                    new PictureInfo{ Name="p1", Description="d1", Uri="u1" },
+                    new PictureInfo{ name="p1", description="d1", uri="u1" },
                 }
             };
             CancellationToken cancellationToken = CancellationToken.None;
@@ -245,9 +245,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(5, resp.quantity);
             Assert.AreEqual(AwardTarget.individual, resp.target);
             Assert.AreEqual(1, resp.pictures.Length);
-            Assert.AreEqual("d1", resp.pictures[0].Description);
-            Assert.AreEqual("u1", resp.pictures[0].Uri);
-            Assert.AreEqual("p1", resp.pictures[0].Name);
+            Assert.AreEqual("d1", resp.pictures[0].description);
+            Assert.AreEqual("u1", resp.pictures[0].uri);
+            Assert.AreEqual("p1", resp.pictures[0].name);
         }
         #endregion
 
