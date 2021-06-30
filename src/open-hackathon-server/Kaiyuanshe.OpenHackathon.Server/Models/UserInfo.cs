@@ -286,7 +286,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>San Zhang</example>
         [MaxLength(128)]
-        [Required]
+        //[Required]
         [JsonProperty("nickName")]
         public string Nickname { get; set; }
 

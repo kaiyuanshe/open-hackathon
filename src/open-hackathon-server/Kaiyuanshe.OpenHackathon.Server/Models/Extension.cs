@@ -25,4 +25,32 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(1024)]
         public string value { get; set; }
     }
+
+    public static class ExtensionHelper
+    {
+        public static Extension[] Merge(this Extension[] extensions, Extension[] updates)
+        {
+            if (extensions == null)
+            {
+                extensions = new Extension[0];
+            }
+            if (updates == null)
+            {
+                updates = new Extension[0];
+            }
+
+            List<Extension> results = new List<Extension>();
+
+            foreach (var ext in extensions.Concat(updates).Reverse())
+            {
+                if (results.Any(r => r.name == ext.name))
+                    continue;
+
+                results.Add(ext);
+            }
+
+            results.Reverse();
+            return results.ToArray();
+        }
+    }
 }

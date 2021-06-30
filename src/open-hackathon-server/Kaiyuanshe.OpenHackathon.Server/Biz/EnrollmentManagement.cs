@@ -20,6 +20,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<EnrollmentEntity> CreateEnrollmentAsync(HackathonEntity hackathon, Enrollment request, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Update an enrollment
+        /// </summary>
+        Task<EnrollmentEntity> UpdateEnrollmentAsync(EnrollmentEntity existing, Enrollment request, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Update status of enrollment.
         /// </summary>
         Task<EnrollmentEntity> UpdateEnrollmentStatusAsync(HackathonEntity hackathon, EnrollmentEntity participant, EnrollmentStatus status, CancellationToken cancellationToken = default);
@@ -101,7 +106,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = request.userId,
                 Status = EnrollmentStatus.pendingApproval,
                 CreatedAt = DateTime.UtcNow,
-                Extensions = request.extensions,
+                Extensions = request.extensions.Merge(null),
             };
             if (hackathon.AutoApprove)
             {
@@ -118,6 +123,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return entity;
+        }
+        #endregion
+
+        #region UpdateEnrollmentAsync
+        public async Task<EnrollmentEntity> UpdateEnrollmentAsync(EnrollmentEntity existing, Enrollment request, CancellationToken cancellationToken = default)
+        {
+            return null;
         }
         #endregion
 
