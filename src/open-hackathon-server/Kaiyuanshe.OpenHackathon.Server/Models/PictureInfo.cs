@@ -17,14 +17,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>vehicle 1</example>
         [MaxLength(128)]
-        public string Name { get; set; }
+        public string name { get; set; }
 
         /// <summary>
         /// rich-text description of the picture. Can be used as alt text.
         /// </summary>
         /// <example>the rear view of the vehicle</example>
         [MaxLength(512)]
-        public string Description { get; set; }
+        public string description { get; set; }
 
         /// <summary>
         /// Uri of the picture
@@ -33,6 +33,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [Required]
         [MaxLength(256)]
         [AbsoluteUri]
-        public string Uri { get; set; }
+        public string uri { get; set; }
     }
 }
