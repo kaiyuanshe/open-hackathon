@@ -33,7 +33,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public EnrollmentStatus status { get; internal set; }
 
         /// <summary>
-        /// Extra properties. A maximum of 10 extensions are allowed
+        /// Extra properties. A maximum of 10 extensions are allowed. 
+        /// `name`(case-sensitive) must be unique. If not unique, the last item with same name will be saved, others are ignored.
         /// </summary>
         [MaxLength(10)]
         public Extension[] extensions { get; set; }
