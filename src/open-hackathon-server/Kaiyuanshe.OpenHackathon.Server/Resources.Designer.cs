@@ -151,6 +151,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Count of extensions exceeds the allowed limit {0}..
+        /// </summary>
+        internal static string Enrollment_TooManyExtensions {
+            get {
+                return ResourceManager.GetString("Enrollment_TooManyExtensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hackathon {0} is already Online..
         /// </summary>
         internal static string Hackathon_AlreadyOnline {

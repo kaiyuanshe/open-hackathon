@@ -57,14 +57,75 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 parameter.userId = CurrentUserId;
                 enrollment = await EnrollmentManagement.CreateEnrollmentAsync(hackathon, parameter, cancellationToken);
+                var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+                return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
             }
             else
             {
                 // update
+                return await UpdateInternalAsync(enrollment, parameter, cancellationToken);
             }
-            var user = await UserManagement.GetUserByIdAsync(CurrentUserId, cancellationToken);
+        }
+        #endregion
+
+        #region Update
+        /// <summary>
+        /// Update a enrollment. Cannot update the status, must call approve/reject API to update the status.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns>The enrollment</returns>
+        /// <response code="200">Success. The response describes a enrollment.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Enrollment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/enrollment/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> Update(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            [FromBody] Enrollment parameter,
+            CancellationToken cancellationToken)
+        {
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+
+            var options = new ValidateHackathonOptions
+            {
+                EnrollmentOpenRequired = true,
+                OnlineRequired = true,
+                HackathonName = hackathonName,
+                HackAdminRequird = (userId != CurrentUserId),
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            var enrollment = await EnrollmentManagement.GetEnrollmentAsync(hackathonName.ToLower(), userId, cancellationToken);
+            if (enrollment == null)
+            {
+                return NotFound(string.Format(Resources.Enrollment_NotFound, userId, hackathonName));
+            }
+
+            return await UpdateInternalAsync(enrollment, parameter, cancellationToken);
+        }
+
+
+        private async Task<object> UpdateInternalAsync(EnrollmentEntity existing, Enrollment request, CancellationToken cancellationToken)
+        {
+            var extensions = existing.Extensions.Merge(request.extensions);
+            if (extensions.Length > Enrollment.MaxExtensions)
+            {
+                return BadRequest(string.Format(Resources.Enrollment_TooManyExtensions, Enrollment.MaxExtensions));
+            }
+
+            var enrollment = await EnrollmentManagement.UpdateEnrollmentAsync(existing, request, cancellationToken);
+            var user = await UserManagement.GetUserByIdAsync(existing.UserId, cancellationToken);
             return Ok(ResponseBuilder.BuildEnrollment(enrollment, user));
         }
+
         #endregion
 
         #region Get

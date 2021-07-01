@@ -32,7 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Enrollment request = new Enrollment
             {
                 userId = "uid",
-                extensions = new Extension[] 
+                extensions = new Extension[]
                 {
                     new Extension { name = "n1", value = "v1" }
                 }
@@ -75,6 +75,46 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             cache.Verify(c => c.Remove("Enrollment-hack"), Times.Once);
             cache.VerifyNoOtherCalls();
             Assert.AreEqual(targetStatus, enrollment.Status);
+        }
+        #endregion
+
+        #region UpdateEnrollmentAsync
+        [Test]
+        public async Task UpdateEnrollmentAsync()
+        {
+            EnrollmentEntity existing = new EnrollmentEntity { PartitionKey = "hack" };
+            Enrollment request = new Enrollment
+            {
+                extensions = new Extension[]
+                {
+                    new Extension { name = "n", value = "v" }
+                }
+            };
+
+            var enrollmentTable = new Mock<IEnrollmentTable>();
+            var storageContext = new Mock<IStorageContext>();
+            var hackathonTable = new Mock<IHackathonTable>();
+            storageContext.SetupGet(p => p.EnrollmentTable).Returns(enrollmentTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Enrollment-hack"));
+
+            var enrollmentManagement = new EnrollmentManagement(null)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await enrollmentManagement.UpdateEnrollmentAsync(existing, request, default);
+
+            // verify
+            Mock.VerifyAll(enrollmentTable, storageContext, cache);
+            enrollmentTable.Verify(e => e.MergeAsync(It.Is<EnrollmentEntity>(en => en.Extensions.Count() == 1 && en.Extensions.First().name == "n" && en.Extensions.First().value == "v"), default), Times.Once);
+            enrollmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, result.Extensions.Count());
+            Assert.AreEqual("n", result.Extensions.First().name);
+            Assert.AreEqual("v", result.Extensions.First().value);
         }
         #endregion
 

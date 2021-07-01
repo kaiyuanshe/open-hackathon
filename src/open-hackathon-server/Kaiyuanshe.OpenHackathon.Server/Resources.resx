@@ -147,6 +147,9 @@
   <data name="Enrollment_NotStarted" xml:space="preserve">
     <value>Enrollment not started. The enrollment will be accepted starting from {0}</value>
   </data>
+  <data name="Enrollment_TooManyExtensions" xml:space="preserve">
+    <value>Count of extensions exceeds the allowed limit {0}.</value>
+  </data>
   <data name="Hackathon_AlreadyOnline" xml:space="preserve">
     <value>Hackathon {0} is already Online.</value>
   </data>
