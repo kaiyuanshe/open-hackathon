@@ -56,8 +56,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         [MaxLength(50)]
         public PictureInfo[] pictures { get; set; }
-
-        
     }
 
     /// <summary>

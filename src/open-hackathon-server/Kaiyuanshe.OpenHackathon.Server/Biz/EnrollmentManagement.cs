@@ -129,7 +129,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #region UpdateEnrollmentAsync
         public async Task<EnrollmentEntity> UpdateEnrollmentAsync(EnrollmentEntity existing, Enrollment request, CancellationToken cancellationToken = default)
         {
-            return null;
+            if (existing == null || request == null)
+                return existing;
+
+            existing.Extensions = existing.Extensions.Merge(request.extensions);
+            await StorageContext.EnrollmentTable.MergeAsync(existing, cancellationToken);
+            InvalidateCachedEnrollment(existing.HackathonName);
+
+            return existing;
         }
         #endregion
 

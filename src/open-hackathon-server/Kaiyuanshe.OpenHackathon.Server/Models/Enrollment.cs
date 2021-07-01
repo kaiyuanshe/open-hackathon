@@ -9,6 +9,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// </summary>
     public class Enrollment : ModelBase
     {
+        public const int MaxExtensions = 10;
+
         /// <summary>
         /// name of hackathon
         /// </summary>
@@ -36,7 +38,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// Extra properties. A maximum of 10 extensions are allowed. 
         /// `name`(case-sensitive) must be unique. If not unique, the last item with same name will be saved, others are ignored.
         /// </summary>
-        [MaxLength(10)]
+        [MaxLength(MaxExtensions)]
         public Extension[] extensions { get; set; }
     }
 
