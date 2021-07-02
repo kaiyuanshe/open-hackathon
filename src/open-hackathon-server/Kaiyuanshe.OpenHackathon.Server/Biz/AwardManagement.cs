@@ -58,7 +58,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default);
 
-        //Task<AwardAssignmentEntity> CreateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Create or Update Assignment async
+        /// </summary>
+        Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default);
     }
 
     public class AwardManagement : ManagementClientBase, IAwardManagement
@@ -181,6 +184,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.AwardTable.MergeAsync(entity);
             InvalidateAwardsCache(entity.PartitionKey);
             return entity;
+        }
+
+        #endregion
+
+        #region CreateOrUpdateAssignmentAsync
+        public async Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default)
+        {
+            var awardAssignments = await StorageContext.AwardAssignmentTable.ListByAwardAsync(request.hackathonName, request.awardId, cancellationToken);
+            var assignment = awardAssignments.SingleOrDefault(a => a.AssigneeId == request.assigneeId);
+            if (assignment == null)
+            {
+                assignment = new AwardAssignmentEntity
+                {
+                    PartitionKey = request.hackathonName,
+                    RowKey = Guid.NewGuid().ToString(),
+                    AssigneeId = request.assigneeId,
+                    AwardId = request.awardId,
+                    CreatedAt = DateTime.UtcNow,
+                    Description = request.description,
+                };
+                await StorageContext.AwardAssignmentTable.InsertAsync(assignment, cancellationToken);
+            }
+            else
+            {
+                assignment.Description = request.description;
+                await StorageContext.AwardAssignmentTable.MergeAsync(assignment, cancellationToken);
+            }
+
+            return assignment;
         }
         #endregion
     }
