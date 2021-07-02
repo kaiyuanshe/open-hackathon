@@ -15,7 +15,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     public class AwardAssignmentEntity : AdvancedTableEntity
     {
         /// <summary>
-        /// name of hackathon
+        /// name of hackathon. PK.
         /// </summary>
         [IgnoreProperty]
         public string HackathonName
@@ -26,6 +26,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
+        /// <summary>
+        /// Auto-generated GUID, RK
+        /// </summary>
         [IgnoreProperty]
         public string AssignmentId
         {
@@ -38,7 +41,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// id of the assignee. userId(if award.Target is individual) or teamId(if award.Target is team).
         /// </summary>
-        public string Assignee { get; set; }
+        public string AssigneeId { get; set; }
 
         public string AwardId { get; set; }
 

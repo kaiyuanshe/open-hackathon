@@ -27,7 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
         [Required]
         [MaxLength(128)]
-        public string assignee { get; set; }
+        public string assigneeId { get; set; }
 
         /// <summary>
         /// awared user. It's null if the award is assigned to a team.
@@ -50,7 +50,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// description of the assignment
         /// </summary>
-        /// <example>Apple Watch, 3 teams</example>
+        /// <example>amazing team</example>
         [MaxLength(256)]
         public string description { get; set; }
     }

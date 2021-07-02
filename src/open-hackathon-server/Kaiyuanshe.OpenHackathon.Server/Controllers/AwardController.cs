@@ -230,5 +230,44 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return NoContent();
         }
         #endregion
+
+        //#region CreateAwardAssignment
+        ///// <summary>
+        ///// Assign a award
+        ///// </summary>
+        ///// <param name="parameter"></param>
+        ///// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        ///// Must contain only letters and/or numbers, length between 1 and 100</param>
+        ///// <returns>The award</returns>
+        ///// <response code="200">Success. The response describes a award.</response>
+        //[HttpPut]
+        //[ProducesResponseType(typeof(AwardAssignment), StatusCodes.Status200OK)]
+        //[SwaggerErrorResponse(400, 403, 404, 412)]
+        //[Route("hackathon/{hackathonName}/award/{awardId}/assignment")]
+        //[Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        //public async Task<object> CreateAwardAssignment(
+        //    [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+        //    [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+        //    [FromBody] AwardAssignment parameter,
+        //    CancellationToken cancellationToken)
+        //{
+        //    // validate hackathon
+        //    var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+        //    var options = new ValidateHackathonOptions
+        //    {
+        //        HackAdminRequird = true,
+        //        HackathonName = hackathonName,
+        //    };
+        //    if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+        //    {
+        //        return options.ValidateResult;
+        //    }
+
+        //    // validate award
+        //    parameter.hackathonName = hackathonName.ToLower();
+        //    var awardEntity = await AwardManagement.CreateAwardAsync(hackathonName.ToLower(), parameter, cancellationToken);
+        //    return Ok(ResponseBuilder.BuildAward(awardEntity));
+        //}
+        //#endregion
     }
 }

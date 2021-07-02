@@ -450,5 +450,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             cache.VerifyNoOtherCalls();
         }
         #endregion
+
+        #region CreateOrUpdateAssignmentAsync
+        [Test]
+        public async Task CreateOrUpdateAssignmentAsync_Create()
+        {
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    AssigneeId = "other"
+                }
+            };
+            var request = new AwardAssignment
+            {
+                assigneeId = "tid",
+                awardId = "award",
+                description = "desc",
+                hackathonName = "hack",
+            };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.ListByAwardAsync("hack", "award", default)).ReturnsAsync(assignments);
+            awardAssignmentTable.Setup(t => t.InsertAsync(It.IsAny<AwardAssignmentEntity>(), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await awardManagement.CreateOrUpdateAssignmentAsync(request, default);
+
+            Mock.VerifyAll(logger, storageContext, awardAssignmentTable);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            awardAssignmentTable.Verify(t => t.InsertAsync(It.Is<AwardAssignmentEntity>(
+                a => a.AssigneeId == "tid"
+                && a.AwardId == "award"
+                && a.Description == "desc"
+                && a.HackathonName == "hack"
+                && !string.IsNullOrWhiteSpace(a.AssignmentId)), default));
+            awardAssignmentTable.VerifyNoOtherCalls();
+
+            Assert.AreEqual("tid", result.AssigneeId);
+            Assert.AreEqual("award", result.AwardId);
+            Assert.AreEqual("desc", result.Description);
+            Assert.AreEqual("hack", result.HackathonName);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result.AssignmentId));
+        }
+
+        [Test]
+        public async Task CreateOrUpdateAssignmentAsync_Update()
+        {
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    AssigneeId = "tid",
+                    Description = "desc"
+                }
+            };
+            var request = new AwardAssignment
+            {
+                assigneeId = "tid",
+                awardId = "award",
+                description = "updated desc",
+                hackathonName = "hack",
+            };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.ListByAwardAsync("hack", "award", default)).ReturnsAsync(assignments);
+            awardAssignmentTable.Setup(t => t.MergeAsync(It.IsAny<AwardAssignmentEntity>(), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await awardManagement.CreateOrUpdateAssignmentAsync(request, default);
+
+            Mock.VerifyAll(logger, storageContext, awardAssignmentTable);
+            logger.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            awardAssignmentTable.Verify(t => t.MergeAsync(It.Is<AwardAssignmentEntity>(a => a.Description == "updated desc"), default));
+            awardAssignmentTable.VerifyNoOtherCalls();
+
+            Assert.AreEqual("tid", result.AssigneeId);
+            Assert.AreEqual("updated desc", result.Description);
+        }
+        #endregion
     }
 }
