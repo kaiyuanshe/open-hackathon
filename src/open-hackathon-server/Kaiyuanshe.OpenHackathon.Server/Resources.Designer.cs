@@ -115,6 +115,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot assign the award to more than {0} assignees..
+        /// </summary>
+        internal static string Award_TooManyAssignments {
+            get {
+                return ResourceManager.GetString("Award_TooManyAssignments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enrollment already ended at {0}.
         /// </summary>
         internal static string Enrollment_Ended {
@@ -309,6 +318,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         internal static string TeamMember_NotFound {
             get {
                 return ResourceManager.GetString("TeamMember_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified user is not found..
+        /// </summary>
+        internal static string User_NotFound {
+            get {
+                return ResourceManager.GetString("User_NotFound", resourceCulture);
             }
         }
     }

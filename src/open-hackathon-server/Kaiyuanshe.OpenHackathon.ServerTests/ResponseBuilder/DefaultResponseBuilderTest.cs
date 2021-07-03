@@ -141,6 +141,36 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         }
 
         [Test]
+        public void BuildAwardAssignmentTest()
+        {
+            AwardAssignmentEntity awardAssignment = new AwardAssignmentEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                AssigneeId = "assignee",
+                AwardId = "award",
+                Description = "desc",
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+            var user = new UserInfo { Device = "device" };
+            var team = new Team { id = "teamid" };
+
+            var responseBuilder = new DefaultResponseBuilder();
+            var result = responseBuilder.BuildAwardAssignment(awardAssignment, team, user);
+
+            Assert.AreEqual("pk", result.hackathonName);
+            Assert.AreEqual("rk", result.assignmentId);
+            Assert.AreEqual("assignee", result.assigneeId);
+            Assert.AreEqual("award", result.awardId);
+            Assert.AreEqual("desc", result.description);
+            Assert.AreEqual(awardAssignment.CreatedAt, result.createdAt);
+            Assert.AreEqual(awardAssignment.Timestamp.DateTime, result.updatedAt);
+            Assert.AreEqual("device", result.user.Device);
+            Assert.AreEqual("teamid", result.team.id);
+        }
+
+        [Test]
         public void BuildResourceListTest()
         {
             string nextLink = "nextlink";

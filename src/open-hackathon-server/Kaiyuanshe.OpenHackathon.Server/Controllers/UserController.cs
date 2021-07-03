@@ -58,6 +58,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             CancellationToken cancellationToken)
         {
             var userInfo = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
+            if (userInfo == null)
+            {
+                return NotFound(Resources.User_NotFound);
+            }
             return Ok(userInfo);
         }
         #endregion

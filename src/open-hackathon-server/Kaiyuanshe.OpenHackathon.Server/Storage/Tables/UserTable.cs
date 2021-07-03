@@ -25,6 +25,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         public async Task<UserInfo> GetUserByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             var entity = await RetrieveAsync(id.ToLower(), string.Empty, cancellationToken);
+            if (entity == null)
+                return null;
+
             UserInfo resp = new UserInfo();
             return entity.ToModel(resp, (m) =>
             {

@@ -135,6 +135,9 @@
   <data name="Award_NotFound" xml:space="preserve">
     <value>Award with specified id is not found.</value>
   </data>
+  <data name="Award_TooManyAssignments" xml:space="preserve">
+    <value>Cannot assign the award to more than {0} assignees.</value>
+  </data>
   <data name="Enrollment_Ended" xml:space="preserve">
     <value>Enrollment already ended at {0}</value>
   </data>
@@ -200,5 +203,8 @@
   </data>
   <data name="Team_NotFound" xml:space="preserve">
     <value>Team with specified id is not found.</value>
+  </data>
+  <data name="User_NotFound" xml:space="preserve">
+    <value>The specified user is not found.</value>
   </data>
 </root>

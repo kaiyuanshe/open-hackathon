@@ -1,4 +1,5 @@
 ﻿using Authing.ApiClient.Types;
+using Kaiyuanshe.OpenHackathon.Server;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.Models;
@@ -46,6 +47,33 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         #endregion
 
         #region GetUserById
+        [Test]
+        public async Task GetUserById_NotFound()
+        {
+            string userId = "uid";
+            CancellationToken cancellationToken = CancellationToken.None;
+            UserInfo userInfo = null;
+
+            // mock
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync(userId, cancellationToken))
+                .ReturnsAsync(userInfo);
+
+            // test
+            var controller = new UserController
+            {
+                UserManagement = userManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetUserById(userId, cancellationToken);
+
+            // verify
+            Mock.VerifyAll(userManagement);
+            userManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.User_NotFound);
+        }
+
         [Test]
         public async Task GetUserById()
         {
