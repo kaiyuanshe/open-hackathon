@@ -86,7 +86,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             // get award
             var award = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
             var awardOptions = new ValidateAwardOptions { };
-            if (ValidateAward(award, awardOptions) == false)
+            if (await ValidateAward(award, awardOptions, cancellationToken) == false)
             {
                 return awardOptions.ValidateResult;
             }
@@ -106,7 +106,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success. The response describes a award.</response>
         [HttpPatch]
         [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 403, 404)]
+        [SwaggerErrorResponse(400, 403, 404, 412)]
         [Route("hackathon/{hackathonName}/award/{awardId}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> UpdateAward(
@@ -129,8 +129,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // validate award
             var award = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
-            var awardOptions = new ValidateAwardOptions { };
-            if (ValidateAward(award, awardOptions) == false)
+            var awardOptions = new ValidateAwardOptions
+            {
+                TargetChangableRequired = true,
+                NewTarget = parameter.target.GetValueOrDefault(award.Target),
+            };
+            if (await ValidateAward(award, awardOptions, cancellationToken) == false)
             {
                 return awardOptions.ValidateResult;
             }

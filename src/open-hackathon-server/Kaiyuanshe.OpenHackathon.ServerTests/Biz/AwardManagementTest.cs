@@ -480,6 +480,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             AwardManagement awardManagement = new AwardManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = new DefaultCacheProvider(new Mock<ILogger<DefaultCacheProvider>>().Object),
             };
             var result = await awardManagement.CreateOrUpdateAssignmentAsync(request, default);
 
@@ -530,6 +531,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             AwardManagement awardManagement = new AwardManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = new DefaultCacheProvider(new Mock<ILogger<DefaultCacheProvider>>().Object),
             };
             var result = await awardManagement.CreateOrUpdateAssignmentAsync(request, default);
 
@@ -541,6 +543,39 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             Assert.AreEqual("tid", result.AssigneeId);
             Assert.AreEqual("updated desc", result.Description);
+        }
+        #endregion
+
+        #region GetAssignmentCountAsync
+        [Test]
+        public async Task GetAssignmentCountAsync()
+        {
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    AssigneeId = "tid",
+                    Description = "desc"
+                }
+            };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.ListByAwardAsync("hack", "award", default)).ReturnsAsync(assignments);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                Cache = new DefaultCacheProvider(new Mock<ILogger<DefaultCacheProvider>>().Object),
+            };
+            var count = await awardManagement.GetAssignmentCountAsync("hack", "award", default);
+
+            Mock.VerifyAll(awardAssignmentTable, storageContext);
+            awardAssignmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual(1, count);
         }
         #endregion
     }

@@ -196,6 +196,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public class ValidateAwardOptions : ControllerValiationOptions
         {
+            public AwardTarget NewTarget { get; set; }
+            /// <summary>
+            /// Validate where award.target is allowed to change to NewTarget
+            /// </summary>
+            public bool TargetChangableRequired { get; set; }
         }
 
         #region ValidateHackathon
@@ -357,12 +362,22 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         #endregion
 
         #region ValidateAward
-        protected bool ValidateAward(AwardEntity award, ValidateAwardOptions options)
+        protected async Task<bool> ValidateAward(AwardEntity award, ValidateAwardOptions options, CancellationToken cancellationToken = default)
         {
             if (award == null)
             {
                 options.ValidateResult = NotFound(Resources.Award_NotFound);
                 return false;
+            }
+
+            if (options.TargetChangableRequired && award.Target != options.NewTarget)
+            {
+                var assignmentCount = await AwardManagement.GetAssignmentCountAsync(award.HackathonName, award.Id, cancellationToken);
+                if (assignmentCount > 0)
+                {
+                    options.ValidateResult = PreconditionFailed(Resources.Award_CannotUpdateTarget);
+                    return false;
+                }
             }
 
             return true;

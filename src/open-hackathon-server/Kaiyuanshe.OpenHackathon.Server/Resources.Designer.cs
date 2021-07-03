@@ -97,6 +97,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to `award.target` cannot be updated since the award is already assigned to a team or user. Please delete the assignment(s) first..
+        /// </summary>
+        internal static string Award_CannotUpdateTarget {
+            get {
+                return ResourceManager.GetString("Award_CannotUpdateTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Award with specified id is not found..
         /// </summary>
         internal static string Award_NotFound {
