@@ -40,12 +40,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public Team team { get; set; }
 
         /// <summary>
-        /// auto-generated id of the award.
+        /// id of the award.
         /// </summary>
         /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
         [Guid]
-        [Required]
-        public string awardId { get; set; }
+        public string awardId { get; internal set; }
 
         /// <summary>
         /// description of the assignment

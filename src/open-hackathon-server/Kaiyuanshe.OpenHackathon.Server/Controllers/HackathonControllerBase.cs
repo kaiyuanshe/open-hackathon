@@ -201,6 +201,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             /// Validate where award.target is allowed to change to NewTarget
             /// </summary>
             public bool TargetChangableRequired { get; set; }
+
+            public bool QuantityCheckRequired { get; set; }
+
+            public string AssigneeId { get; set; }
+            public bool AssigneeExistRequired { get; set; }
         }
 
         #region ValidateHackathon
@@ -377,6 +382,41 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 {
                     options.ValidateResult = PreconditionFailed(Resources.Award_CannotUpdateTarget);
                     return false;
+                }
+            }
+
+            if (options.QuantityCheckRequired)
+            {
+                var assignmentCount = await AwardManagement.GetAssignmentCountAsync(award.HackathonName, award.Id, cancellationToken);
+                if (assignmentCount >= award.Quantity)
+                {
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Award_TooManyAssignments, award.Quantity));
+                    return false;
+                }
+            }
+
+            if (options.AssigneeExistRequired)
+            {
+                switch (award.Target)
+                {
+                    case AwardTarget.team:
+                        var team = await TeamManagement.GetTeamByIdAsync(award.HackathonName, options.AssigneeId, cancellationToken);
+                        if (team == null)
+                        {
+                            options.ValidateResult = NotFound(Resources.Team_NotFound);
+                            return false;
+                        }
+                        break;
+                    case AwardTarget.individual:
+                        var enrollment = await EnrollmentManagement.GetEnrollmentAsync(award.HackathonName, options.AssigneeId, cancellationToken);
+                        if (enrollment == null || enrollment.Status != EnrollmentStatus.approved)
+                        {
+                            options.ValidateResult = NotFound(string.Format(Resources.Enrollment_NotFound, options.AssigneeId, award.HackathonName));
+                            return false;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
 
