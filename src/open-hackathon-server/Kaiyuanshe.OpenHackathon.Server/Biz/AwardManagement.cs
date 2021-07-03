@@ -40,7 +40,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <returns></returns>
         Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default);
 
-
         /// <summary>
         /// List paged awards of hackathon
         /// </summary>
@@ -62,6 +61,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// Create or Update Assignment async
         /// </summary>
         Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get count of assignment of an award
+        /// </summary>
+        Task<int> GetAssignmentCountAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
     }
 
     public class AwardManagement : ManagementClientBase, IAwardManagement
@@ -82,6 +86,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         private void InvalidateAwardsCache(string hackathonName)
         {
             Cache.Remove(CacheKeyAwards(hackathonName));
+        }
+
+        private async Task<IEnumerable<AwardAssignmentEntity>> ListByAwardAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
+        {
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.AwardAssignment, $"{hackathonName}-{awardId}");
+            return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromSeconds(3), (ct) =>
+            {
+                return StorageContext.AwardAssignmentTable.ListByAwardAsync(hackathonName, awardId, ct);
+            }, false, cancellationToken);
         }
         #endregion
 
@@ -191,7 +204,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #region CreateOrUpdateAssignmentAsync
         public async Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default)
         {
-            var awardAssignments = await StorageContext.AwardAssignmentTable.ListByAwardAsync(request.hackathonName, request.awardId, cancellationToken);
+            var awardAssignments = await ListByAwardAsync(request.hackathonName, request.awardId, cancellationToken);
             var assignment = awardAssignments.SingleOrDefault(a => a.AssigneeId == request.assigneeId);
             if (assignment == null)
             {
@@ -213,6 +226,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return assignment;
+        }
+        #endregion
+
+        #region GetAssignmentCountAsync
+        public async Task<int> GetAssignmentCountAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
+        {
+            var allAssignment = await ListByAwardAsync(hackathonName, awardId, cancellationToken);
+            return allAssignment.Count();
         }
         #endregion
     }

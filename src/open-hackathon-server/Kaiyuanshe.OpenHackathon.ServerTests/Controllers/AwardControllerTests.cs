@@ -183,39 +183,52 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         #endregion
 
         #region UpdateAward
-        [Test]
-        public async Task UpdateAward()
+        [TestCase(AwardTarget.individual, AwardTarget.individual, 0, true)]
+        [TestCase(AwardTarget.individual, AwardTarget.individual, 1, true)]
+        [TestCase(AwardTarget.individual, AwardTarget.team, 0, true)]
+        [TestCase(AwardTarget.individual, AwardTarget.team, 1, false)]
+        public async Task UpdateAward(AwardTarget exiting, AwardTarget update, int assignmentCount, bool expectedSuccess)
         {
             // input
             string hackName = "Foo";
             string awardId = "aid";
             HackathonEntity hackathon = new HackathonEntity { };
-            Award parameter = new Award { };
+            Award parameter = new Award
+            {
+                target = update,
+            };
             AwardEntity awardEntity = new AwardEntity
             {
                 Name = "n",
-                PartitionKey = "pk",
+                PartitionKey = "foo",
                 RowKey = "rk",
                 Description = "desc",
                 Quantity = 5,
-                Target = AwardTarget.individual,
+                Target = exiting,
                 Pictures = new PictureInfo[]
                 {
                     new PictureInfo{ name="p1", description="d1", uri="u1" },
                 }
             };
-            CancellationToken cancellationToken = CancellationToken.None;
             var authResult = AuthorizationResult.Success();
 
             // moq
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
                 .ReturnsAsync(hackathon);
             var awardManagement = new Mock<IAwardManagement>();
-            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, cancellationToken))
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, default))
                 .ReturnsAsync(awardEntity);
-            awardManagement.Setup(t => t.UpdateAwardAsync(awardEntity, parameter, cancellationToken))
-                .ReturnsAsync(awardEntity);
+            if (expectedSuccess)
+            {
+                awardManagement.Setup(t => t.UpdateAwardAsync(awardEntity, parameter, default))
+                    .ReturnsAsync(awardEntity);
+            }
+            if (exiting != update)
+            {
+                awardManagement.Setup(t => t.GetAssignmentCountAsync("foo", "rk", default))
+                    .ReturnsAsync(assignmentCount);
+            }
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
                 .ReturnsAsync(authResult);
@@ -229,7 +242,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.UpdateAward(hackName, awardId, parameter, cancellationToken);
+            var result = await controller.UpdateAward(hackName, awardId, parameter, default);
 
             // verify
             Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);
@@ -237,17 +250,24 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             awardManagement.VerifyNoOtherCalls();
             authorizationService.VerifyNoOtherCalls();
 
-            Award resp = AssertHelper.AssertOKResult<Award>(result);
-            Assert.AreEqual("desc", resp.description);
-            Assert.AreEqual("pk", resp.hackathonName);
-            Assert.AreEqual("rk", resp.id);
-            Assert.AreEqual("n", resp.name);
-            Assert.AreEqual(5, resp.quantity);
-            Assert.AreEqual(AwardTarget.individual, resp.target);
-            Assert.AreEqual(1, resp.pictures.Length);
-            Assert.AreEqual("d1", resp.pictures[0].description);
-            Assert.AreEqual("u1", resp.pictures[0].uri);
-            Assert.AreEqual("p1", resp.pictures[0].name);
+            if (!expectedSuccess)
+            {
+                AssertHelper.AssertObjectResult(result, 412, Resources.Award_CannotUpdateTarget);
+            }
+            else
+            {
+                Award resp = AssertHelper.AssertOKResult<Award>(result);
+                Assert.AreEqual("desc", resp.description);
+                Assert.AreEqual("foo", resp.hackathonName);
+                Assert.AreEqual("rk", resp.id);
+                Assert.AreEqual("n", resp.name);
+                Assert.AreEqual(5, resp.quantity);
+                Assert.AreEqual(AwardTarget.individual, resp.target);
+                Assert.AreEqual(1, resp.pictures.Length);
+                Assert.AreEqual("d1", resp.pictures[0].description);
+                Assert.AreEqual("u1", resp.pictures[0].uri);
+                Assert.AreEqual("p1", resp.pictures[0].name);
+            }
         }
         #endregion
 
