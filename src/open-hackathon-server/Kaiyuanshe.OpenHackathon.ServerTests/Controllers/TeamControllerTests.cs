@@ -1448,6 +1448,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             AssertHelper.AssertNoContentResult(result);
         }
 
+        #region DeleteTeam
+
         [Test]
         public async Task DeleteTeam_AlreadyDeleted()
         {
@@ -1456,14 +1458,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string teamId = "tid";
             HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
             TeamEntity teamEntity = null;
-            CancellationToken cancellationToken = CancellationToken.None;
 
             // moq
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
                 .ReturnsAsync(hackathon);
             var teamManagement = new Mock<ITeamManagement>();
-            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", default))
                 .ReturnsAsync(teamEntity);
 
             // run
@@ -1473,7 +1474,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 TeamManagement = teamManagement.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.DeleteTeam(hackName, teamId, cancellationToken);
+            var result = await controller.DeleteTeam(hackName, teamId, default);
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement);
             hackathonManagement.VerifyNoOtherCalls();
@@ -1483,24 +1484,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
-        public async Task DeleteTeam_Succeeded()
+        public async Task DeleteTeam_HasAssignment()
         {
             // input
             string hackName = "Foo";
             string teamId = "tid";
             HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
-            TeamEntity teamEntity = new TeamEntity { };
-            CancellationToken cancellationToken = CancellationToken.None;
+            TeamEntity teamEntity = new TeamEntity { PartitionKey = "foo", RowKey = "rk" };
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    Description = "desc"
+                }
+            };
             var authResult = AuthorizationResult.Success();
 
             // moq
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
                 .ReturnsAsync(hackathon);
             var teamManagement = new Mock<ITeamManagement>();
-            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", cancellationToken))
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", default))
                 .ReturnsAsync(teamEntity);
-            teamManagement.Setup(t => t.DeleteTeamAsync(teamEntity, cancellationToken));
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(a => a.ListAssignmentsByTeamAsync("foo", "rk", default))
+                .ReturnsAsync(assignments);
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
                 .ReturnsAsync(authResult);
@@ -1509,19 +1518,68 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var controller = new TeamController
             {
                 HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
                 TeamManagement = teamManagement.Object,
                 AuthorizationService = authorizationService.Object,
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.DeleteTeam(hackName, teamId, cancellationToken);
+            var result = await controller.DeleteTeam(hackName, teamId, default);
             // verify
-            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService);
+            Mock.VerifyAll(hackathonManagement, teamManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Team_HasAward);
+        }
+
+        [Test]
+        public async Task DeleteTeam_Succeeded()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { PartitionKey = "foo", RowKey = "rk" };
+            var authResult = AuthorizationResult.Success();
+            var assignments = new List<AwardAssignmentEntity>();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", default))
+                .ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.DeleteTeamAsync(teamEntity, default));
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
+                .ReturnsAsync(authResult);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(a => a.ListAssignmentsByTeamAsync("foo", "rk", default))
+                .ReturnsAsync(assignments);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                AwardManagement = awardManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.DeleteTeam(hackName, teamId, default);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService, awardManagement);
             hackathonManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
             authorizationService.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
 
             AssertHelper.AssertNoContentResult(result);
         }
+        #endregion
 
         [Test]
         public async Task GetTeamMember_Succeeded()

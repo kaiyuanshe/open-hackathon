@@ -265,6 +265,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var teamValidateOptions = new ValidateTeamOptions
             {
                 TeamAdminRequired = true,
+                NoAwardAssignmentRequired = true,
             };
             if (await ValidateTeam(team, teamValidateOptions) == false)
             {
@@ -274,7 +275,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             // Delete team
             await TeamManagement.DeleteTeamAsync(team, cancellationToken);
             return NoContent();
-        } 
+        }
         #endregion
 
         #region JoinTeam
@@ -299,7 +300,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             CancellationToken cancellationToken)
         {
             return await AddTeamMemberInternalAsync(hackathonName.ToLower(), teamId, CurrentUserId, parameter, false, cancellationToken);
-        } 
+        }
         #endregion
 
         #region AddTeamMember
@@ -389,7 +390,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember, user));
-        } 
+        }
         #endregion
 
         #region UpdateTeamMember
@@ -446,7 +447,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             teamMember = await TeamManagement.UpdateTeamMemberAsync(teamMember, parameter, cancellationToken);
             var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember, user));
-        } 
+        }
         #endregion
 
         #region ApproveTeamMember
@@ -510,7 +511,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             teamMember = await TeamManagement.UpdateTeamMemberStatusAsync(teamMember, TeamMemberStatus.approved, cancellationToken);
             var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember, user));
-        } 
+        }
         #endregion
 
         #region UpdateTeamMemberRole
@@ -575,7 +576,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             teamMember = await TeamManagement.UpdateTeamMemberRoleAsync(teamMember, parameter.role.GetValueOrDefault(teamMember.Role), cancellationToken);
             var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember, user));
-        } 
+        }
         #endregion
 
         #region LeaveTeam
@@ -621,7 +622,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Delete team member
             return await DeleteMemberInternalAsync(teamId.ToLower(), CurrentUserId, cancellationToken);
-        } 
+        }
         #endregion
 
         #region DeleteTeamMember
@@ -692,7 +693,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             // remove it
             await TeamManagement.DeleteTeamMemberAsync(teamMember, cancellationToken);
             return NoContent();
-        } 
+        }
         #endregion
 
         #region GetTeamMember
@@ -750,7 +751,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
             return Ok(ResponseBuilder.BuildTeamMember(teamMember, user));
-        } 
+        }
         #endregion
 
         #region ListMembers
@@ -832,7 +833,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     tuples,
                     ResponseBuilder.BuildTeamMember,
                     nextLink));
-        } 
+        }
         #endregion
     }
 }
