@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Threading;
@@ -187,6 +188,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public class ValidateTeamOptions : ControllerValiationOptions
         {
             public bool TeamAdminRequired { get; set; }
+            public bool NoAwardAssignmentRequired { get; set; }
         }
 
         public class ValidateTeamMemberOptions : ControllerValiationOptions
@@ -327,6 +329,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (!authorizationResult.Succeeded)
                 {
                     options.ValidateResult = Forbidden(Resources.Team_NotAdmin);
+                    return false;
+                }
+            }
+
+            if (options.NoAwardAssignmentRequired)
+            {
+                var assignments = await AwardManagement.ListAssignmentsByTeamAsync(team.HackathonName, team.Id, cancellationToken);
+                if (assignments.Count() > 0)
+                {
+                    options.ValidateResult = PreconditionFailed(Resources.Team_HasAward);
                     return false;
                 }
             }

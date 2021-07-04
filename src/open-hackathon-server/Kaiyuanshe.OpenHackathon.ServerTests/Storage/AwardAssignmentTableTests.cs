@@ -29,5 +29,23 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Storage
             awardTable.VerifyNoOtherCalls();
         }
         #endregion
+
+        #region ListByAssigneeAsync
+        [Test]
+        public async Task ListByAssigneeAsync()
+        {
+            string hackathonName = "hack";
+            string assigneeId = "assid";
+
+            var awardTable = new Mock<AwardAssignmentTable> { };
+            await awardTable.Object.ListByAssigneeAsync(hackathonName, assigneeId, default);
+
+            awardTable.Verify(t => t.ExecuteQuerySegmentedAsync(
+                It.Is<TableQuery<AwardAssignmentEntity>>(q => q.FilterString == "(PartitionKey eq 'hack') and (AssigneeId eq 'assid')"),
+                It.IsAny<Action<TableQuerySegment<AwardAssignmentEntity>>>(),
+                default), Times.Once);
+            awardTable.VerifyNoOtherCalls();
+        }
+        #endregion
     }
 }

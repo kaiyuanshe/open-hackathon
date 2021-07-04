@@ -578,5 +578,37 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(1, count);
         }
         #endregion
+
+        #region ListAssignmentsByTeamAsync
+        [Test]
+        public async Task ListAssignmentsByTeamAsync()
+        {
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    Description = "desc"
+                }
+            };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.ListByAssigneeAsync("hack", "tid", default)).ReturnsAsync(assignments);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await awardManagement.ListAssignmentsByTeamAsync("hack", "tid", default);
+
+            Mock.VerifyAll(awardAssignmentTable, storageContext);
+            awardAssignmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual(1, result.Count());
+            Assert.AreEqual("desc", result.First().Description);
+        }
+        #endregion
     }
 }

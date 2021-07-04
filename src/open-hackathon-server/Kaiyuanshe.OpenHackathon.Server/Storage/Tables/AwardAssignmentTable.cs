@@ -11,6 +11,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
     public interface IAwardAssignmentTable : IAzureTable<AwardAssignmentEntity>
     {
         Task<IEnumerable<AwardAssignmentEntity>> ListByAwardAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<AwardAssignmentEntity>> ListByAssigneeAsync(string hackathonName, string assigneeId, CancellationToken cancellationToken = default);
+
     }
 
     public class AwardAssignmentTable : AzureTable<AwardAssignmentEntity>, IAwardAssignmentTable
@@ -48,6 +51,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 
             return list;
         }
-        #endregion 
+        #endregion
+
+        #region ListByAssigneeAsync
+        public async Task<IEnumerable<AwardAssignmentEntity>> ListByAssigneeAsync(string hackathonName, string assigneeId, CancellationToken cancellationToken = default)
+        {
+            List<AwardAssignmentEntity> list = new List<AwardAssignmentEntity>();
+
+            var hackathonNameFilter = TableQuery.GenerateFilterCondition(
+                nameof(AwardAssignmentEntity.PartitionKey),
+                QueryComparisons.Equal,
+                hackathonName);
+            var assigneeIdFilter = TableQuery.GenerateFilterCondition(
+                nameof(AwardAssignmentEntity.AssigneeId),
+                QueryComparisons.Equal,
+                assigneeId);
+            var filter = TableQueryHelper.And(hackathonNameFilter, assigneeIdFilter);
+
+            TableQuery<AwardAssignmentEntity> query = new TableQuery<AwardAssignmentEntity>().Where(filter);
+            await ExecuteQuerySegmentedAsync(query, (segment) =>
+            {
+                list.AddRange(segment);
+            }, cancellationToken);
+
+            return list;
+        }
+        #endregion
     }
 }
