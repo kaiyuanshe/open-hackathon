@@ -9,6 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
     {
         string CreateContainerSasToken(int expiration);
         string CreateBlobSasToken(int expiration, string blobName);
+        string CreateBlobSasUrl(int expiration, string blobName);
     }
 
     public class AzureBlobContainer: IAzureBlobContainer
@@ -104,6 +105,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
             var sasPolicy = this.CreateSasPolicy(expiration);
             var blobProxy = blobContainerProxy.GetBlobReference(blobName);
             return blobProxy.GetSharedAccessSignature(sasPolicy);
+        }
+
+        public string CreateBlobSasUrl(int expiration, string blobName)
+        {
+            var sasPolicy = this.CreateSasPolicy(expiration);
+            var blobProxy = blobContainerProxy.GetBlobReference(blobName);
+            return blobProxy.Uri.ToString() + blobProxy.GetSharedAccessSignature(sasPolicy);
         }
     }
 }

@@ -68,23 +68,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
-        #region GetUploadToken
+        #region GetUploadUrl
         /// <summary>
-        /// Get file upload token
+        /// Get file upload URL
         /// </summary>
-        /// <returns>the SAS token</returns>
-        /// <response code="200">Success. The response return a SAS token.</response>
+        /// <returns>the SAS URL</returns>
+        /// <response code="200">Success. The response return a SAS URL.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(SasToken), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SasUrl), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400)]
-        [Route("user/generateSasToken")]
+        [Route("user/generateSasUrl")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> GetUploadToken([FromBody] FileUpload parameter)
+        public async Task<object> GetUploadUrl([FromBody] FileUpload parameter)
         {
             var filename = parameter.filename;
             var folder = CurrentUserId;
-            var token = UserManagement.GetUploadToken(parameter.expiration.GetValueOrDefault(), folder + "/" + filename);
-            var sas = new SasToken { token = token };
+            var url = UserManagement.GetUploadUrl(parameter.expiration.GetValueOrDefault(), folder + "/" + filename);
+            var sas = new SasUrl { url = url };
             return Ok(sas);
         }
         #endregion

@@ -83,12 +83,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get the upload token.
+        /// Get the upload URL.
         /// </summary>
         /// <param name="expiration">token expiration in minutes</param>
         /// <param name="blobName">the target blob to upload file</param>
         /// <returns></returns>
-        string GetUploadToken(int expiration, string blobName);
+        string GetUploadUrl(int expiration, string blobName);
     }
 
     /// <inheritdoc cref="IUserManagement"/>
@@ -210,9 +210,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        public string GetUploadToken(int expiration, string blobName)
+        public string GetUploadUrl(int expiration, string blobName)
         {
-            return StorageContext.UserBlobContainer.CreateBlobSasToken(expiration, blobName);
+            return StorageContext.UserBlobContainer.CreateBlobSasUrl(expiration, blobName);
         }
     }
 }
