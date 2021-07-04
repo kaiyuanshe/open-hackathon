@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
-    /// SAS Expiration Time
+    /// FileUpload
     /// </summary>
-    public class SasExpiration
+    public class FileUpload
     {
         /// <summary>
         /// SAS token expiration time. 2 by default.
@@ -14,5 +14,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>3</example>
         [Range(2, 30)]
         public int? expiration { get; set; }
+
+        /// <summary>
+        /// The name of the file to upload to the blob.
+        /// </summary>
+        /// <example>avatar.jpg</example>
+        [MaxLength(256)]
+        public string filename { get; set; }
     }
 }

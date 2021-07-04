@@ -7,7 +7,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 
     public interface IAzureBlobContainer
     {
-        string CreateSasToken(int expiration);
+        string CreateContainerSasToken(int expiration);
+        string CreateBlobSasToken(int expiration, string blobName);
     }
 
     public class AzureBlobContainer: IAzureBlobContainer
@@ -52,7 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
         /// <summary>
         ///  The name of the blob container exists under the storage account with which this AzureBlobContainer is configured.
         /// </summary>
-        protected readonly string blobName;
+        protected readonly string containerName;
 
         /// <summary>
         /// Test-only constructor
@@ -60,23 +61,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
         protected AzureBlobContainer()
         { }
 
-        protected AzureBlobContainer(CloudStorageAccount storageAccount, string blobName)
+        protected AzureBlobContainer(CloudStorageAccount storageAccount, string containerName)
         {
-            this.blobName = blobName;
+            this.containerName = containerName;
             blobServiceProxy = storageAccount.CreateCloudBlobClient();
             blobServiceProxy.DefaultRequestOptions.RetryPolicy = new Microsoft.WindowsAzure.Storage.RetryPolicies.LinearRetry(
                 TimeSpan.FromSeconds(BlobContainerRetryInterval), BlobContaineRetryCount);
-            blobContainerProxy = this.blobServiceProxy.GetContainerReference(this.blobName);
+            blobContainerProxy = this.blobServiceProxy.GetContainerReference(this.containerName);
             blobContainerProxy.CreateIfNotExistsAsync().Wait();
         }
 
-        public string CreateSasToken(int expiration)
+        protected SharedAccessBlobPolicy CreateSasPolicy(int expiration)
         {
             if (expiration > 0)
             {
                 expiration = Math.Min(expiration, BlobContainerMaxSasExpiration);
                 expiration = Math.Max(expiration, BlobContainerMinSasExpiration);
-            } else
+            }
+            else
             {
                 expiration = BlobContainerDefaultSasExpiration;
             }
@@ -88,7 +90,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
                     SharedAccessStartTime = DateTime.UtcNow.Subtract(new TimeSpan(0, leadingTime, 0)),
                     Permissions = SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write
                 };
+            return sasPolicy;
+        }
+
+        public string CreateContainerSasToken(int expiration)
+        {
+            var sasPolicy = this.CreateSasPolicy(expiration);
             return blobContainerProxy.GetSharedAccessSignature(sasPolicy);
+        }
+
+        public string CreateBlobSasToken(int expiration, string blobName)
+        {
+            var sasPolicy = this.CreateSasPolicy(expiration);
+            var blobProxy = blobContainerProxy.GetBlobReference(blobName);
+            return blobProxy.GetSharedAccessSignature(sasPolicy);
         }
     }
 }

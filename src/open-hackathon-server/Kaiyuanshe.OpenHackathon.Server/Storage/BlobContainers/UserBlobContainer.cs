@@ -8,8 +8,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 
     public class UserBlobContainer: AzureBlobContainer, IUserBlobContainer
     {
-        public UserBlobContainer(CloudStorageAccount storageAccount, string blobName)
-            : base(storageAccount, blobName)
+        public UserBlobContainer(CloudStorageAccount storageAccount, string blobContainerName)
+            : base(storageAccount, blobContainerName)
         {
         }
     }

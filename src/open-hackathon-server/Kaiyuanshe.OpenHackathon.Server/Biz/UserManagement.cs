@@ -86,8 +86,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// Get the upload token.
         /// </summary>
         /// <param name="expiration">token expiration in minutes</param>
+        /// <param name="blobName">the target blob to upload file</param>
         /// <returns></returns>
-        string GetUploadToken(int expiration);
+        string GetUploadToken(int expiration, string blobName);
     }
 
     /// <inheritdoc cref="IUserManagement"/>
@@ -209,9 +210,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        public string GetUploadToken(int expiration)
+        public string GetUploadToken(int expiration, string blobName)
         {
-            return StorageContext.UserBlobContainer.CreateSasToken(expiration);
+            return StorageContext.UserBlobContainer.CreateBlobSasToken(expiration, blobName);
         }
     }
 }
