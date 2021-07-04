@@ -83,7 +83,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             var filename = parameter.filename;
             var folder = CurrentUserId;
-            var token = UserManagement.GetUploadToken(parameter.expiration.Value, folder + "/" + filename);
+            var token = UserManagement.GetUploadToken(parameter.expiration.GetValueOrDefault(), folder + "/" + filename);
             var sas = new SasToken { token = token };
             return Ok(sas);
         }

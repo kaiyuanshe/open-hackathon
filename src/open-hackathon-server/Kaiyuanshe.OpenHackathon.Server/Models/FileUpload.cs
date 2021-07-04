@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     public class FileUpload
     {
         /// <summary>
-        /// SAS token expiration time. 2 by default.
+        /// SAS token expiration time. 2 minutes by default.
         /// </summary>
         /// <example>3</example>
         [Range(2, 30)]
@@ -19,6 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// The name of the file to upload to the blob.
         /// </summary>
         /// <example>avatar.jpg</example>
+        [Required]
         [MaxLength(256)]
         public string filename { get; set; }
     }
