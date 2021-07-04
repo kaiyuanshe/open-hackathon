@@ -6,6 +6,7 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
+using Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
@@ -410,6 +411,36 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
             userTable.VerifyNoOtherCalls();
             Assert.AreEqual(result, userInfo);
+        }
+        #endregion
+
+        #region GetCurrentUserAsync
+        [Test]
+        public async Task GetUploadUrl()
+        {
+            // input
+            int expiration = 5;
+            string blobName = "user/avatar.jpg";
+            string url = "https://container.blob.core.chinacloudapi.cn/kysuser/user/avatar.jpg?sv=2018-03-28&sr=b&sig=JT1H%2FcjWK1xbwK3gy1qXXbXAxuQBTmYoCwpmK2Z9Ls0%3D&st=2021-07-04T09%3A25%3A39Z&se=2021-07-04T09%3A32%3A39Z&sp=rw";
+
+            // moc
+            var storageContext = new Mock<IStorageContext>();
+            var userBlobContainer = new Mock<IUserBlobContainer>();
+            storageContext.SetupGet(s => s.UserBlobContainer).Returns(userBlobContainer.Object);
+            userBlobContainer.Setup(u => u.CreateBlobSasUrl(expiration, blobName)).Returns(url);
+
+            // test
+            var userManagement = new UserManagement
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = userManagement.GetUploadUrl(expiration, blobName);
+
+            // verify
+            Mock.VerifyAll(storageContext, userBlobContainer);
+            storageContext.VerifyNoOtherCalls();
+            userBlobContainer.VerifyNoOtherCalls();
+            Assert.AreEqual(result, url);
         }
         #endregion
     }

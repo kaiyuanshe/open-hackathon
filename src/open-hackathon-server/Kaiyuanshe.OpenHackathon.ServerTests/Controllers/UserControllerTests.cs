@@ -73,5 +73,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         #endregion
+
+        #region GetUploadUrl
+        [Test]
+        public async Task GetUploadUrl()
+        {
+            // input
+            var parameter = new FileUpload { expiration = 10, filename = "user/avatar.jpg" };
+            string url = "https://container.blob.core.chinacloudapi.cn/kysuser/user/avatar.jpg?sv=2018-03-28&sr=b&sig=JT1H%2FcjWK1xbwK3gy1qXXbXAxuQBTmYoCwpmK2Z9Ls0%3D&st=2021-07-04T09%3A25%3A39Z&se=2021-07-04T09%3A32%3A39Z&sp=rw";
+
+            // mock
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUploadUrl(parameter.expiration.GetValueOrDefault(), parameter.filename)).Returns(url);
+
+            // test
+            var controller = new UserController
+            {
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.GetUploadUrl(parameter);
+
+            // verify
+            Mock.VerifyAll(userManagement);
+            userManagement.VerifyNoOtherCalls();
+            var resp = AssertHelper.AssertOKResult<string>(result);
+            Assert.AreEqual(resp, url);
+        }
+        #endregion
     }
 }
