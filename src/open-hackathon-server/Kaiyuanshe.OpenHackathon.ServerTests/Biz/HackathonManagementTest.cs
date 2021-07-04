@@ -79,6 +79,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(string.Empty, result.RowKey);
             Assert.IsTrue(result.EventStartedAt.HasValue);
             Assert.IsFalse(result.EventEndedAt.HasValue);
+            Assert.IsFalse(result.ReadOnly);
 
             Assert.AreEqual("loc", hackInserted.Location);
             Assert.AreEqual("uid", hackInserted.CreatorId);
@@ -87,6 +88,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("pn", hackInserted.Banners[0].name);
             Assert.AreEqual("pd", hackInserted.Banners[0].description);
             Assert.AreEqual("pu", hackInserted.Banners[0].uri);
+            Assert.IsFalse(hackInserted.ReadOnly);
 
             Assert.AreEqual("test", adminCaptured.hackathonName);
             Assert.AreEqual("uid", adminCaptured.userId);

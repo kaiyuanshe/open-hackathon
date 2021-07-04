@@ -39,6 +39,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         [ConvertableEntityProperty]
         public PictureInfo[] Banners { get; set; }
         public HackathonStatus Status { get; set; }
+
+        public bool ReadOnly { get; set; }
+
         /// <summary>
         /// Id of User who creates this hackathon. PartitionKey of Users table
         /// </summary>

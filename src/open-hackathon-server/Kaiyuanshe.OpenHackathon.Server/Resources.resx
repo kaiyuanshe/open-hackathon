@@ -180,6 +180,9 @@
   <data name="Hackathon_NotStarted" xml:space="preserve">
     <value>The hackathon is not started yet. </value>
   </data>
+  <data name="Hackathon_ReadOnly" xml:space="preserve">
+    <value>Hackathon is archived and is ReadOnly.</value>
+  </data>
   <data name="Hackathon_UnhandledException" xml:space="preserve">
     <value>An unexpected exception occurs. Please try again later or report an issue at https://github.com/kaiyuanshe/open-hackathon/issues</value>
   </data>

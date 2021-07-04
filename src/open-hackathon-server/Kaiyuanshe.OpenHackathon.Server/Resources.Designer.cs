@@ -250,6 +250,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hackathon is archived and is ReadOnly..
+        /// </summary>
+        internal static string Hackathon_ReadOnly {
+            get {
+                return ResourceManager.GetString("Hackathon_ReadOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An unexpected exception occurs. Please try again later or report an issue at https://github.com/kaiyuanshe/open-hackathon/issues.
         /// </summary>
         internal static string Hackathon_UnhandledException {

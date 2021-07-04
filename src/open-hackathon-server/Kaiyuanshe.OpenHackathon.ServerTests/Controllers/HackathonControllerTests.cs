@@ -23,6 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     [TestFixture]
     public class HackathonControllerTests
     {
+        #region CheckNameAvailability
         [TestCase("")]
         [TestCase("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
         [TestCase("@")]
@@ -92,6 +93,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(resp.nameAvailable);
         }
 
+        #endregion
+
+        #region CreateOrUpdate
         [Test]
         public async Task CreateOrUpdateTest_Create()
         {
@@ -201,6 +205,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(resp.roles.isAdmin);
         }
 
+        #endregion
+
+        #region Update
         [Test]
         public async Task UpdateTest_NotFound()
         {
@@ -223,6 +230,29 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Mock.VerifyAll(hackathonManagement);
             hackathonManagement.VerifyNoOtherCalls();
             AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, name.ToLower()));
+        }
+
+        [Test]
+        public async Task UpdateTest_ReadOnly()
+        {
+            string name = "Foo";
+            HackathonEntity entity = new HackathonEntity { ReadOnly = true };
+            Hackathon parameter = new Hackathon();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("foo", default))
+                .ReturnsAsync(entity);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.Update(name, parameter, default);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            AssertHelper.AssertObjectResult(result, 403, Resources.Hackathon_ReadOnly);
         }
 
         [Test]
@@ -294,6 +324,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.IsTrue(resp.roles.isAdmin);
         }
 
+        #endregion
+
+        #region Get
         [Test]
         public async Task GetTest_NotFound()
         {
@@ -375,7 +408,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         public async Task GetTest_OK()
         {
             string name = "Foo";
-            HackathonEntity entity = new HackathonEntity { Detail = "detail" };
+            HackathonEntity entity = new HackathonEntity { Detail = "detail", ReadOnly = true };
             CancellationToken cancellationToken = CancellationToken.None;
             var role = new HackathonRoles { isAdmin = true };
 
@@ -400,6 +433,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("detail", hackathon.detail);
             Assert.IsTrue(hackathon.roles.isAdmin);
         }
+
+        #endregion
 
         #region ListHackathon
         private static IEnumerable ListHackathonTestData()
@@ -512,6 +547,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
         #endregion
 
+        #region Delete
         [Test]
         public async Task DeleteTest_NotExist()
         {
@@ -579,6 +615,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             AssertHelper.AssertNoContentResult(result);
         }
 
+        #endregion
+
+        #region RequestPublish
         [Test]
         public async Task RequestPublish_Deleted()
         {
@@ -674,7 +713,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<Hackathon>(result);
             Assert.AreEqual(HackathonStatus.pendingApproval, resp.status);
         }
+        #endregion
 
+        #region Publish
         [TestCase(HackathonStatus.planning)]
         [TestCase(HackathonStatus.pendingApproval)]
         [TestCase(HackathonStatus.offline)]
@@ -711,5 +752,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<Hackathon>(result);
             Assert.AreEqual(HackathonStatus.online, resp.status);
         }
+        #endregion
     }
 }

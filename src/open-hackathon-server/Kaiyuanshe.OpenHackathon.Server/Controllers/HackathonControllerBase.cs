@@ -172,6 +172,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public class ValidateHackathonOptions : ControllerValiationOptions
         {
+            /// <summary>
+            /// default to 'true'
+            /// </summary>
+            public bool WritableRequired { get; set; } = true;
             public bool EnrollmentOpenRequired { get; set; }
             public bool EnrollmentNotFullRequired { get; set; }
             public bool HackathonOpenRequired { get; set; }
@@ -220,6 +224,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             if (hackathon == null)
             {
                 options.ValidateResult = NotFound(string.Format(Resources.Hackathon_NotFound, options.HackathonName));
+                return false;
+            }
+
+            if (options.WritableRequired && hackathon.ReadOnly)
+            {
+                options.ValidateResult = Forbidden(Resources.Hackathon_ReadOnly);
                 return false;
             }
 

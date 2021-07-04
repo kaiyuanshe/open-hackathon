@@ -22,6 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 JudgeStartedAt = DateTime.UtcNow,
                 Status = HackathonStatus.online,
                 Enrollment = 100,
+                ReadOnly = true,
             };
 
             var roles = new HackathonRoles
@@ -45,6 +46,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.IsTrue(hack.roles.isAdmin);
             Assert.IsTrue(hack.roles.isEnrolled);
             Assert.IsTrue(hack.roles.isJudge);
+            Assert.IsTrue(hack.readOnly);
         }
 
         [Test]

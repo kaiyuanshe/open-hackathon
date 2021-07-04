@@ -62,6 +62,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public PictureInfo[] banners { get; set; }
 
         /// <summary>
+        /// whether a hackathon is readOnly or not. 
+        /// If a hackathon is readOnly, no WRITE operation is allowed including hackathon, enrollment, team etc.
+        /// </summary>
+        public bool readOnly { get; internal set; }
+
+        /// <summary>
         /// Status of Hackathon. Readonly. Can be updated though status change APIs like approve, delete.
         /// </summary>
         /// <example>online</example>
