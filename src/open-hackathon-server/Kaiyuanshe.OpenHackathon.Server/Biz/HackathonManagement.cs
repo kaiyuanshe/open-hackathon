@@ -130,6 +130,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 JudgeStartedAt = request.judgeStartedAt,
                 JudgeEndedAt = request.judgeEndedAt,
                 Location = request.location,
+                ReadOnly = false,
             };
             await StorageContext.HackathonTable.InsertAsync(entity, cancellationToken);
             InvalidateCacheAllHackathon();

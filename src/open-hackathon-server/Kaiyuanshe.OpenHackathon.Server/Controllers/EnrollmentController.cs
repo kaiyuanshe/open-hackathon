@@ -252,6 +252,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 HackathonName = hackathonName,
                 UserId = userId,
+                WritableRequired = false,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
@@ -292,6 +293,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var options = new ValidateHackathonOptions
             {
                 HackathonName = hackathonName,
+                WritableRequired = false,
             };
             if (await ValidateHackathon(hackathon, options) == false)
             {
