@@ -129,6 +129,9 @@
   <data name="Auth_Unauthorized" xml:space="preserve">
     <value>Token is either missing or invalid. Please add it to Http request headers: Headers["Authorization"]=token TOKEN. </value>
   </data>
+  <data name="AwardAssignment_NotFound" xml:space="preserve">
+    <value>The assignment is not found.</value>
+  </data>
   <data name="Award_CannotUpdateTarget" xml:space="preserve">
     <value>`award.target` cannot be updated since the award is already assigned to a team or user. Please delete the assignment(s) first.</value>
   </data>

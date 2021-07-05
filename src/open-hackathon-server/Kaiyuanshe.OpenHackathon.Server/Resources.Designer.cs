@@ -124,6 +124,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The assignment is not found..
+        /// </summary>
+        internal static string AwardAssignment_NotFound {
+            get {
+                return ResourceManager.GetString("AwardAssignment_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enrollment already ended at {0}.
         /// </summary>
         internal static string Enrollment_Ended {
