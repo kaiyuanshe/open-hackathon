@@ -1,7 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
-using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
+using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns>The award</returns>
-        /// <response code="200">Success. The response describes a award.</response>
+        /// <response code="200">Success. The response describes an award.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404, 412)]
@@ -60,16 +60,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
         /// <returns>The award</returns>
-        /// <response code="200">Success. The response describes a award.</response>
+        /// <response code="200">Success. The response describes an award.</response>
         [HttpGet]
         [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/award/{awardId}")]
         public async Task<object> GetAward(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            [FromRoute, Required, Guid] string awardId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -102,9 +102,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
         /// <returns>The award</returns>
-        /// <response code="200">Success. The response describes a award.</response>
+        /// <response code="200">Success. The response describes an award.</response>
         [HttpPatch]
         [ProducesResponseType(typeof(Award), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 403, 404, 412)]
@@ -112,7 +112,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> UpdateAward(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            [FromRoute, Required, Guid] string awardId,
             [FromBody] Award parameter,
             CancellationToken cancellationToken)
         {
@@ -201,15 +201,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the team. Auto-generated on server side.</param>
-        /// <response code="204">Success. The response indicates that a award is deleted.</response>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
+        /// <response code="204">Success. The response indicates that an award is deleted.</response>
         [HttpDelete]
         [SwaggerErrorResponse(400, 404)]
         [Route("hackathon/{hackathonName}/award/{awardId}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> DeleteAward(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            [FromRoute, Required, Guid] string awardId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -261,13 +261,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region CreateAwardAssignment
         /// <summary>
-        /// Assign a award
+        /// Assign an award
         /// </summary>
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <returns>The award</returns>
-        /// <response code="200">Success. The response describes a award.</response>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
+        /// <returns>The award assignment</returns>
+        /// <response code="200">Success. The response describes an award assignment.</response>
         [HttpPut]
         [ProducesResponseType(typeof(AwardAssignment), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 403, 404, 412)]
@@ -275,7 +276,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateAwardAssignment(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string awardId,
+            [FromRoute, Required, Guid] string awardId,
             [FromBody] AwardAssignment parameter,
             CancellationToken cancellationToken)
         {
@@ -307,6 +308,62 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             parameter.hackathonName = hackathonName.ToLower();
             parameter.awardId = awardId;
             var assignment = await AwardManagement.CreateOrUpdateAssignmentAsync(parameter, cancellationToken);
+            return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
+        }
+        #endregion
+
+        #region UpdateAwardAssignment
+        /// <summary>
+        /// Update an award assignment. AwardId and AssigneeId will not be updated. 
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
+        /// <param name="assignmentId" example="270d61b3-c676-403b-b582-cc38dfe122e4">unique Guid of the assignment. Auto-generated on server side.</param>
+        /// <returns>The award assignment</returns>
+        /// <response code="200">Success. The response describes an award assignment.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(AwardAssignment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/award/{awardId}/assignment/{assignmentId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> UpdateAwardAssignment(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string awardId,
+            [FromRoute, Required, Guid] string assignmentId,
+            [FromBody] AwardAssignment parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate award
+            var awardEntity = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
+            var validateAwardOptions = new ValidateAwardOptions
+            {
+            };
+            if (await ValidateAward(awardEntity, validateAwardOptions, cancellationToken) == false)
+            {
+                return validateAwardOptions.ValidateResult;
+            }
+
+            // update assignment
+            var assignment = await AwardManagement.GetAssignmentAsync(hackathonName.ToLower(), assignmentId, cancellationToken);
+            if (assignment == null)
+            {
+                return NotFound(Resources.AwardAssignment_NotFound);
+            }
+            assignment = await AwardManagement.UpdateAssignmentAsync(assignment, parameter, cancellationToken);
             return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
         }
         #endregion

@@ -63,9 +63,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Update an asssignment.
+        /// </summary>
+        Task<AwardAssignmentEntity> UpdateAssignmentAsync(AwardAssignmentEntity existing, AwardAssignment request, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Get count of assignment of an award
         /// </summary>
         Task<int> GetAssignmentCountAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get assignment by Id
+        /// </summary>
+        Task<AwardAssignmentEntity> GetAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List award assignments by a team
@@ -234,11 +244,33 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
+        #region UpdateAssignmentAsync
+        public async Task<AwardAssignmentEntity> UpdateAssignmentAsync(AwardAssignmentEntity existing, AwardAssignment request, CancellationToken cancellationToken = default)
+        {
+            if (existing == null || request == null)
+                return existing;
+
+            existing.Description = request.description ?? existing.Description;
+            await StorageContext.AwardAssignmentTable.MergeAsync(existing, cancellationToken);
+            return existing;
+        }
+        #endregion
+
         #region GetAssignmentCountAsync
         public async Task<int> GetAssignmentCountAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
         {
             var allAssignment = await ListByAwardAsync(hackathonName, awardId, cancellationToken);
             return allAssignment.Count();
+        }
+        #endregion
+
+        #region GetAssignmentAsync
+        public async Task<AwardAssignmentEntity> GetAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(assignmentId))
+                return null;
+
+            return await StorageContext.AwardAssignmentTable.RetrieveAsync(hackathonName, assignmentId, cancellationToken);
         }
         #endregion
 

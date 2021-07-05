@@ -546,6 +546,38 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateAssignmentAsync
+        [TestCase(null, "desc")]
+        [TestCase("desc2", "desc2")]
+        public async Task UpdateAssignmentAsync(string requestDesc, string expectedDesc)
+        {
+            AwardAssignmentEntity existing = new AwardAssignmentEntity { Description = "desc" };
+            AwardAssignment request = new AwardAssignment { description = requestDesc, assigneeId = "ass", assignmentId = "rk", awardId = "award" };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.MergeAsync(It.Is<AwardAssignmentEntity>(a => a.Description == expectedDesc), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await awardManagement.UpdateAssignmentAsync(existing, request, default);
+
+            Mock.VerifyAll(awardAssignmentTable, storageContext);
+            awardAssignmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedDesc, result.Description);
+            Assert.IsNull(result.AssigneeId);
+            Assert.IsNull(result.AssignmentId);
+            Assert.IsNull(result.AwardId);
+            Assert.IsNull(result.HackathonName);
+        }
+        #endregion
+
         #region GetAssignmentCountAsync
         [Test]
         public async Task GetAssignmentCountAsync()
@@ -576,6 +608,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             awardAssignmentTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             Assert.AreEqual(1, count);
+        }
+        #endregion
+
+        #region GetAssignmentAsync
+        [Test]
+        public async Task GetAssignmentAsync()
+        {
+            AwardAssignmentEntity entity = new AwardAssignmentEntity { AwardId = "award" };
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.RetrieveAsync("hack", "assign", default)).ReturnsAsync(entity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await awardManagement.GetAssignmentAsync("hack", "assign", default);
+
+            Mock.VerifyAll(awardAssignmentTable, storageContext);
+            awardAssignmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual("award", result.AwardId);
         }
         #endregion
 
