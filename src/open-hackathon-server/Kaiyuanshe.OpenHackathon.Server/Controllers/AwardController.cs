@@ -367,5 +367,57 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
         }
         #endregion
+
+        #region GetAwardAssignment
+        /// <summary>
+        /// Get an award assignment by assignmentId
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
+        /// <param name="assignmentId" example="270d61b3-c676-403b-b582-cc38dfe122e4">unique Guid of the assignment. Auto-generated on server side.</param>
+        /// <returns>The award assignment</returns>
+        /// <response code="200">Success. The response describes an award assignment.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(AwardAssignment), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/award/{awardId}/assignment/{assignmentId}")]
+        public async Task<object> GetAwardAssignment(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string awardId,
+            [FromRoute, Required, Guid] string assignmentId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate award
+            var awardEntity = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
+            var validateAwardOptions = new ValidateAwardOptions
+            {
+            };
+            if (await ValidateAward(awardEntity, validateAwardOptions, cancellationToken) == false)
+            {
+                return validateAwardOptions.ValidateResult;
+            }
+
+            // update assignment
+            var assignment = await AwardManagement.GetAssignmentAsync(hackathonName.ToLower(), assignmentId, cancellationToken);
+            if (assignment == null)
+            {
+                return NotFound(Resources.AwardAssignment_NotFound);
+            }
+            return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
+        }
+        #endregion
     }
 }

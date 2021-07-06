@@ -730,5 +730,54 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("ip", resp.team.creator.LastIp);
         }
         #endregion
+
+        #region GetAwardAssignment
+        [Test]
+        public async Task GetAwardAssignment()
+        {
+            var hackathon = new HackathonEntity { };
+            var authResult = AuthorizationResult.Success();
+            var awardEntity = new AwardEntity { PartitionKey = "hack" };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            var assignment = new AwardAssignmentEntity { RowKey = "rk", AssigneeId = "teamId" };
+            var creator = new UserInfo { LastIp = "ip" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(h => h.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("hack", "award", default)).ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.GetAssignmentAsync("hack", "assignid", default)).ReturnsAsync(assignment);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(team);
+
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(creator);
+
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetAwardAssignment("Hack", "award", "assignid", default);
+
+            Mock.VerifyAll(hackathonManagement, awardManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<AwardAssignment>(result);
+            Assert.AreEqual("rk", resp.assignmentId);
+            Assert.AreEqual("teamId", resp.assigneeId);
+            Assert.IsNull(resp.user);
+            Assert.AreEqual("creator", resp.team.creatorId);
+            Assert.AreEqual("ip", resp.team.creator.LastIp);
+        }
+        #endregion
     }
 }
