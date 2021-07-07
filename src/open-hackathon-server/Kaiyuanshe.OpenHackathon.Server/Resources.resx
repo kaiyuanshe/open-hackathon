@@ -132,6 +132,9 @@
   <data name="AwardAssignment_NotFound" xml:space="preserve">
     <value>The assignment is not found.</value>
   </data>
+  <data name="Award_CannotDeleteAssigned" xml:space="preserve">
+    <value>The award is assigned hence cannot delete. Please delete the assignments first.</value>
+  </data>
   <data name="Award_CannotUpdateTarget" xml:space="preserve">
     <value>`award.target` cannot be updated since the award is already assigned to a team or user. Please delete the assignment(s) first.</value>
   </data>

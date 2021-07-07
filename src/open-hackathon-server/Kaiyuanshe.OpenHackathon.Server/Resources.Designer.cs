@@ -97,6 +97,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The award is assigned hence cannot delete. Please delete the assignments first..
+        /// </summary>
+        internal static string Award_CannotDeleteAssigned {
+            get {
+                return ResourceManager.GetString("Award_CannotDeleteAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to `award.target` cannot be updated since the award is already assigned to a team or user. Please delete the assignment(s) first..
         /// </summary>
         internal static string Award_CannotUpdateTarget {
