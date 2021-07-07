@@ -78,6 +78,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<AwardAssignmentEntity> GetAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Delete assignment by Id
+        /// </summary>
+        Task DeleteAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List award assignments by a team
         /// </summary>
         Task<IEnumerable<AwardAssignmentEntity>> ListAssignmentsByTeamAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
@@ -281,6 +286,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return new List<AwardAssignmentEntity>();
 
             return await StorageContext.AwardAssignmentTable.ListByAssigneeAsync(hackathonName, teamId, cancellationToken);
+        }
+        #endregion
+
+        #region DeleteAssignmentAsync
+        public async Task DeleteAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default)
+        {
+            await StorageContext.AwardAssignmentTable.DeleteAsync(hackathonName, assignmentId, cancellationToken);
         }
         #endregion
     }

@@ -19,6 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     public class AwardManagementTest
     {
+        #region GetAwardByIdAsync
         [TestCase(null, null)]
         [TestCase(null, "")]
         [TestCase(null, " ")]
@@ -63,6 +64,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             awardTable.VerifyNoOtherCalls();
             Assert.AreEqual("desc", result.Description);
         }
+        #endregion
+
+        #region CreateAwardAsync
 
         private static IEnumerable CreateAwardAsyncTestData()
         {
@@ -149,6 +153,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(expectedEntity.Pictures[0].description, result.Pictures[0].description);
             }
         }
+        #endregion
 
         #region UpdateAwardAsync
         private static IEnumerable UpdateAwardAsyncTestData()
@@ -665,6 +670,28 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
             Assert.AreEqual(1, result.Count());
             Assert.AreEqual("desc", result.First().Description);
+        }
+        #endregion
+
+        #region DeleteAssignmentAsync
+        [Test]
+        public async Task DeleteAssignmentAsync()
+        {
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            awardAssignmentTable.Setup(t => t.DeleteAsync("hack", "assign", default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+
+            AwardManagement awardManagement = new AwardManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await awardManagement.DeleteAssignmentAsync("hack", "assign", default);
+
+            Mock.VerifyAll(awardAssignmentTable, storageContext);
+            awardAssignmentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
         }
         #endregion
     }

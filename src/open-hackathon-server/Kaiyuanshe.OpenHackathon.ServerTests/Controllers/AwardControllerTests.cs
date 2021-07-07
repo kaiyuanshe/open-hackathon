@@ -779,5 +779,48 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("ip", resp.team.creator.LastIp);
         }
         #endregion
+
+        #region DeleteAwardAssignment
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task DeleteAwardAssignment(bool firstTime)
+        {
+            var hackathon = new HackathonEntity { };
+            var authResult = AuthorizationResult.Success();
+            var awardEntity = new AwardEntity { PartitionKey = "hack" };
+            AwardAssignmentEntity assignment = firstTime ? new AwardAssignmentEntity() : null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(h => h.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("hack", "award", default)).ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.GetAssignmentAsync("hack", "assignid", default)).ReturnsAsync(assignment);
+            if (firstTime)
+            {
+                awardManagement.Setup(t => t.DeleteAssignmentAsync("hack", "assignid", default));
+            }
+
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.DeleteAwardAssignment("Hack", "award", "assignid", default);
+
+            Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }
