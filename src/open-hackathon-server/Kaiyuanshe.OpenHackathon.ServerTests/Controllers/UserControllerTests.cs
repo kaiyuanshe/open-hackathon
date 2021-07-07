@@ -84,7 +84,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             // mock
             var userManagement = new Mock<IUserManagement>();
-            userManagement.Setup(u => u.GetUploadUrl(parameter.expiration.GetValueOrDefault(), parameter.filename)).Returns(url);
+            userManagement.Setup(u => u.GetUploadUrl(parameter.expiration.GetValueOrDefault(), "/" + parameter.filename)).Returns(url);
 
             // test
             var controller = new UserController
@@ -96,8 +96,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             // verify
             Mock.VerifyAll(userManagement);
             userManagement.VerifyNoOtherCalls();
-            var resp = AssertHelper.AssertOKResult<string>(result);
-            Assert.AreEqual(resp, url);
+            SasUrl resp = AssertHelper.AssertOKResult<SasUrl>(result);
+            Assert.AreEqual(resp.url, url);
         }
         #endregion
     }
