@@ -369,15 +369,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         #endregion
 
         #region DeleteAward
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task DeleteAward(bool firstTimeDelete)
+        [Test]
+        public async Task DeleteAward_Assigned()
         {
             // input
-            string hackName = "Foo";
             HackathonEntity hackathon = new HackathonEntity { };
-            string awardId = "aid";
-            AwardEntity awardEntity = firstTimeDelete ? new AwardEntity() : null;
+            AwardEntity awardEntity = new AwardEntity { RowKey = "rk" };
             CancellationToken cancellationToken = CancellationToken.None;
             var authResult = AuthorizationResult.Success();
 
@@ -386,11 +383,54 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
                 .ReturnsAsync(hackathon);
             var awardManagement = new Mock<IAwardManagement>();
-            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", awardId, cancellationToken))
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", "aid", cancellationToken))
+                .ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.GetAssignmentCountAsync("foo", "rk", default)).ReturnsAsync(1);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+
+            // run
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.DeleteAward("Foo", "aid", cancellationToken);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Award_CannotDeleteAssigned);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task DeleteAward(bool firstTimeDelete)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity { };
+            AwardEntity awardEntity = firstTimeDelete ? new AwardEntity { RowKey = "rk" } : null;
+            CancellationToken cancellationToken = CancellationToken.None;
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+                .ReturnsAsync(hackathon);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.GetAwardByIdAsync("foo", "aid", cancellationToken))
                 .ReturnsAsync(awardEntity);
             if (firstTimeDelete)
             {
                 awardManagement.Setup(t => t.DeleteAwardAsync(awardEntity, cancellationToken));
+                awardManagement.Setup(t => t.GetAssignmentCountAsync("foo", "rk", default)).ReturnsAsync(0);
             }
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
@@ -403,7 +443,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AwardManagement = awardManagement.Object,
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.DeleteAward(hackName, awardId, cancellationToken);
+            var result = await controller.DeleteAward("Foo", "aid", cancellationToken);
 
             // verify
             Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);

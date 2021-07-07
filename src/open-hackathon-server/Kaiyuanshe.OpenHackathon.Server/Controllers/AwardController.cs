@@ -230,6 +230,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return NoContent();
             }
+            var assignmentCount = await AwardManagement.GetAssignmentCountAsync(hackathonName.ToLower(), award.Id, cancellationToken);
+            if (assignmentCount > 0)
+            {
+                return PreconditionFailed(Resources.Award_CannotDeleteAssigned);
+            }
 
             // delete award
             await AwardManagement.DeleteAwardAsync(award, cancellationToken);
