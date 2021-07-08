@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -243,7 +245,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         #endregion
 
         #region BuildAwardAssignment
-        private async Task<object> BuildAwardAssignment(
+        private async Task<AwardAssignment> BuildAwardAssignment(
             AwardAssignmentEntity awardAssignmentEntity,
             AwardEntity awardEntity,
             CancellationToken cancellationToken)
@@ -254,10 +256,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     var teamEntity = await TeamManagement.GetTeamByIdAsync(awardEntity.HackathonName, awardAssignmentEntity.AssigneeId, cancellationToken);
                     var teamCreator = await UserManagement.GetUserByIdAsync(teamEntity.CreatorId, cancellationToken);
                     var team = ResponseBuilder.BuildTeam(teamEntity, teamCreator);
-                    return Ok(ResponseBuilder.BuildAwardAssignment(awardAssignmentEntity, team, null));
+                    return ResponseBuilder.BuildAwardAssignment(awardAssignmentEntity, team, null);
                 case AwardTarget.individual:
                     var user = await UserManagement.GetUserByIdAsync(awardAssignmentEntity.AssigneeId, cancellationToken);
-                    return Ok(ResponseBuilder.BuildAwardAssignment(awardAssignmentEntity, null, user));
+                    return ResponseBuilder.BuildAwardAssignment(awardAssignmentEntity, null, user);
                 default:
                     return null;
             }
@@ -313,7 +315,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             parameter.hackathonName = hackathonName.ToLower();
             parameter.awardId = awardId;
             var assignment = await AwardManagement.CreateOrUpdateAssignmentAsync(parameter, cancellationToken);
-            return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
+            return Ok(await BuildAwardAssignment(assignment, awardEntity, cancellationToken));
         }
         #endregion
 
@@ -369,7 +371,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(Resources.AwardAssignment_NotFound);
             }
             assignment = await AwardManagement.UpdateAssignmentAsync(assignment, parameter, cancellationToken);
-            return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
+            return Ok(await BuildAwardAssignment(assignment, awardEntity, cancellationToken));
         }
         #endregion
 
@@ -421,7 +423,73 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return NotFound(Resources.AwardAssignment_NotFound);
             }
-            return await BuildAwardAssignment(assignment, awardEntity, cancellationToken);
+            return Ok(await BuildAwardAssignment(assignment, awardEntity, cancellationToken));
+        }
+        #endregion
+
+        #region ListAssignmentsByAward
+        /// <summary>
+        /// List paginated assignments of an award.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="awardId" example="c877c675-4c97-4deb-9e48-97d079fa4b72">unique Guid of the award. Auto-generated on server side.</param>
+        /// <returns>the response contains a list of award assginments and a nextLink if there are more results.</returns>
+        /// <response code="200">Success. The response describes a list of award assignments.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(AwardAssignmentList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/award/{awardId}/assignments")]
+        public async Task<object> ListAssignmentsByAward(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string awardId,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate award
+            var awardEntity = await AwardManagement.GetAwardByIdAsync(hackathonName.ToLower(), awardId, cancellationToken);
+            var validateAwardOptions = new ValidateAwardOptions
+            {
+            };
+            if (await ValidateAward(awardEntity, validateAwardOptions, cancellationToken) == false)
+            {
+                return validateAwardOptions.ValidateResult;
+            }
+
+            // query
+            var assignmentQueryOptions = new AwardAssignmentQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+                AwardId = awardId,
+                QueryType = AwardAssignmentQueryType.Award,
+            };
+            var assignments = await AwardManagement.ListPaginatedAssignmentsAsync(hackathonName.ToLower(), assignmentQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, assignmentQueryOptions.Next);
+
+            var resp = await ResponseBuilder.BuildResourceListAsync<AwardAssignmentEntity, AwardAssignment, AwardAssignmentList>(
+                assignments,
+                (assignment, ct) => BuildAwardAssignment(assignment, awardEntity, ct),
+                nextLink);
+
+            return Ok(resp);
         }
         #endregion
 

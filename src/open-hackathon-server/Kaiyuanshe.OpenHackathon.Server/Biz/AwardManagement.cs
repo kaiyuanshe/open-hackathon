@@ -78,6 +78,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<AwardAssignmentEntity> GetAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// List paginated assignments by award
+        /// </summary>
+        Task<IEnumerable<AwardAssignmentEntity>> ListPaginatedAssignmentsAsync(string hackathonName, AwardAssignmentQueryOptions options, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Delete assignment by Id
         /// </summary>
         Task DeleteAssignmentAsync(string hackathonName, string assignmentId, CancellationToken cancellationToken = default);
@@ -111,7 +116,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         private async Task<IEnumerable<AwardAssignmentEntity>> ListByAwardAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default)
         {
             string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.AwardAssignment, $"{hackathonName}-{awardId}");
-            return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromSeconds(3), (ct) =>
+            return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromSeconds(10), (ct) =>
             {
                 return StorageContext.AwardAssignmentTable.ListByAwardAsync(hackathonName, awardId, ct);
             }, false, cancellationToken);
@@ -277,6 +282,47 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             return await StorageContext.AwardAssignmentTable.RetrieveAsync(hackathonName, assignmentId, cancellationToken);
         }
+        #endregion
+
+        #region ListPaginatedAssignmentsAsync
+
+        public async Task<IEnumerable<AwardAssignmentEntity>> ListPaginatedAssignmentsAsync(string hackathonName, AwardAssignmentQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<AwardAssignmentEntity> awardAssignments = new List<AwardAssignmentEntity>();
+            switch (options.QueryType)
+            {
+                case AwardAssignmentQueryType.Award:
+                    awardAssignments = await ListByAwardAsync(hackathonName, options.AwardId, cancellationToken);
+                    break;
+                case AwardAssignmentQueryType.Team:
+                    break;
+                case AwardAssignmentQueryType.Hackathon:
+                    break;
+                default:
+                    break;
+            }
+
+            // paging
+            int.TryParse(options.TableContinuationToken?.NextPartitionKey, out int np);
+            int top = options.Top.GetValueOrDefault(100);
+            var assignments = awardAssignments.OrderByDescending(a => a.CreatedAt)
+                .Skip(np)
+                .Take(top);
+
+            // next paging
+            options.Next = null;
+            if (assignments.Count() >= top)
+            {
+                options.Next = new TableContinuationToken
+                {
+                    NextPartitionKey = (np + top).ToString(),
+                    NextRowKey = (np + top).ToString(),
+                };
+            }
+
+            return assignments;
+        }
+
         #endregion
 
         #region ListAssignmentsByTeamAsync

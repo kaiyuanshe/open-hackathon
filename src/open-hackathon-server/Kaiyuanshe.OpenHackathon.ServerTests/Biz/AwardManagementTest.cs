@@ -641,6 +641,112 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region ListPaginatedAssignmentsAsync
+
+        private static IEnumerable ListPaginatedAssignmentsAsyncTestData()
+        {
+            var a1 = new AwardAssignmentEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            var a2 = new AwardAssignmentEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(3),
+            };
+            var a3 = new AwardAssignmentEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(2),
+            };
+            var a4 = new AwardAssignmentEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(4),
+            };
+
+            // arg0: options
+            // arg1: awards
+            // arg2: expected result
+            // arg3: expected Next
+
+            // minimal
+            yield return new TestCaseData(
+                new AwardAssignmentQueryOptions { AwardId = "awardId", QueryType = AwardAssignmentQueryType.Award, },
+                new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
+                new List<AwardAssignmentEntity> { a4, a2, a3, a1 },
+                null
+                );
+
+            // top
+            yield return new TestCaseData(
+                new AwardAssignmentQueryOptions { Top = 2, AwardId = "awardId", QueryType = AwardAssignmentQueryType.Award, },
+                new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
+                new List<AwardAssignmentEntity> { a4, a2, },
+                new TableContinuationToken { NextPartitionKey = "2", NextRowKey = "2" }
+                );
+
+            // paging
+            yield return new TestCaseData(
+                new AwardAssignmentQueryOptions
+                {
+                    Top = 2,
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "1",
+                        NextRowKey = "1"
+                    },
+                    AwardId = "awardId",
+                    QueryType = AwardAssignmentQueryType.Award,
+                },
+                new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
+                new List<AwardAssignmentEntity> { a2, a3, },
+                new TableContinuationToken { NextPartitionKey = "3", NextRowKey = "3" }
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedAssignmentsAsyncTestData))]
+        public async Task ListPaginatedAssignmentsAsync_Award(
+            AwardAssignmentQueryOptions options,
+            IEnumerable<AwardAssignmentEntity> allAwards,
+            IEnumerable<AwardAssignmentEntity> expectedResult,
+            TableContinuationToken expectedNext)
+        {
+            string hackName = "foo";
+
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardAssignmentEntity>>>(c => c.CacheKey == "AwardAssignment-foo-awardId"), default))
+                .ReturnsAsync(allAwards);
+
+            var awardManagement = new AwardManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await awardManagement.ListPaginatedAssignmentsAsync(hackName, options, default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult.Count(), result.Count());
+            for (int i = 0; i < expectedResult.Count(); i++)
+            {
+                Assert.AreEqual(expectedResult.ElementAt(i).AssignmentId, result.ElementAt(i).AssignmentId);
+            }
+            if (expectedNext == null)
+            {
+                Assert.IsNull(options.Next);
+            }
+            else
+            {
+                Assert.IsNotNull(options.Next);
+                Assert.AreEqual(expectedNext.NextPartitionKey, options.Next.NextPartitionKey);
+                Assert.AreEqual(expectedNext.NextRowKey, options.Next.NextRowKey);
+            }
+        }
+        #endregion
+
         #region ListAssignmentsByTeamAsync
         [Test]
         public async Task ListAssignmentsByTeamAsync()
