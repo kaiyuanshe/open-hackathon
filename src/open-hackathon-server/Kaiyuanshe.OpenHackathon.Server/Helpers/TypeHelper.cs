@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             if (src == null)
             {
-                throw new ArgumentNullException("Unable to convert null.");
+                return default;
             }
 
             TDestination resp = new TDestination();

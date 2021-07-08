@@ -3,6 +3,8 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 {
@@ -20,14 +22,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         AwardAssignment BuildAwardAssignment(AwardAssignmentEntity awardAssignmentEntity, Team team, UserInfo user);
 
-        TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
+        TResult BuildResourceList<TSrcItem, TResultItem, TResult>(
+            IEnumerable<TSrcItem> items,
+            Func<TSrcItem, TResultItem> converter,
+            string nextLink)
             where TResult : IResourceList<TResultItem>, new();
 
         TResult BuildResourceList<TSrcItem1, TSrcItem2, TResultItem, TResult>(
             IEnumerable<Tuple<TSrcItem1, TSrcItem2>> items,
             Func<TSrcItem1, TSrcItem2, TResultItem> converter,
             string nextLink)
-           where TResult : IResourceList<TResultItem>, new();
+            where TResult : IResourceList<TResultItem>, new();
+
+        TResult BuildResourceList<TSrcItem1, TSrcItem2, TSrcItem3, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2, TSrcItem3>> items,
+            Func<TSrcItem1, TSrcItem2, TSrcItem3, TResultItem> converter,
+            string nextLink)
+            where TResult : IResourceList<TResultItem>, new();
+
+        Task<TResult> BuildResourceListAsync<TSrcItem, TResultItem, TResult>(
+            IEnumerable<TSrcItem> items,
+            Func<TSrcItem, CancellationToken, Task<TResultItem>> converter,
+            string nextLink,
+            CancellationToken cancellationToken = default)
+            where TResult : IResourceList<TResultItem>, new();
+
+        Task<TResult> BuildResourceListAsync<TSrcItem1, TSrcItem2, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2>> items,
+            Func<TSrcItem1, TSrcItem2, CancellationToken, Task<TResultItem>> converter,
+            string nextLink,
+            CancellationToken cancellationToken = default)
+            where TResult : IResourceList<TResultItem>, new();
     }
 
     public class DefaultResponseBuilder : IResponseBuilder
@@ -67,6 +92,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
                 p.user = member;
             });
         }
+        public Award BuildAward(AwardEntity awardEntity)
+        {
+            return awardEntity.As<Award>(p =>
+            {
+                p.updatedAt = awardEntity.Timestamp.DateTime;
+            });
+        }
 
         public AwardAssignment BuildAwardAssignment(AwardAssignmentEntity awardAssignmentEntity, Team team, UserInfo user)
         {
@@ -78,7 +110,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             });
         }
 
-        public TResult BuildResourceList<TSrcItem, TResultItem, TResult>(IEnumerable<TSrcItem> items, Func<TSrcItem, TResultItem> converter, string nextLink)
+        public TResult BuildResourceList<TSrcItem, TResultItem, TResult>(
+            IEnumerable<TSrcItem> items,
+            Func<TSrcItem, TResultItem> converter,
+            string nextLink)
             where TResult : IResourceList<TResultItem>, new()
         {
             return new TResult
@@ -101,12 +136,60 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             };
         }
 
-        public Award BuildAward(AwardEntity awardEntity)
+        public TResult BuildResourceList<TSrcItem1, TSrcItem2, TSrcItem3, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2, TSrcItem3>> items,
+            Func<TSrcItem1, TSrcItem2, TSrcItem3, TResultItem> converter,
+            string nextLink)
+           where TResult : IResourceList<TResultItem>, new()
         {
-            return awardEntity.As<Award>(p =>
+            return new TResult
             {
-                p.updatedAt = awardEntity.Timestamp.DateTime;
-            });
+                value = items.Select(p => converter(p.Item1, p.Item2, p.Item3)).ToArray(),
+                nextLink = nextLink,
+            };
         }
+
+        public async Task<TResult> BuildResourceListAsync<TSrcItem, TResultItem, TResult>(
+            IEnumerable<TSrcItem> items,
+            Func<TSrcItem, CancellationToken, Task<TResultItem>> converter,
+            string nextLink,
+            CancellationToken cancellationToken = default)
+            where TResult : IResourceList<TResultItem>, new()
+        {
+            List<TResultItem> list = new List<TResultItem>();
+            foreach (var src in items)
+            {
+                var resultItem = await converter(src, cancellationToken);
+                list.Add(resultItem);
+            }
+
+            return new TResult
+            {
+                value = list.ToArray(),
+                nextLink = nextLink,
+            };
+        }
+
+        public async Task<TResult> BuildResourceListAsync<TSrcItem1, TSrcItem2, TResultItem, TResult>(
+            IEnumerable<Tuple<TSrcItem1, TSrcItem2>> items,
+            Func<TSrcItem1, TSrcItem2, CancellationToken, Task<TResultItem>> converter,
+            string nextLink,
+            CancellationToken cancellationToken = default)
+            where TResult : IResourceList<TResultItem>, new()
+        {
+            List<TResultItem> list = new List<TResultItem>();
+            foreach (var src in items)
+            {
+                var resultItem = await converter(src.Item1, src.Item2, cancellationToken);
+                list.Add(resultItem);
+            }
+
+            return new TResult
+            {
+                value = list.ToArray(),
+                nextLink = nextLink,
+            };
+        }
+
     }
 }
