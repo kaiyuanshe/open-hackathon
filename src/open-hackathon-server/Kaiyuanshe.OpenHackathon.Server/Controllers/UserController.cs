@@ -1,7 +1,9 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -65,5 +67,27 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(userInfo);
         }
         #endregion
+
+        #region GetUploadUrl
+        /// <summary>
+        /// Get file upload URL
+        /// </summary>
+        /// <returns>the SAS URL</returns>
+        /// <response code="200">Success. The response return a SAS URL.</response>
+        [HttpPost]
+        [ProducesResponseType(typeof(SasUrl), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400)]
+        [Route("user/generateSasUrl")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
+        public async Task<object> GetUploadUrl([FromBody] FileUpload parameter)
+        {
+            var filename = parameter.filename;
+            var folder = CurrentUserId;
+            var url = UserManagement.GetUploadUrl(parameter.expiration.GetValueOrDefault(), folder + "/" + filename);
+            var sas = new SasUrl { url = url };
+            return Ok(sas);
+        }
+        #endregion
+
     }
 }

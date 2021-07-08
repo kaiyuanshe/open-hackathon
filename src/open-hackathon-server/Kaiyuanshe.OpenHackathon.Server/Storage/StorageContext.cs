@@ -1,4 +1,5 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
+using Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
@@ -13,6 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         ITeamMemberTable TeamMemberTable { get; }
         IUserTable UserTable { get; }
         IUserTokenTable UserTokenTable { get; }
+        IUserBlobContainer UserBlobContainer { get; }
     }
 
 
@@ -29,6 +31,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public ITeamMemberTable TeamMemberTable { get; }
         public IUserTable UserTable { get; }
         public IUserTokenTable UserTokenTable { get; }
+        public IUserBlobContainer UserBlobContainer { get; }
 
         public StorageContext(IStorageAccountProvider storageAccountProvider)
         {
@@ -45,6 +48,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             TeamMemberTable = new TeamMemberTable(storageAccount, TableNames.TeamMember);
             UserTable = new UserTable(storageAccount, TableNames.User);
             UserTokenTable = new UserTokenTable(storageAccount, TableNames.UserToken);
+
+            // blob containers
+            UserBlobContainer = new UserBlobContainer(storageAccount, BlobContainerNames.User);
         }
     }
 }
