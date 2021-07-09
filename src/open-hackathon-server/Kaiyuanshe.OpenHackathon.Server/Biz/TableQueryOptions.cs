@@ -57,6 +57,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
         public AwardAssignmentQueryType QueryType { get; set; }
         public string AwardId { get; set; }
+        public string TeamId { get; set; }
     }
 
     public enum AwardAssignmentQueryType

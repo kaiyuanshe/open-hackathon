@@ -671,9 +671,17 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // arg2: expected result
             // arg3: expected Next
 
-            // minimal
+            // by Award
             yield return new TestCaseData(
                 new AwardAssignmentQueryOptions { AwardId = "awardId", QueryType = AwardAssignmentQueryType.Award, },
+                new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
+                new List<AwardAssignmentEntity> { a4, a2, a3, a1 },
+                null
+                );
+
+            // by Team
+            yield return new TestCaseData(
+                new AwardAssignmentQueryOptions { TeamId = "teamId", QueryType = AwardAssignmentQueryType.Team, },
                 new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
                 new List<AwardAssignmentEntity> { a4, a2, a3, a1 },
                 null
@@ -707,27 +715,40 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
 
         [Test, TestCaseSource(nameof(ListPaginatedAssignmentsAsyncTestData))]
-        public async Task ListPaginatedAssignmentsAsync_Award(
+        public async Task ListPaginatedAssignmentsAsync(
             AwardAssignmentQueryOptions options,
             IEnumerable<AwardAssignmentEntity> allAwards,
             IEnumerable<AwardAssignmentEntity> expectedResult,
             TableContinuationToken expectedNext)
         {
-            string hackName = "foo";
+            string hackName = "hack";
 
             var logger = new Mock<ILogger<AwardManagement>>();
             var cache = new Mock<ICacheProvider>();
-            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardAssignmentEntity>>>(c => c.CacheKey == "AwardAssignment-foo-awardId"), default))
-                .ReturnsAsync(allAwards);
+            if (options.QueryType == AwardAssignmentQueryType.Award)
+            {
+                cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardAssignmentEntity>>>(c => c.CacheKey == "AwardAssignment-hack-awardId"), default))
+                  .ReturnsAsync(allAwards);
+            }
+            var awardAssignmentTable = new Mock<IAwardAssignmentTable>();
+            var storageContext = new Mock<IStorageContext>();
+            if (options.QueryType == AwardAssignmentQueryType.Team)
+            {
+                awardAssignmentTable.Setup(t => t.ListByAssigneeAsync("hack", options.TeamId, default)).ReturnsAsync(allAwards);
+                storageContext.SetupGet(p => p.AwardAssignmentTable).Returns(awardAssignmentTable.Object);
+            }
 
             var awardManagement = new AwardManagement(logger.Object)
             {
                 Cache = cache.Object,
+                StorageContext = storageContext.Object,
             };
             var result = await awardManagement.ListPaginatedAssignmentsAsync(hackName, options, default);
 
-            Mock.VerifyAll(cache);
+            Mock.VerifyAll(cache, storageContext, awardAssignmentTable);
             cache.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            awardAssignmentTable.VerifyNoOtherCalls();
 
             Assert.AreEqual(expectedResult.Count(), result.Count());
             for (int i = 0; i < expectedResult.Count(); i++)

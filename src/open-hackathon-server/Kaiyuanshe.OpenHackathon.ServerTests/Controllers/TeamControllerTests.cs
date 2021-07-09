@@ -21,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     [TestFixture]
     public class TeamControllerTests
     {
+        #region CreateTeam
         [Test]
         public async Task CreateTeam_HackNotFound()
         {
@@ -235,7 +236,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("pk", resp.hackathonName);
             Assert.AreEqual("rk", resp.id);
         }
+        #endregion
 
+        #region UpdateTeam
         [Test]
         public async Task UpdateTeam_HackNotFound()
         {
@@ -411,7 +414,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("updated", output.description);
         }
+        #endregion
 
+        #region GetTeam
         [Test]
         public async Task GetTeam_HackNotFound()
         {
@@ -509,7 +514,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Team output = AssertHelper.AssertOKResult<Team>(result);
             Assert.AreEqual("uid", output.creatorId);
         }
+        #endregion
 
+        #region ListTeams
         private static IEnumerable ListTeamsTestData()
         {
             // arg0: pagination
@@ -620,6 +627,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
 
+        #endregion
+
+        #region JoinTeam
         [TestCase(true, TeamMemberStatus.approved)]
         [TestCase(false, TeamMemberStatus.pendingApproval)]
         public async Task JoinTeam_Create(bool autoApprove, TeamMemberStatus expectedStatus)
@@ -734,6 +744,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(TeamMemberStatus.pendingApproval, output.status); // status should NOT be updated
         }
 
+        #endregion
+
+        #region AddTeamMember
         [TestCase(true)]
         [TestCase(false)]
         public async Task AddTeamMember_Create(bool autoApprove)
@@ -859,7 +872,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("desc", output.description);
             Assert.AreEqual(TeamMemberStatus.pendingApproval, output.status); // status should NOT be updated
         }
+        #endregion
 
+        #region UpdateTeamMember
         [Test]
         public async Task UpdateTeamMember_TeamNotFound()
         {
@@ -1046,6 +1061,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("desc2", resp.description);
         }
 
+        #endregion
+
+        #region ApproveTeamMember
         [Test]
         public async Task ApproveTeamMember_MemberNotFound()
         {
@@ -1150,7 +1168,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<TeamMember>(result);
             Assert.AreEqual(TeamMemberStatus.approved, resp.status);
         }
+        #endregion
 
+        #region UpdateTeamMemberRole
         [TestCase(null, TeamMemberRole.Member)]
         [TestCase(TeamMemberRole.Admin, TeamMemberRole.Admin)]
         [TestCase(TeamMemberRole.Member, TeamMemberRole.Member)]
@@ -1206,7 +1226,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var resp = AssertHelper.AssertOKResult<TeamMember>(result);
         }
+        #endregion
 
+        #region LeaveTeam
         [Test]
         public async Task LeaveTeam_NotMember()
         {
@@ -1375,6 +1397,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             AssertHelper.AssertNoContentResult(result);
         }
 
+        #endregion
+
+        #region DeleteTeamMember
         [Test]
         public async Task DeleteTeamMember_Succeeded()
         {
@@ -1447,6 +1472,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             AssertHelper.AssertNoContentResult(result);
         }
+        #endregion
 
         #region DeleteTeam
 
@@ -1581,6 +1607,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
         #endregion
 
+        #region GetTeamMember
         [Test]
         public async Task GetTeamMember_Succeeded()
         {
@@ -1626,7 +1653,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var resp = AssertHelper.AssertOKResult<TeamMember>(result);
             Assert.AreEqual("desc", resp.description);
         }
+        #endregion
 
+        #region ListMembers
         private static IEnumerable ListMembersTestData()
         {
             // arg0: pagination
@@ -1758,5 +1787,114 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
         }
+        #endregion
+
+        #region ListAssignmentsByTeam
+        private static IEnumerable ListAssignmentsByTeamTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListAssignmentsByTeamTestData))]
+        public async Task ListAssignmentsByTeam(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity();
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                }
+            };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            var creator = new UserInfo { LastLogin = "2020" };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync(It.IsAny<string>(), It.IsAny<string>(), default)).ReturnsAsync(team);
+
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(p => p.ListPaginatedAssignmentsAsync("hack", It.Is<AwardAssignmentQueryOptions>(o => o.QueryType == AwardAssignmentQueryType.Team), default))
+                .Callback<string, AwardAssignmentQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    o.Next = next;
+                })
+                .ReturnsAsync(assignments);
+
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(creator);
+
+            // run
+            var controller = new TeamController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.ListAssignmentsByTeam("Hack", "awardId", pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<AwardAssignmentList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].assignmentId);
+            Assert.AreEqual("2020", list.value[0].team.creator.LastLogin);
+        }
+        #endregion
     }
 }
