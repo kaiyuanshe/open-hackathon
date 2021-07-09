@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
@@ -92,7 +93,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> UpdateTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromBody] Team parameter,
             CancellationToken cancellationToken)
         {
@@ -141,7 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{hackathonName}/team/{teamId}")]
         public async Task<object> GetTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -242,7 +243,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> DeleteTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -297,7 +298,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
         public async Task<object> JoinTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
         {
@@ -323,7 +324,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> AddTeamMember(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromRoute, Required] string userId,
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
@@ -413,7 +414,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamMember)]
         public async Task<object> UpdateTeamMember(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromRoute, Required] string userId,
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
@@ -469,7 +470,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> ApproveTeamMember(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromRoute, Required] string userId,
             CancellationToken cancellationToken)
         {
@@ -533,7 +534,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> UpdateTeamMemberRole(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromRoute, Required] string userId,
             [FromBody] TeamMember parameter,
             CancellationToken cancellationToken)
@@ -596,7 +597,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
         public async Task<object> LeaveTeam(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -643,8 +644,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamAdministrator)]
         public async Task<object> DeleteTeamMember(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
-             [FromRoute, Required] string userId,
+            [FromRoute, Required, Guid] string teamId,
+            [FromRoute, Required] string userId,
             CancellationToken cancellationToken)
         {
             // validate hackathon
@@ -714,7 +715,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{hackathonName}/team/{teamId}/member/{userId}")]
         public async Task<object> GetTeamMember(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromRoute, Required] string userId,
             CancellationToken cancellationToken)
         {
@@ -774,7 +775,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         [Route("hackathon/{hackathonName}/team/{teamId}/members")]
         public async Task<object> ListMembers(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
-            [FromRoute, Required, StringLength(36, MinimumLength = 36)] string teamId,
+            [FromRoute, Required, Guid] string teamId,
             [FromQuery] Pagination pagination,
             [FromQuery] TeamMemberRole? role,
             [FromQuery] TeamMemberStatus? status,
@@ -837,6 +838,76 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     tuples,
                     ResponseBuilder.BuildTeamMember,
                     nextLink));
+        }
+        #endregion
+
+        #region ListAssignmentsByTeam
+        /// <summary>
+        /// List paginated award assignments of an team.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <returns>the response contains a list of award assginments and a nextLink if there are more results.</returns>
+        /// <response code="200">Success. The response describes a list of award assignments.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(AwardAssignmentList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/assignments")]
+        public async Task<object> ListAssignmentsByTeam(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string teamId,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var teamEntity = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+            };
+            if (await ValidateTeam(teamEntity, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+
+            // query
+            var assignmentQueryOptions = new AwardAssignmentQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+                TeamId = teamId,
+                QueryType = AwardAssignmentQueryType.Team,
+            };
+            var assignments = await AwardManagement.ListPaginatedAssignmentsAsync(hackathonName.ToLower(), assignmentQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, assignmentQueryOptions.Next);
+
+            // build resp
+            var creator = await UserManagement.GetUserByIdAsync(teamEntity.CreatorId, cancellationToken);
+            var team = ResponseBuilder.BuildTeam(teamEntity, creator);
+            var resp = await ResponseBuilder.BuildResourceListAsync<AwardAssignmentEntity, AwardAssignment, AwardAssignmentList>(
+                assignments,
+                (assignment, ct) => Task.FromResult(ResponseBuilder.BuildAwardAssignment(assignment, team, null)),
+                nextLink);
+
+            return Ok(resp);
         }
         #endregion
     }

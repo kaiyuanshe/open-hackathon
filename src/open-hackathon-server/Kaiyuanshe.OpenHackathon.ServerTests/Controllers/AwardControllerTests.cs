@@ -925,14 +925,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 }
             };
             TeamEntity team = new TeamEntity { CreatorId = "creator" };
-            var creator = new UserInfo { LastIp = "ip" };
+            var creator = new UserInfo { Locale = "locale" };
 
             // mock and capture
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
             var awardManagement = new Mock<IAwardManagement>();
             awardManagement.Setup(a => a.GetAwardByIdAsync("hack", "awardId", default)).ReturnsAsync(award);
-            awardManagement.Setup(p => p.ListPaginatedAssignmentsAsync("hack", It.IsAny<AwardAssignmentQueryOptions>(), default))
+            awardManagement.Setup(p => p.ListPaginatedAssignmentsAsync("hack", It.Is<AwardAssignmentQueryOptions>(o => o.QueryType == AwardAssignmentQueryType.Award), default))
                 .Callback<string, AwardAssignmentQueryOptions, CancellationToken>((n, o, t) =>
                 {
                     o.Next = next;
@@ -968,6 +968,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(1, list.value.Length);
             Assert.AreEqual("pk", list.value[0].hackathonName);
             Assert.AreEqual("rk", list.value[0].assignmentId);
+            Assert.AreEqual("locale", list.value[0].team.creator.Locale);
         }
         #endregion
     }

@@ -295,6 +295,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     awardAssignments = await ListByAwardAsync(hackathonName, options.AwardId, cancellationToken);
                     break;
                 case AwardAssignmentQueryType.Team:
+                    awardAssignments = await ListAssignmentsByTeamAsync(hackathonName, options.TeamId, cancellationToken);
                     break;
                 case AwardAssignmentQueryType.Hackathon:
                     break;
