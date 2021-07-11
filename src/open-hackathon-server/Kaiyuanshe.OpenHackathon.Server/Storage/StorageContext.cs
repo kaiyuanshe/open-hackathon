@@ -5,6 +5,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public interface IStorageContext
     {
+        IStorageAccountProvider StorageAccountProvider { get; }
+
         IAwardTable AwardTable { get; }
         IAwardAssignmentTable AwardAssignmentTable { get; }
         IEnrollmentTable EnrollmentTable { get; }
@@ -20,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
 
     public class StorageContext : IStorageContext
     {
-        IStorageAccountProvider StorageAccountProvider { get; }
+        public IStorageAccountProvider StorageAccountProvider { get; }
 
         public IAwardTable AwardTable { get; }
         public IAwardAssignmentTable AwardAssignmentTable { get; }
@@ -50,7 +52,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             UserTokenTable = new UserTokenTable(storageAccount, TableNames.UserToken);
 
             // blob containers
-            UserBlobContainer = new UserBlobContainer(storageAccount, BlobContainerNames.User);
+            UserBlobContainer = new UserBlobContainer(storageAccount, BlobContainerNames.StaticWebsite);
         }
     }
 }

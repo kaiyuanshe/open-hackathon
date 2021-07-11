@@ -15,7 +15,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IUserManagement
     {
-
         /// <summary>
         /// Handle data from succesful Authing login.
         /// </summary>
@@ -81,15 +80,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<JWTTokenStatus> ValidateTokenRemotelyAsync(string userPoolId, string token, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Get the upload URL.
-        /// </summary>
-        /// <param name="expiration">token expiration in minutes</param>
-        /// <param name="blobName">the target blob to upload file</param>
-        /// <returns></returns>
-        string GetUploadUrl(int expiration, string blobName);
-    }
+   }
 
     /// <inheritdoc cref="IUserManagement"/>
     public class UserManagement : ManagementClientBase, IUserManagement
@@ -217,10 +208,5 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 cancellationToken);
         }
         #endregion
-
-        public string GetUploadUrl(int expiration, string blobName)
-        {
-            return StorageContext.UserBlobContainer.CreateBlobSasUrl(expiration, blobName);
-        }
     }
 }

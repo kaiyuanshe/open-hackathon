@@ -70,22 +70,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region GetUploadUrl
         /// <summary>
-        /// Get file upload URL
+        /// Get file URLs including a readOnly url and a writable URL to upload.
+        /// Follow https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob to upload the file after get Sas Token.
+        /// Basically PUT the file content to `uploadUrl`with required headers.
         /// </summary>
-        /// <returns>the SAS URL</returns>
-        /// <response code="200">Success. The response return a SAS URL.</response>
+        /// <returns>an object contains and URL for upload and an URL for anonymous read.</returns>
+        /// <response code="200">Success. The response contains and URL for upload and an URL for anonymous read.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(SasUrl), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileUpload), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400)]
-        [Route("user/generateSasUrl")]
+        [Route("user/generateFileUrl")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.LoginUser)]
-        public async Task<object> GetUploadUrl([FromBody] FileUpload parameter)
+        public async Task<object> GetUploadUrl(
+            [FromBody] FileUpload parameter,
+            CancellationToken cancellationToken)
         {
-            var filename = parameter.filename;
-            var folder = CurrentUserId;
-            var url = UserManagement.GetUploadUrl(parameter.expiration.GetValueOrDefault(), folder + "/" + filename);
-            var sas = new SasUrl { url = url };
-            return Ok(sas);
+            var result = await FileManagement.GetUploadUrlAsync(User, parameter, cancellationToken);
+            return Ok(result);
         }
         #endregion
 

@@ -4,15 +4,13 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 {
-
     public interface IAzureBlobContainer
     {
-        string CreateContainerSasToken(int expiration);
-        string CreateBlobSasToken(int expiration, string blobName);
-        string CreateBlobSasUrl(int expiration, string blobName);
+        string CreateContainerSasToken(SharedAccessBlobPolicy policy);
+        string CreateBlobSasToken(string blobName, SharedAccessBlobPolicy polich);
     }
 
-    public class AzureBlobContainer: IAzureBlobContainer
+    public class AzureBlobContainer : IAzureBlobContainer
     {
         #region Constants
         /// <summary>
@@ -24,21 +22,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
         /// The retry count for blob container operations
         /// </summary>
         static readonly int BlobContaineRetryCount = 5;
-
-        /// <summary>
-        /// The minimum SAS expiration time in minutes
-        /// </summary>
-        static readonly int BlobContainerMinSasExpiration = 2; // minutes
-
-        /// <summary>
-        /// The maximum SAS expiration time in minutes
-        /// </summary>
-        static readonly int BlobContainerMaxSasExpiration = 30; // minutes
-
-        /// <summary>
-        /// The default SAS expiration time in minutes
-        /// </summary>
-        static readonly int BlobContainerDefaultSasExpiration = 5; // minutes
         #endregion
 
         /// <summary>
@@ -68,50 +51,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
             blobServiceProxy = storageAccount.CreateCloudBlobClient();
             blobServiceProxy.DefaultRequestOptions.RetryPolicy = new Microsoft.WindowsAzure.Storage.RetryPolicies.LinearRetry(
                 TimeSpan.FromSeconds(BlobContainerRetryInterval), BlobContaineRetryCount);
-            blobContainerProxy = this.blobServiceProxy.GetContainerReference(this.containerName);
+            blobContainerProxy = blobServiceProxy.GetContainerReference(this.containerName);
             blobContainerProxy.CreateIfNotExistsAsync().Wait();
         }
 
-        protected SharedAccessBlobPolicy CreateSasPolicy(int expiration)
+        public string CreateContainerSasToken(SharedAccessBlobPolicy policy)
         {
-            if (expiration > 0)
-            {
-                expiration = Math.Min(expiration, BlobContainerMaxSasExpiration);
-                expiration = Math.Max(expiration, BlobContainerMinSasExpiration);
-            }
-            else
-            {
-                expiration = BlobContainerDefaultSasExpiration;
-            }
-            var leadingTime = BlobContainerMinSasExpiration; // avoid inconsistent timestamp between client and server
-            var sasPolicy =
-                new SharedAccessBlobPolicy
-                {
-                    SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(expiration + leadingTime),
-                    SharedAccessStartTime = DateTime.UtcNow.Subtract(new TimeSpan(0, leadingTime, 0)),
-                    Permissions = SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write
-                };
-            return sasPolicy;
+            return blobContainerProxy.GetSharedAccessSignature(policy);
         }
 
-        public string CreateContainerSasToken(int expiration)
+        public string CreateBlobSasToken(string blobName, SharedAccessBlobPolicy policy)
         {
-            var sasPolicy = this.CreateSasPolicy(expiration);
-            return blobContainerProxy.GetSharedAccessSignature(sasPolicy);
-        }
-
-        public string CreateBlobSasToken(int expiration, string blobName)
-        {
-            var sasPolicy = this.CreateSasPolicy(expiration);
             var blobProxy = blobContainerProxy.GetBlobReference(blobName);
-            return blobProxy.GetSharedAccessSignature(sasPolicy);
-        }
-
-        public string CreateBlobSasUrl(int expiration, string blobName)
-        {
-            var sasPolicy = this.CreateSasPolicy(expiration);
-            var blobProxy = blobContainerProxy.GetBlobReference(blobName);
-            return blobProxy.Uri.ToString() + blobProxy.GetSharedAccessSignature(sasPolicy);
+            return blobProxy.GetSharedAccessSignature(policy);
         }
     }
 }
