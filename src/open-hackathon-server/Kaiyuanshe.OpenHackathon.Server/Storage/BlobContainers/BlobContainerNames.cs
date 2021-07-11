@@ -2,6 +2,6 @@
 {
     public static class BlobContainerNames
     {
-        public static readonly string User = "kysuser";
+        public static readonly string StaticWebsite = "$web";
     }
 }

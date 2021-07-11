@@ -6,6 +6,7 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Moq;
 using NUnit.Framework;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -107,25 +108,26 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         public async Task GetUploadUrl()
         {
             // input
-            var parameter = new FileUpload { expiration = 10, filename = "user/avatar.jpg" };
-            string url = "https://container.blob.core.chinacloudapi.cn/kysuser/user/avatar.jpg?sv=2018-03-28&sr=b&sig=JT1H%2FcjWK1xbwK3gy1qXXbXAxuQBTmYoCwpmK2Z9Ls0%3D&st=2021-07-04T09%3A25%3A39Z&se=2021-07-04T09%3A32%3A39Z&sp=rw";
+            var parameter = new FileUpload { };
+            var uploaded = new FileUpload { expiration = 10, filename = "user/avatar.jpg" };
 
             // mock
-            var userManagement = new Mock<IUserManagement>();
-            userManagement.Setup(u => u.GetUploadUrl(parameter.expiration.GetValueOrDefault(), "/" + parameter.filename)).Returns(url);
+            var fileManagement = new Mock<IFileManagement>();
+            fileManagement.Setup(u => u.GetUploadUrlAsync(It.IsAny<ClaimsPrincipal>(), parameter, default)).ReturnsAsync(uploaded);
 
             // test
             var controller = new UserController
             {
-                UserManagement = userManagement.Object,
+                FileManagement = fileManagement.Object,
             };
-            var result = await controller.GetUploadUrl(parameter);
+            var result = await controller.GetUploadUrl(parameter, default);
 
             // verify
-            Mock.VerifyAll(userManagement);
-            userManagement.VerifyNoOtherCalls();
-            SasUrl resp = AssertHelper.AssertOKResult<SasUrl>(result);
-            Assert.AreEqual(resp.url, url);
+            Mock.VerifyAll(fileManagement);
+            fileManagement.VerifyNoOtherCalls();
+            FileUpload resp = AssertHelper.AssertOKResult<FileUpload>(result);
+            Assert.AreEqual(10, resp.expiration.Value);
+            Assert.AreEqual("user/avatar.jpg", resp.filename);
         }
         #endregion
     }
