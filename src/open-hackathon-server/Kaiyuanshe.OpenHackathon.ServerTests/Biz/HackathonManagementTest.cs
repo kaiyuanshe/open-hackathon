@@ -471,6 +471,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 PartitionKey = "h4",
                 CreatedAt = DateTime.Now.AddDays(4),
             };
+            var h5 = new HackathonEntity
+            {
+                PartitionKey = "h5",
+                CreatedAt = DateTime.Now.AddDays(4),
+                Status = HackathonStatus.offline,
+            };
 
             var a0 = new HackathonAdminEntity { RowKey = "uid" };
             var a1 = new HackathonAdminEntity { RowKey = "a1" };
@@ -531,14 +537,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     { "h1", h1 },
                     { "h2", h2 },
                     { "h3", h3 },
-                    { "h4", h4 }
+                    { "h4", h4 },
+                    { "h5", h5 }
                 },
                 new Dictionary<string, List<HackathonAdminEntity>>
                 {
                     { "h1", new List<HackathonAdminEntity> { } },
                     { "h2", new List<HackathonAdminEntity> { a0 } },
                     { "h3", new List<HackathonAdminEntity> { a1, a2 } },
-                    { "h4", new List<HackathonAdminEntity> { a0, a1 } }
+                    { "h4", new List<HackathonAdminEntity> { a0, a1 } },
                 },
                 new List<HackathonEntity>
                 {
@@ -621,6 +628,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 PartitionKey = "h4",
                 CreatedAt = DateTime.Now.AddDays(4),
             };
+            var h5 = new HackathonEntity
+            {
+                PartitionKey = "h5",
+                CreatedAt = DateTime.Now.AddDays(4),
+                Status = HackathonStatus.offline,
+            };
 
             // arg0: user
             // arg1: all hackathons
@@ -673,14 +686,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     { "h1", h1 },
                     { "h2", h2 },
                     { "h3", h3 },
-                    { "h4", h4 }
+                    { "h4", h4 },
+                    { "h5", h5 }
                 },
                 new Dictionary<string, bool>
                 {
                     { "h1", true },
                     { "h2", false },
                     { "h3", true },
-                    { "h4", false }
+                    { "h4", false },
                 },
                 new List<HackathonEntity>
                 {
@@ -714,7 +728,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
                 foreach (var h in allHackathons.Values)
                 {
-                    enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(h, userId, cancellationToken)).ReturnsAsync(enrolled[h.Name]);
+                    if (enrolled.ContainsKey(h.Name))
+                    {
+                        enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(h, userId, cancellationToken)).ReturnsAsync(enrolled[h.Name]);
+                    }
                 }
             }
 

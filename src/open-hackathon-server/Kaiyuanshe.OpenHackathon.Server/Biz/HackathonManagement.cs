@@ -271,6 +271,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 List<HackathonEntity> filtered = new List<HackathonEntity>();
                 foreach (var item in hackathons)
                 {
+                    if (item.Status == HackathonStatus.offline)
+                        continue;
+
                     var admins = await HackathonAdminManagement.ListHackathonAdminAsync(item.Name, cancellationToken);
                     if (admins.Any(a => a.UserId == userId))
                     {
@@ -295,6 +298,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             IEnumerable<HackathonEntity> hackathons = (await ListAllHackathonsAsync(cancellationToken)).Values;
             foreach (var hackathon in hackathons)
             {
+                if (hackathon.Status == HackathonStatus.offline)
+                    continue;
+
                 var enrolled = await EnrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
                 if (enrolled)
                 {
