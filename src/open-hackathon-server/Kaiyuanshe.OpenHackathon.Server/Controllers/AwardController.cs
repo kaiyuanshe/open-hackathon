@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -487,6 +488,66 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             var resp = await ResponseBuilder.BuildResourceListAsync<AwardAssignmentEntity, AwardAssignment, AwardAssignmentList>(
                 assignments,
                 (assignment, ct) => BuildAwardAssignment(assignment, awardEntity, ct),
+                nextLink);
+
+            return Ok(resp);
+        }
+        #endregion
+
+        #region ListAssignmentsByHackathon
+        /// <summary>
+        /// List paginated assignments of a hackathon.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>the response contains a list of award assginments and a nextLink if there are more results.</returns>
+        /// <response code="200">Success. The response describes a list of award assignments.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(AwardAssignmentList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/assignments")]
+        public async Task<object> ListAssignmentsByHackathon(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // query
+            var assignmentQueryOptions = new AwardAssignmentQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+                QueryType = AwardAssignmentQueryType.Hackathon,
+            };
+            var assignments = await AwardManagement.ListPaginatedAssignmentsAsync(hackathonName.ToLower(), assignmentQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, assignmentQueryOptions.Next);
+
+            var awards = await AwardManagement.ListAwardsAsync(hackathonName.ToLower(), cancellationToken);
+            var resp = await ResponseBuilder.BuildResourceListAsync<AwardAssignmentEntity, AwardAssignment, AwardAssignmentList>(
+                assignments,
+                async (assignment, ct) =>
+                {
+                    var awardEntity = awards.SingleOrDefault(a => a.Id == assignment.AwardId);
+                    if (awardEntity == null)
+                        return null;
+                    return await BuildAwardAssignment(assignment, awardEntity, ct);
+                },
                 nextLink);
 
             return Ok(resp);

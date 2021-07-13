@@ -687,6 +687,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 null
                 );
 
+            // by Team
+            yield return new TestCaseData(
+                new AwardAssignmentQueryOptions {QueryType = AwardAssignmentQueryType.Hackathon, },
+                new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
+                new List<AwardAssignmentEntity> { a4, a2, a3, a1 },
+                null
+                );
+
             // top
             yield return new TestCaseData(
                 new AwardAssignmentQueryOptions { Top = 2, AwardId = "awardId", QueryType = AwardAssignmentQueryType.Award, },
@@ -728,6 +736,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             if (options.QueryType == AwardAssignmentQueryType.Award)
             {
                 cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardAssignmentEntity>>>(c => c.CacheKey == "AwardAssignment-hack-awardId"), default))
+                  .ReturnsAsync(allAwards);
+            }
+            if(options.QueryType == AwardAssignmentQueryType.Hackathon)
+            {
+                cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardAssignmentEntity>>>(c => c.CacheKey == "AwardAssignment-hack"), default))
                   .ReturnsAsync(allAwards);
             }
             var awardAssignmentTable = new Mock<IAwardAssignmentTable>();

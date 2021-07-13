@@ -41,6 +41,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// List awards, internal only
+        /// </summary>
+        Task<IEnumerable<AwardEntity>> ListAwardsAsync(string hackathonName, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List paged awards of hackathon
         /// </summary>
         /// <param name="hackathonName">name of hackathon</param>
@@ -119,6 +124,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromSeconds(10), (ct) =>
             {
                 return StorageContext.AwardAssignmentTable.ListByAwardAsync(hackathonName, awardId, ct);
+            }, false, cancellationToken);
+        }
+
+        private async Task<IEnumerable<AwardAssignmentEntity>> ListByHackathonAsync(string hackathonName, CancellationToken cancellationToken = default)
+        {
+            string cacheKey = CacheKeys.GetCacheKey(CacheEntryType.AwardAssignment, $"{hackathonName}");
+            return await Cache.GetOrAddAsync(cacheKey, TimeSpan.FromSeconds(60), (ct) =>
+            {
+                return StorageContext.AwardAssignmentTable.ListByHackathonAsync(hackathonName, ct);
             }, false, cancellationToken);
         }
         #endregion
@@ -298,6 +312,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                     awardAssignments = await ListAssignmentsByTeamAsync(hackathonName, options.TeamId, cancellationToken);
                     break;
                 case AwardAssignmentQueryType.Hackathon:
+                    awardAssignments = await ListByHackathonAsync(hackathonName, cancellationToken);
                     break;
                 default:
                     break;
