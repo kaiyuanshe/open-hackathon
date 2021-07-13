@@ -160,7 +160,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             foreach (var src in items)
             {
                 var resultItem = await converter(src, cancellationToken);
-                list.Add(resultItem);
+                if (resultItem != null)
+                {
+                    list.Add(resultItem);
+                }
             }
 
             return new TResult
@@ -181,7 +184,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             foreach (var src in items)
             {
                 var resultItem = await converter(src.Item1, src.Item2, cancellationToken);
-                list.Add(resultItem);
+                if (resultItem != null)
+                {
+                    list.Add(resultItem);
+                }
             }
 
             return new TResult

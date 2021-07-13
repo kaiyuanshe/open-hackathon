@@ -971,5 +971,121 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("locale", list.value[0].team.creator.Locale);
         }
         #endregion
+
+        #region ListAssignmentsByAward
+        private static IEnumerable ListAssignmentsByHackathonTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListAssignmentsByHackathonTestData))]
+        public async Task ListAssignmentsByHackathon(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity();
+            List<AwardEntity> awards = new List<AwardEntity> { new AwardEntity { PartitionKey = "hack", RowKey = "awardId" } };
+            var assignments = new List<AwardAssignmentEntity>
+            {
+                new AwardAssignmentEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                    AwardId = "awardId",
+                },
+                new AwardAssignmentEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                    AwardId = "awardId2",
+                }
+            };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            var creator = new UserInfo { Locality = "locality" };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(a => a.ListAwardsAsync("hack", default)).ReturnsAsync(awards);
+            awardManagement.Setup(p => p.ListPaginatedAssignmentsAsync("hack", It.Is<AwardAssignmentQueryOptions>(o => o.QueryType == AwardAssignmentQueryType.Hackathon), default))
+                .Callback<string, AwardAssignmentQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    o.Next = next;
+                })
+                .ReturnsAsync(assignments);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync(It.IsAny<string>(), It.IsAny<string>(), default)).ReturnsAsync(team);
+
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(creator);
+
+            // run
+            var controller = new AwardController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.ListAssignmentsByHackathon("Hack", pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<AwardAssignmentList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].assignmentId);
+            Assert.AreEqual("locality", list.value[0].team.creator.Locality);
+        }
+        #endregion
     }
 }
