@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
-    /// Information of a file upload. You cannot upload a file via hackathon API,
-    /// instead Hackathon API returns URLs via which you can upload/access files directly the file storage
+    /// Information of a file upload request. You cannot upload a file via hackathon API,
+    /// instead Hackathon API returns backend storage URLs where you can talk to the file stroage directly through these Urls.
     /// </summary>
     public class FileUpload
     {

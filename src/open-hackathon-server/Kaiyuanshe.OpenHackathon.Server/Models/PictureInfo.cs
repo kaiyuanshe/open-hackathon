@@ -27,7 +27,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string description { get; set; }
 
         /// <summary>
-        /// Uri of the picture
+        /// Uri of the picture. 
+        /// If the picture is from a third-party website, please make sure it's allowed to be referenced by https://hackathon.kaiyuanshe.cn.
         /// </summary>
         /// <example>https://example.com/a.png</example>
         [Required]
