@@ -18,6 +18,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member);
 
+        TeamWork BuildTeamWork(TeamWorkEntity teamWorkEntity);
+
         Award BuildAward(AwardEntity awardEntity);
 
         AwardAssignment BuildAwardAssignment(AwardAssignmentEntity awardAssignmentEntity, Team team, UserInfo user);
@@ -92,6 +94,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
                 p.user = member;
             });
         }
+
+        public TeamWork BuildTeamWork(TeamWorkEntity teamWorkEntity)
+        {
+            return teamWorkEntity.As<TeamWork>(p =>
+            {
+                p.updatedAt = teamWorkEntity.Timestamp.DateTime;
+            });
+        }
+
         public Award BuildAward(AwardEntity awardEntity)
         {
             return awardEntity.As<Award>(p =>

@@ -143,6 +143,36 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         }
 
         [Test]
+        public void BuildTeamWorkTest()
+        {
+            var entity = new TeamWorkEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                HackathonName = "hack",
+                Description = "desc",
+                Title = "title",
+                Type = TeamWorkType.word,
+                Url = "url",
+                CreatedAt = DateTime.Now,
+                Timestamp = DateTime.Now
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var teamWork = respBuilder.BuildTeamWork(entity);
+
+            Assert.AreEqual("pk", teamWork.teamId);
+            Assert.AreEqual("rk", teamWork.id);
+            Assert.AreEqual("hack", teamWork.hackathonName);
+            Assert.AreEqual("desc", teamWork.description);
+            Assert.AreEqual("title", teamWork.title);
+            Assert.AreEqual(TeamWorkType.word, teamWork.type);
+            Assert.AreEqual("url", teamWork.url);
+            Assert.AreEqual(entity.CreatedAt, teamWork.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, teamWork.updatedAt);
+        }
+
+        [Test]
         public void BuildAwardAssignmentTest()
         {
             AwardAssignmentEntity awardAssignment = new AwardAssignmentEntity

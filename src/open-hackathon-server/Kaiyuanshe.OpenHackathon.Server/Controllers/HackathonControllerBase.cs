@@ -38,6 +38,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public IFileManagement FileManagement { get; set; }
 
+        public IWorkManagement WorkManagement { get; set; }
+
         /// <summary>
         /// Id of current User. Return string.Empty if token is not required or invalid.
         /// </summary>

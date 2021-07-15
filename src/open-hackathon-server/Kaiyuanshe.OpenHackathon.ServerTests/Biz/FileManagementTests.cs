@@ -41,7 +41,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     new Claim(AuthConstant.ClaimType.UserId, "userId")
                }));
             var request = new FileUpload { filename = "dir/abc.png" };
-            // var storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=name;AccountKey=key;EndpointSuffix=core.chinacloudapi.cn");
             var storageAccount = CloudStorageAccount.DevelopmentStorageAccount;
             var sas = "?sas";
             string blobName = $"userId/{DateTime.UtcNow.ToString("yyyy/MM/dd")}/dir/abc.png";
