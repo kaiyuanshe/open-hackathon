@@ -1947,5 +1947,82 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("desc", output.description);
         }
         #endregion
+
+        #region GetTeamWork
+        [Test]
+        public async Task GetTeamWork_NotFound()
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamWorkEntity teamWorkEntity = null;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(teamEntity);
+
+            var workManagement = new Mock<IWorkManagement>();
+            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                WorkManagement = workManagement.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.GetTeamWork("Hack", "teamId", "workId", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, workManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            workManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.TeamWork_NotFound);
+        }
+
+        [Test]
+        public async Task GetTeamWork_Success()
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamWorkEntity teamWorkEntity = new TeamWorkEntity { Title = "title" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(teamEntity);
+
+            var workManagement = new Mock<IWorkManagement>();
+            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                WorkManagement = workManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetTeamWork("Hack", "teamId", "workId", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, workManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            workManagement.VerifyNoOtherCalls();
+
+            TeamWork teamWork = AssertHelper.AssertOKResult<TeamWork>(result);
+            Assert.AreEqual("title", teamWork.title);
+        }
+        #endregion
     }
 }

@@ -6,9 +6,6 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
@@ -55,6 +52,34 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Mock.VerifyAll(teamWorkTable, storageContext);
             teamWorkTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+        }
+        #endregion
+
+        #region GetTeamWorkAsync
+        [Test]
+        public async Task GetTeamWorkAsync()
+        {
+            var teamWork = new TeamWorkEntity { HackathonName = "hack" };
+
+            // mock
+            var logger = new Mock<ILogger<WorkManagement>>();
+            var teamWorkTable = new Mock<ITeamWorkTable>();
+            teamWorkTable.Setup(p => p.RetrieveAsync("tid", "wid", default)).ReturnsAsync(teamWork);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
+
+            // test
+            var workManagement = new WorkManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await workManagement.GetTeamWorkAsync("tid", "wid", default);
+
+            // verify
+            Mock.VerifyAll(teamWorkTable, storageContext);
+            teamWorkTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.AreEqual("hack", result.HackathonName);
         }
         #endregion
     }

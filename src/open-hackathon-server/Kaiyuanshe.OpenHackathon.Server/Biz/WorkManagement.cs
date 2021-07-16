@@ -14,6 +14,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// </summary>
         /// <returns></returns>
         Task<TeamWorkEntity> CreateTeamWorkAsync(TeamWork request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get a team work.
+        /// </summary>
+        /// <returns></returns>
+        Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
     }
 
     public class WorkManagement : ManagementClientBase, IWorkManagement
@@ -45,6 +51,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             };
             await StorageContext.TeamWorkTable.InsertAsync(entity);
             return entity;
+        }
+        #endregion
+
+        #region Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
+        public async Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(workId))
+                return null;
+
+            return await StorageContext.TeamWorkTable.RetrieveAsync(teamId, workId, cancellationToken);
         }
         #endregion
     }

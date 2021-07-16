@@ -358,6 +358,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The team work cannot be found..
+        /// </summary>
+        internal static string TeamWork_NotFound {
+            get {
+                return ResourceManager.GetString("TeamWork_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified user is not found..
         /// </summary>
         internal static string User_NotFound {

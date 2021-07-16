@@ -204,6 +204,9 @@
   <data name="TeamMember_NotFound" xml:space="preserve">
     <value>Member {0} is not a member of team {1}</value>
   </data>
+  <data name="TeamWork_NotFound" xml:space="preserve">
+    <value>The team work cannot be found.</value>
+  </data>
   <data name="Team_HasAward" xml:space="preserve">
     <value>Cannot delete the team for awards are assigned to this team. Please delete the award assignments first.</value>
   </data>
