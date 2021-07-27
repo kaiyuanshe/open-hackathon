@@ -208,7 +208,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             // next paging
             options.Next = null;
-            if (awards.Count() >= top)
+            if (np + top < allAwards.Count())
             {
                 options.Next = new TableContinuationToken
                 {
@@ -327,7 +327,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             // next paging
             options.Next = null;
-            if (assignments.Count() >= top)
+            if (np + top < awardAssignments.Count())
             {
                 options.Next = new TableContinuationToken
                 {

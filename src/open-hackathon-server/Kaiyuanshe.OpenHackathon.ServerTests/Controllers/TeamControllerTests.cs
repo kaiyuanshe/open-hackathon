@@ -2024,5 +2024,106 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("title", teamWork.title);
         }
         #endregion
+
+        #region ListWorksByTeam
+        private static IEnumerable ListWorksByTeamTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListWorksByTeamTestData))]
+        public async Task ListWorksByTeam(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity();
+            var teamWorks = new List<TeamWorkEntity>
+            {
+                new TeamWorkEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                }
+            };
+            TeamEntity team = new TeamEntity { };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync(It.IsAny<string>(), It.IsAny<string>(), default)).ReturnsAsync(team);
+
+            var workManagement = new Mock<IWorkManagement>();
+            workManagement.Setup(p => p.ListPaginatedWorksAsync("tid", It.IsAny<TeamWorkQueryOptions>(), default))
+                .Callback<string, TeamWorkQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    o.Next = next;
+                })
+                .ReturnsAsync(teamWorks);
+
+            // run
+            var controller = new TeamController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                WorkManagement = workManagement.Object,
+                TeamManagement = teamManagement.Object,
+            };
+            var result = await controller.ListWorksByTeam("Hack", "tid", pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, workManagement, teamManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            workManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<TeamWorkList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].teamId);
+            Assert.AreEqual("rk", list.value[0].id);
+        }
+        #endregion
     }
 }

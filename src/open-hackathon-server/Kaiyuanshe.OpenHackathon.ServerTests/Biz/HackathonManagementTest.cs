@@ -370,7 +370,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 new TableContinuationToken
                 {
                     NextPartitionKey = "3",
-                    NextRowKey = "nr"
+                    NextRowKey = "3"
                 }
                 );
 
@@ -399,7 +399,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 new TableContinuationToken
                 {
                     NextPartitionKey = "3",
-                    NextRowKey = "nr"
+                    NextRowKey = "3"
                 }
                 );
         }

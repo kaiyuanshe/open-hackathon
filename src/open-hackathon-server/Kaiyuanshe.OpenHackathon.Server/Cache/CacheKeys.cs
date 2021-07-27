@@ -24,5 +24,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         Award,
         AwardAssignment,
         TeamMember,
+        TeamWork,
     }
 }

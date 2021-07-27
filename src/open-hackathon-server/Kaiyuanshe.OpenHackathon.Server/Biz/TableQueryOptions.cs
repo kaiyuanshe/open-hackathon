@@ -66,4 +66,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Team,
         Hackathon,
     }
+
+    public class TeamWorkQueryOptions : TableQueryOptions
+    {
+
+    }
 }

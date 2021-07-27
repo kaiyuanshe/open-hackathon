@@ -85,4 +85,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         powerpoint
     }
+
+    /// <summary>
+    /// a list of team works
+    /// </summary>
+    public class TeamWorkList : IResourceList<TeamWork>
+    {
+        /// <summary>
+        /// a list of team works
+        /// </summary>
+        public TeamWork[] value { get; set; }
+
+        /// <summary>
+        ///  The URL the client should use to fetch the next page (per server side paging).
+        ///  No more results if it's null or empty.
+        /// </summary>
+        public string nextLink { get; set; }
+    }
 }
