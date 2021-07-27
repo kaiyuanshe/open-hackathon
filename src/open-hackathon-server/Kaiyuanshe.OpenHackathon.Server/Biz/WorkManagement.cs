@@ -1,7 +1,11 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +24,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// </summary>
         /// <returns></returns>
         Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// List paginated works by team
+        /// </summary>
+        Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
     }
 
     public class WorkManagement : ManagementClientBase, IWorkManagement
@@ -30,6 +39,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         {
             Logger = logger;
         }
+
+        #region Cache
+        private string CacheKeyWorks(string teamId)
+        {
+            return CacheKeys.GetCacheKey(CacheEntryType.TeamWork, teamId);
+        }
+
+        private void InvalidateCachedWorks(string teamId)
+        {
+            Cache.Remove(CacheKeyWorks(teamId));
+        }
+
+        private async Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string teamId, CancellationToken cancellationToken)
+        {
+            return await Cache.GetOrAddAsync(
+                CacheKeyWorks(teamId),
+                TimeSpan.FromHours(4),
+                (ct) => StorageContext.TeamWorkTable.ListByTeamAsync(teamId, ct),
+                true,
+                cancellationToken);
+        }
+        #endregion
 
         #region CreateTeamWorkAsync
         public async Task<TeamWorkEntity> CreateTeamWorkAsync(TeamWork request, CancellationToken cancellationToken = default)
@@ -50,6 +81,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Url = request.url,
             };
             await StorageContext.TeamWorkTable.InsertAsync(entity);
+
+            InvalidateCachedWorks(request.teamId);
             return entity;
         }
         #endregion
@@ -61,6 +94,34 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return null;
 
             return await StorageContext.TeamWorkTable.RetrieveAsync(teamId, workId, cancellationToken);
+        }
+        #endregion
+
+        #region Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
+        public async Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var allWorks = await ListByTeamAsync(teamId, cancellationToken);
+
+            // paging
+            int np = 0;
+            int.TryParse(options.TableContinuationToken?.NextPartitionKey, out np);
+            int top = options.Top.GetValueOrDefault(100);
+            var works = allWorks.OrderByDescending(a => a.CreatedAt)
+                .Skip(np)
+                .Take(top);
+
+            // next paging
+            options.Next = null;
+            if (np + top < allWorks.Count())
+            {
+                options.Next = new TableContinuationToken
+                {
+                    NextPartitionKey = (np + top).ToString(),
+                    NextRowKey = (np + top).ToString(),
+                };
+            }
+
+            return works;
         }
         #endregion
     }

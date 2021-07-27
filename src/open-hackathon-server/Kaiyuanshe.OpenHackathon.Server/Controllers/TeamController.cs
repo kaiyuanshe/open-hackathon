@@ -1019,5 +1019,71 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ResponseBuilder.BuildTeamWork(teamWorkEntity));
         }
         #endregion
+
+        #region ListWorksByTeam
+        /// <summary>
+        /// List paginated works of an team.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <returns>the response contains a list of award assginments and a nextLink if there are more results.</returns>
+        /// <response code="200">Success. The response describes a list of works.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(TeamWorkList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/works")]
+        public async Task<object> ListWorksByTeam(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string teamId,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team
+            var teamEntity = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamValidateOptions = new ValidateTeamOptions
+            {
+            };
+            if (await ValidateTeam(teamEntity, teamValidateOptions) == false)
+            {
+                return teamValidateOptions.ValidateResult;
+            }
+
+
+            // query
+            var teamWorkQueryOptions = new TeamWorkQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+            };
+            var assignments = await WorkManagement.ListPaginatedWorksAsync(teamId.ToLower(), teamWorkQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, teamWorkQueryOptions.Next);
+
+            // build resp
+            var resp = ResponseBuilder.BuildResourceList<TeamWorkEntity, TeamWork, TeamWorkList>(
+                assignments,
+                ResponseBuilder.BuildTeamWork,
+                nextLink);
+
+            return Ok(resp);
+        }
+        #endregion
     }
 }

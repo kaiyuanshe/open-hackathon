@@ -232,12 +232,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             // next paging
             options.Next = null;
-            if (hackathons.Count() >= top)
+            if (np + top < candidtes.Count())
             {
                 options.Next = new TableContinuationToken
                 {
                     NextPartitionKey = (np + top).ToString(),
-                    NextRowKey = "nr"
+                    NextRowKey = (np + top).ToString(),
                 };
             }
 

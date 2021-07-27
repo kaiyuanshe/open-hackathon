@@ -687,7 +687,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 null
                 );
 
-            // by Team
+            // by Hackathon
             yield return new TestCaseData(
                 new AwardAssignmentQueryOptions {QueryType = AwardAssignmentQueryType.Hackathon, },
                 new List<AwardAssignmentEntity> { a1, a2, a3, a4 },
