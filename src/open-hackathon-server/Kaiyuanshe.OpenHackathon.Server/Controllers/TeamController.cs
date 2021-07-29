@@ -967,6 +967,67 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
+        #region UpdateTeamWork
+        /// <summary>
+        /// Update an existing team work
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="workId" example="c85e65ef-fd5e-4539-a1f8-bafb7e4f9d74">unique Guid of the work. Auto-generated on server side.</param>
+        /// <returns>The work</returns>
+        /// <response code="200">Success. The response describes a team work.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(TeamWork), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/work/{workId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamMember)]
+        public async Task<object> UpdateTeamWork(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string teamId,
+            [FromRoute, Required, Guid] string workId,
+            [FromBody] TeamWork parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                OnlineRequired = true,
+                HackathonOpenRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team and member
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMemberValidateOption = new ValidateTeamMemberOptions
+            {
+                TeamId = teamId,
+                UserId = CurrentUserId,
+                ApprovedMemberRequired = true,
+            };
+            if (await ValidateTeamMember(team, teamMember, teamMemberValidateOption, cancellationToken) == false)
+            {
+                return teamMemberValidateOption.ValidateResult;
+            }
+
+            // create team work
+            var teamWorkEntity = await WorkManagement.GetTeamWorkAsync(teamId, workId, cancellationToken);
+            if (teamWorkEntity == null)
+            {
+                return NotFound(Resources.TeamWork_NotFound);
+            }
+            teamWorkEntity = await WorkManagement.UpdateTeamWorkAsync(teamWorkEntity, parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildTeamWork(teamWorkEntity));
+        }
+        #endregion
+
         #region GetTeamWork
         /// <summary>
         /// Query a team work.

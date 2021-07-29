@@ -20,6 +20,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamWorkEntity> CreateTeamWorkAsync(TeamWork request, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Update a team work.
+        /// </summary>
+        Task<TeamWorkEntity> UpdateTeamWorkAsync(TeamWorkEntity existing, TeamWork request, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Get a team work.
         /// </summary>
         /// <returns></returns>
@@ -84,6 +89,23 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             InvalidateCachedWorks(request.teamId);
             return entity;
+        }
+        #endregion
+
+        #region Task<TeamWorkEntity> UpdateTeamWorkAsync(TeamWorkEntity existing, TeamWork request, CancellationToken cancellationToken = default);
+        public async Task<TeamWorkEntity> UpdateTeamWorkAsync(TeamWorkEntity existing, TeamWork request, CancellationToken cancellationToken = default)
+        {
+            if (existing == null || request == null)
+                return existing;
+
+            existing.Title = request.title ?? existing.Title;
+            existing.Description = request.description ?? existing.Description;
+            existing.Url = request.url ?? existing.Url;
+            existing.Type = request.type.GetValueOrDefault(existing.Type);
+
+            await StorageContext.TeamWorkTable.MergeAsync(existing, cancellationToken);
+            InvalidateCachedWorks(existing.TeamId);
+            return existing;
         }
         #endregion
 
