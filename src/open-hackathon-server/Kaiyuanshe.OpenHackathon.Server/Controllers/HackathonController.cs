@@ -41,6 +41,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             [FromQuery] HackathonListType? listType,
             CancellationToken cancellationToken)
         {
+            // check login if list by admin
+            if (listType == HackathonListType.admin)
+            {
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, null, AuthConstant.PolicyForSwagger.LoginUser);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized(Resources.Auth_Unauthorized);
+                }
+            }
+
             var hackathonQueryOptions = new HackathonQueryOptions
             {
                 TableContinuationToken = pagination.ToContinuationToken(),

@@ -2022,7 +2022,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var workManagement = new Mock<IWorkManagement>();
             workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
-            workManagement.Setup(w=>w.UpdateTeamWorkAsync(It.IsAny<TeamMemberEntity>(),)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.UpdateTeamWorkAsync(It.IsAny<TeamWorkEntity>(), request, default)).ReturnsAsync(teamWorkEntity);
 
             // run
             var controller = new TeamController
@@ -2034,7 +2034,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 ProblemDetailsFactory = new CustomProblemDetailsFactory(),
             };
-            var result = await controller.CreateTeamWork("Hack", "teamId", request, default);
+            var result = await controller.UpdateTeamWork("Hack", "teamId", "workId", request, default);
 
             // verify
             Mock.VerifyAll(hackathonManagement, teamManagement, workManagement, authorizationService);
