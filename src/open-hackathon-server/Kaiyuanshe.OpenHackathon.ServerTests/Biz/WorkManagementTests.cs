@@ -65,6 +65,61 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateTeamWorkAsync
+        [Test]
+        public async Task UpdateTeamWorkAsync()
+        {
+            // input
+            TeamWorkEntity existing = new TeamWorkEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                HackathonName = "hack1",
+                Description = "desc1",
+                Title = "title1",
+                Type = TeamWorkType.image,
+                Url = "url1",
+            };
+            TeamWork request = new TeamWork
+            {
+                description = "desc2",
+                hackathonName = "hack2",
+                teamId = "teamId2",
+                title = "title2",
+                type = TeamWorkType.powerpoint,
+                url = "url2"
+            };
+
+            // mock
+            var logger = new Mock<ILogger<WorkManagement>>();
+            var teamWorkTable = new Mock<ITeamWorkTable>();
+            teamWorkTable.Setup(p => p.MergeAsync(It.Is<TeamWorkEntity>(e => e.Description == "desc2"
+                && e.HackathonName == "hack1"
+                && e.TeamId == "pk"
+                && e.Title == "title2"
+                && e.Url == "url2"
+                && e.Type == TeamWorkType.powerpoint), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("TeamWork-pk"));
+
+            // test
+            var workManagement = new WorkManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await workManagement.UpdateTeamWorkAsync(existing, request, default);
+
+            // verify
+            Mock.VerifyAll(teamWorkTable, storageContext, cache);
+            teamWorkTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+        }
+        #endregion
+
         #region GetTeamWorkAsync
         [Test]
         public async Task GetTeamWorkAsync()
