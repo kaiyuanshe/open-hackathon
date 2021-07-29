@@ -437,6 +437,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         #endregion
 
         #region ListHackathon
+        [Test]
+        public async Task ListHackathon_Unauthorized()
+        {
+            // input
+            var authResult = AuthorizationResult.Failed();
+
+            // mock and capture
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), null, AuthConstant.PolicyForSwagger.LoginUser))
+                .ReturnsAsync(authResult);
+
+            // run
+            var controller = new HackathonController
+            {
+                AuthorizationService = authorizationService.Object,
+                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+            };
+            var result = await controller.ListHackathon(null, null, null, HackathonListType.admin, default);
+
+            // verify
+            Mock.VerifyAll(authorizationService);
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 401, Resources.Auth_Unauthorized);
+        }
+
         private static IEnumerable ListHackathonTestData()
         {
             // arg0: pagination
@@ -495,7 +521,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             string expectedLink)
         {
             // input
-            var cancellationToken = CancellationToken.None;
             var hackathons = new List<HackathonEntity>
             {
                 new HackathonEntity
@@ -509,31 +534,41 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 Tuple.Create(hackathons.First(), new HackathonRoles{})
             };
             ClaimsPrincipal user = null;
+            var authResult = AuthorizationResult.Success();
 
             // mock and capture
             var hackathonManagement = new Mock<IHackathonManagement>();
             HackathonQueryOptions optionsCaptured = null;
-            hackathonManagement.Setup(p => p.ListPaginatedHackathonsAsync(user, It.IsAny<HackathonQueryOptions>(), cancellationToken))
+            hackathonManagement.Setup(p => p.ListPaginatedHackathonsAsync(user, It.IsAny<HackathonQueryOptions>(), default))
                 .Callback<ClaimsPrincipal, HackathonQueryOptions, CancellationToken>((u, o, t) =>
                  {
                      optionsCaptured = o;
                      optionsCaptured.Next = next;
                  })
                 .ReturnsAsync(hackathons);
-            hackathonManagement.Setup(h => h.ListHackathonRolesAsync(hackathons, user, cancellationToken))
+            hackathonManagement.Setup(h => h.ListHackathonRolesAsync(hackathons, user, default))
                 .ReturnsAsync(hackWithRoles);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            if (listType == HackathonListType.admin)
+            {
+                authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), null, AuthConstant.PolicyForSwagger.LoginUser))
+                    .ReturnsAsync(authResult);
+            }
 
             // run
             var controller = new HackathonController
             {
                 ResponseBuilder = new DefaultResponseBuilder(),
+                AuthorizationService = authorizationService.Object,
                 HackathonManagement = hackathonManagement.Object,
             };
-            var result = await controller.ListHackathon(pagination, search, orderBy, listType, cancellationToken);
+            var result = await controller.ListHackathon(pagination, search, orderBy, listType, default);
 
             // verify
-            Mock.VerifyAll(hackathonManagement);
+            Mock.VerifyAll(hackathonManagement, authorizationService);
             hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
 
             var list = AssertHelper.AssertOKResult<HackathonList>(result);
             Assert.AreEqual(expectedLink, list.nextLink);
