@@ -252,5 +252,26 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region DeleteTeamWorkAsync
+        [Test]
+        public async Task DeleteTeamWorkAsync()
+        {
+            var logger = new Mock<ILogger<WorkManagement>>();
+            var teamWorkTable = new Mock<ITeamWorkTable>();
+            teamWorkTable.Setup(t => t.DeleteAsync("teamId", "workId", default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
+
+            WorkManagement workManagement = new WorkManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await workManagement.DeleteTeamWorkAsync("teamId", "workId", default);
+
+            Mock.VerifyAll(teamWorkTable, storageContext);
+            teamWorkTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
+        #endregion
     }
 }
