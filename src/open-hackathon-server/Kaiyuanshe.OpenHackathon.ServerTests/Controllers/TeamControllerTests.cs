@@ -2225,5 +2225,57 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("rk", list.value[0].id);
         }
         #endregion
+
+        #region DeleteTeamWork
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task DeleteTeamWork(bool firstTime)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { };
+            TeamMemberEntity memberEntity = new TeamMemberEntity { };
+            TeamWorkEntity teamWorkEntity = firstTime ? new TeamWorkEntity() : null;
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(teamEntity);
+            teamManagement.Setup(t => t.GetTeamMemberAsync("teamId", It.IsAny<string>(), default)).ReturnsAsync(memberEntity);
+
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamMember))
+                .ReturnsAsync(authResult);
+
+            var workManagement = new Mock<IWorkManagement>();
+            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            if (firstTime)
+            {
+                workManagement.Setup(w => w.DeleteTeamWorkAsync("teamId", "workId", default));
+            }
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                TeamManagement = teamManagement.Object,
+                WorkManagement = workManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.DeleteTeamWork("Hack", "teamId", "workId", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, workManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            workManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }

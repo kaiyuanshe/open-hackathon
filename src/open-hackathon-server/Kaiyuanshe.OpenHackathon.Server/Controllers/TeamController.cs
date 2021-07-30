@@ -2,7 +2,6 @@
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
-using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
@@ -1144,6 +1143,63 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 nextLink);
 
             return Ok(resp);
+        }
+        #endregion
+
+        #region DeleteTeamWork
+        /// <summary>
+        /// Delete an team work by workId
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">unique Guid of the team. Auto-generated on server side.</param>
+        /// <param name="workId" example="c85e65ef-fd5e-4539-a1f8-bafb7e4f9d74">unique Guid of the work. Auto-generated on server side.</param>
+        /// <response code="204">Deleted. </response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/team/{teamId}/work/{workId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.TeamMember)]
+        public async Task<object> DeleteTeamWork(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+           [FromRoute, Required, Guid] string teamId,
+            [FromRoute, Required, Guid] string workId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                HackathonOpenRequired = true,
+                OnlineRequired = true,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Validate team and member
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMemberValidateOption = new ValidateTeamMemberOptions
+            {
+                TeamId = teamId,
+                UserId = CurrentUserId,
+                ApprovedMemberRequired = true,
+            };
+            if (await ValidateTeamMember(team, teamMember, teamMemberValidateOption, cancellationToken) == false)
+            {
+                return teamMemberValidateOption.ValidateResult;
+            }
+
+            // Delete work
+            var work = await WorkManagement.GetTeamWorkAsync(teamId, workId, cancellationToken);
+            if (work == null)
+            {
+                return NoContent();
+            }
+            await WorkManagement.DeleteTeamWorkAsync(teamId, workId, cancellationToken);
+            return NoContent();
         }
         #endregion
     }

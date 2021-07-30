@@ -34,6 +34,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// List paginated works by team
         /// </summary>
         Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
+
+
+        /// <summary>
+        /// Delete team work by Id
+        /// </summary>
+        Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
     }
 
     public class WorkManagement : ManagementClientBase, IWorkManagement
@@ -144,6 +150,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return works;
+        }
+        #endregion
+
+        #region Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
+        public async Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(workId))
+                return;
+
+            await StorageContext.TeamWorkTable.DeleteAsync(teamId, workId, cancellationToken);
         }
         #endregion
     }
