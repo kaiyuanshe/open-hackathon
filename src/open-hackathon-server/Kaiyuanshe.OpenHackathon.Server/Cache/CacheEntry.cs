@@ -49,7 +49,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         {
             if (cacheKey == null)
                 throw new ArgumentNullException(nameof(cacheKey));
-            if (slidingExpiration == null)
+            if (slidingExpiration == TimeSpan.MinValue)
                 throw new ArgumentNullException(nameof(slidingExpiration));
             if (supplyValue == null && !EnvHelper.IsRunningInTests())
                 throw new ArgumentNullException(nameof(supplyValue));
