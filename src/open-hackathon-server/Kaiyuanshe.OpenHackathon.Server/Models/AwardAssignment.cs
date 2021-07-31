@@ -32,12 +32,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// awared user. It's null if the award is assigned to a team.
         /// </summary>
-        public UserInfo user { get; set; }
+        public UserInfo user { get; internal set; }
 
         /// <summary>
         /// awarded team. It's null if the award is assigned to an individual user.
         /// </summary>
-        public Team team { get; set; }
+        public Team team { get; internal set; }
 
         /// <summary>
         /// id of the award.
