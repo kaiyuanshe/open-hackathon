@@ -1,5 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
-using Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers;
+﻿using Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
@@ -12,6 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IEnrollmentTable EnrollmentTable { get; }
         IHackathonTable HackathonTable { get; }
         IHackathonAdminTable HackathonAdminTable { get; }
+        IJudgeTable JudgeTable { get; }
         ITeamTable TeamTable { get; }
         ITeamMemberTable TeamMemberTable { get; }
         ITeamWorkTable TeamWorkTable { get; }
@@ -30,6 +31,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public IEnrollmentTable EnrollmentTable { get; }
         public IHackathonAdminTable HackathonAdminTable { get; }
         public IHackathonTable HackathonTable { get; }
+        public IJudgeTable JudgeTable { get; }
         public ITeamTable TeamTable { get; }
         public ITeamMemberTable TeamMemberTable { get; }
         public ITeamWorkTable TeamWorkTable { get; }
@@ -48,6 +50,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             EnrollmentTable = new EnrollmentTable(storageAccount, TableNames.Enrollment);
             HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
+            JudgeTable = new JudgeTable(storageAccount, TableNames.Judge);
             TeamTable = new TeamTable(storageAccount, TableNames.Team);
             TeamMemberTable = new TeamMemberTable(storageAccount, TableNames.TeamMember);
             TeamWorkTable = new TeamWorkTable(storageAccount, TableNames.TeamWork);
