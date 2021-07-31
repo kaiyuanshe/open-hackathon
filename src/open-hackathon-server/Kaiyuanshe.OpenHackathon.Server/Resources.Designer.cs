@@ -304,6 +304,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The team name &apos;{0}&apos; is already taken. Please try a different name..
+        /// </summary>
+        internal static string Team_NameTaken {
+            get {
+                return ResourceManager.GetString("Team_NameTaken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Access denied. Please contact admins of the team..
         /// </summary>
         internal static string Team_NotAdmin {

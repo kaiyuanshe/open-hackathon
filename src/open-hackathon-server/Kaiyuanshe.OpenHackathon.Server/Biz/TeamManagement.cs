@@ -40,6 +40,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<TeamEntity> GetTeamByIdAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Get team(s) by team name
+        /// </summary>
+        Task<IEnumerable<TeamEntity>> GetTeamByNameAsync(string hackathonName, string teamName, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Delete a team
         /// </summary>
         /// <param name="team"></param>
@@ -72,7 +77,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default);
-
 
         /// <summary>
         /// Get a team member by userId
@@ -220,6 +224,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
+        #region GetTeamByNameAsync
+        public async Task<IEnumerable<TeamEntity>> GetTeamByNameAsync(string hackathonName, string teamName, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQueryHelper.And(
+                TableQuery.GenerateFilterCondition(nameof(TeamEntity.PartitionKey), QueryComparisons.Equal, hackathonName),
+                TableQuery.GenerateFilterCondition(nameof(TeamEntity.DisplayName), QueryComparisons.Equal, teamName)
+                );
+
+            TableQuery<TeamEntity> query = new TableQuery<TeamEntity>().Where(filter);
+
+            List<TeamEntity> list = new List<TeamEntity>();
+            await StorageContext.TeamTable.ExecuteQuerySegmentedAsync(query, (segment) =>
+            {
+                list.AddRange(segment);
+            }, cancellationToken);
+
+            return list;
+        }
+        #endregion
+
         #region ListPaginatedTeamsAsync
         public async Task<TableQuerySegment<TeamEntity>> ListPaginatedTeamsAsync(string hackathonName, TeamQueryOptions options, CancellationToken cancellationToken = default)
         {
@@ -310,17 +334,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region DeleteTeamMemberAsync
-        public async Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default)
-        {
-            if (member == null)
-                return;
-
-            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
-            await UpdateTeamMembersCountAsync(member.HackathonName, member.TeamId, cancellationToken);
-        }
-        #endregion
-
         #region UpdateTeamMemberRoleAsync
         public async Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default)
         {
@@ -334,6 +347,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return member;
+        }
+        #endregion
+
+        #region DeleteTeamMemberAsync
+        public async Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default)
+        {
+            if (member == null)
+                return;
+
+            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
+            await UpdateTeamMembersCountAsync(member.HackathonName, member.TeamId, cancellationToken);
         }
         #endregion
 

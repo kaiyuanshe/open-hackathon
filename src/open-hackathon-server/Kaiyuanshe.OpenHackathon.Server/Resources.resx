@@ -210,6 +210,9 @@
   <data name="Team_HasAward" xml:space="preserve">
     <value>Cannot delete the team for awards are assigned to this team. Please delete the award assignments first.</value>
   </data>
+  <data name="Team_NameTaken" xml:space="preserve">
+    <value>The team name '{0}' is already taken. Please try a different name.</value>
+  </data>
   <data name="Team_NotAdmin" xml:space="preserve">
     <value>Access denied. Please contact admins of the team.</value>
   </data>

@@ -66,12 +66,24 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return enrollmentOptions.ValidateResult;
             }
 
+            // Check name exitance
+            if (await IsTeamNameTaken(hackathonName.ToLower(), parameter.displayName, cancellationToken))
+            {
+                return PreconditionFailed(string.Format(Resources.Team_NameTaken, parameter.displayName));
+            }
+
             // create team
             parameter.hackathonName = hackathonName.ToLower();
             parameter.creatorId = CurrentUserId;
             var teamEntity = await TeamManagement.CreateTeamAsync(parameter, cancellationToken);
             var creator = await GetCurrentUserInfo(cancellationToken);
             return Ok(ResponseBuilder.BuildTeam(teamEntity, creator));
+        }
+
+        private async Task<bool> IsTeamNameTaken(string hackathonName, string teamName, CancellationToken cancellationToken)
+        {
+            var teams = await TeamManagement.GetTeamByNameAsync(hackathonName, teamName, cancellationToken);
+            return teams.Count() > 0;
         }
         #endregion
 
@@ -111,6 +123,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // validate team
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            // check name uniqueness
+            if (parameter.displayName != null && team.DisplayName != parameter.displayName)
+            {
+                if (await IsTeamNameTaken(hackathonName.ToLower(), parameter.displayName, cancellationToken))
+                {
+                    return PreconditionFailed(string.Format(Resources.Team_NameTaken, parameter.displayName));
+                }
+            }
             var teamOptions = new ValidateTeamOptions
             {
                 TeamAdminRequired = true,
