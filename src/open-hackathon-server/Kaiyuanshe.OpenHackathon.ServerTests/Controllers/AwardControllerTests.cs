@@ -600,7 +600,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var parameter = new AwardAssignment { assigneeId = "teamId" };
             TeamEntity team = new TeamEntity { CreatorId = "creator", DisplayName = "dn" };
             var assignment = new AwardAssignmentEntity { PartitionKey = "hack", RowKey = "rk", AssigneeId = "teamId", };
-            var creator = new UserInfo { FamilyName = "fn" };
+            var creator = new UserInfo { };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(h => h.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);

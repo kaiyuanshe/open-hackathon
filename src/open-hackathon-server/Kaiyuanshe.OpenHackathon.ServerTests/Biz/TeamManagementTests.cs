@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     [TestFixture]
-    public class TeamManagementTest
+    public class TeamManagementTests
     {
         #region CreateTeamAsync
         [TestCase(null, "uid")]

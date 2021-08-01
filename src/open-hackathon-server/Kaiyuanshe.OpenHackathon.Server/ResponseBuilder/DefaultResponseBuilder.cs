@@ -24,6 +24,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         AwardAssignment BuildAwardAssignment(AwardAssignmentEntity awardAssignmentEntity, Team team, UserInfo user);
 
+        Judge BuildJudge(JudgeEntity judgeEntity, UserInfo userInfo);
+
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(
             IEnumerable<TSrcItem> items,
             Func<TSrcItem, TResultItem> converter,
@@ -118,6 +120,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
                 p.updatedAt = awardAssignmentEntity.Timestamp.DateTime;
                 p.user = user;
                 p.team = team;
+            });
+        }
+
+        public Judge BuildJudge(JudgeEntity judgeEntity, UserInfo userInfo)
+        {
+            return judgeEntity.As<Judge>((p) =>
+            {
+                p.updatedAt = judgeEntity.Timestamp.DateTime;
+                p.user = userInfo;
             });
         }
 

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
-    public class AwardManagementTest
+    public class AwardManagementTests
     {
         #region GetAwardByIdAsync
         [TestCase(null, null)]

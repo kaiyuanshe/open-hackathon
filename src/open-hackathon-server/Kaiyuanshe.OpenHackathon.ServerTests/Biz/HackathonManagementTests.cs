@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     [TestFixture]
-    public class HackathonManagementTest
+    public class HackathonManagementTests
     {
         #region CreateHackathonAsyncTest
         [Test]

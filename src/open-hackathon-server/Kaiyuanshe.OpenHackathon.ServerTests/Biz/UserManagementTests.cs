@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     [TestFixture]
-    public class UserManagementTest
+    public class UserManagementTests
     {
         [Test]
         public async Task AuthingAsyncTest()
