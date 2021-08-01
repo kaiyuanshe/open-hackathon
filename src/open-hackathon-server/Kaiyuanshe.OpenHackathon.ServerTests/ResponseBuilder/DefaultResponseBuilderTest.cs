@@ -142,6 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("city", teamMember.user.City);
         }
 
+        #region BuildTeamWorkTest
         [Test]
         public void BuildTeamWorkTest()
         {
@@ -171,7 +172,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(entity.CreatedAt, teamWork.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, teamWork.updatedAt);
         }
+        #endregion
 
+        #region BuildAwardAssignmentTest
         [Test]
         public void BuildAwardAssignmentTest()
         {
@@ -201,7 +204,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("device", result.user.Device);
             Assert.AreEqual("teamid", result.team.id);
         }
+        #endregion
 
+        #region BuildJudgeTest
+        [Test]
+        public void BuildJudgeTest()
+        {
+            JudgeEntity entity = new JudgeEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                Description = "desc",
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+            var user = new UserInfo { MiddleName = "mn" };
+
+            var responseBuilder = new DefaultResponseBuilder();
+            var result = responseBuilder.BuildJudge(entity, user);
+
+            Assert.AreEqual("pk", result.hackathonName);
+            Assert.AreEqual("rk", result.userId);
+            Assert.AreEqual("desc", result.description);
+            Assert.AreEqual(entity.CreatedAt, result.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, result.updatedAt);
+            Assert.AreEqual("mn", result.user.MiddleName);
+        }
+        #endregion
+
+        #region BuildResourceListTest
         [Test]
         public void BuildResourceListTest()
         {
@@ -246,5 +277,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(EnrollmentStatus.rejected, result.value[1].status);
             Assert.AreEqual("email", result.value[1].user.Email);
         }
+        #endregion
     }
 }

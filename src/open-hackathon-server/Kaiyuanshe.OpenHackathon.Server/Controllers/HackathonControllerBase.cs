@@ -40,6 +40,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         public IWorkManagement WorkManagement { get; set; }
 
+        public IJudgeManagement JudgeManagement { get; set; }
+
         /// <summary>
         /// Id of current User. Return string.Empty if token is not required or invalid.
         /// </summary>

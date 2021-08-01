@@ -26,6 +26,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
             builder.RegisterType<AwardManagement>().As<IAwardManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<FileManagement>().As<IFileManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<WorkManagement>().As<IWorkManagement>().PropertiesAutowired().SingleInstance();
+            builder.RegisterType<JudgeManagement>().As<IJudgeManagement>().PropertiesAutowired().SingleInstance();
 
             // Response
             builder.RegisterType<DefaultResponseBuilder>().As<IResponseBuilder>().PropertiesAutowired().SingleInstance();
