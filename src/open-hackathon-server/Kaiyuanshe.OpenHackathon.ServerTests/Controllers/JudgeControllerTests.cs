@@ -90,5 +90,85 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         #endregion
+
+        #region GetJudge
+        [Test]
+        public async Task GetJudge_HackNotOnline()
+        {
+            var hackathon = new HackathonEntity { };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+            };
+            var result = await controller.GetJudge("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Hackathon_NotFound, "Hack"));
+        }
+
+        [Test]
+        public async Task GetJudge_NotFound()
+        {
+            var hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            UserInfo user = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.GetJudge("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.User_NotFound);
+        }
+        [Test]
+        public async Task GetJudge_Succeeded()
+        {
+            var hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            UserInfo user = new UserInfo { Profile = "profile" };
+            var judgeEntity = new JudgeEntity { PartitionKey = "pk" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.GetJudgeAsync("hack", "uid", default)).ReturnsAsync(judgeEntity);
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetJudge("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, userManagement, judgeManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Judge>(result);
+            Assert.AreEqual("pk", resp.hackathonName);
+            Assert.AreEqual("profile", resp.user.Profile);
+        }
+
+        #endregion
     }
 }
