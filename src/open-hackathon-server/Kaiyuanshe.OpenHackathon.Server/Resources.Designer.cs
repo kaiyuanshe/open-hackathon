@@ -286,6 +286,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified user is not judge of the hackathon..
+        /// </summary>
+        internal static string Judge_NotFound {
+            get {
+                return ResourceManager.GetString("Judge_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required parameter {0} is null or empty..
         /// </summary>
         internal static string Parameter_Required {

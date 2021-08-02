@@ -54,5 +54,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("uid", result.UserId);
         }
         #endregion
+
+        #region GetJudgeAsync
+        [Test]
+        public async Task GetJudgeAsync()
+        {
+            var judge = new JudgeEntity { PartitionKey = "pk" };
+
+            var logger = new Mock<ILogger<JudgeManagement>>();
+            var judgeTable = new Mock<IJudgeTable>();
+            judgeTable.Setup(j => j.RetrieveAsync("hack", "uid", default)).ReturnsAsync(judge);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.JudgeTable).Returns(judgeTable.Object);
+
+            var judgeManagement = new JudgeManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await judgeManagement.GetJudgeAsync("hack", "uid", default);
+
+            Mock.VerifyAll(judgeTable, storageContext);
+            judgeTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("pk", result.HackathonName);
+        }
+        #endregion
     }
 }
