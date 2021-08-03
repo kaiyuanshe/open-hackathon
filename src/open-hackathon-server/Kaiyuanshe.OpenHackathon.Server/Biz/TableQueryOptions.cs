@@ -71,4 +71,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
 
     }
+
+    public class JudgeQueryOptions : TableQueryOptions
+    {
+
+    }
 }

@@ -6,9 +6,13 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
@@ -169,6 +173,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("profile", resp.user.Profile);
         }
 
+        #endregion
+
+        #region ListJudgesByHackathon
+        private static IEnumerable ListJudgesByHackathonTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListJudgesByHackathonTestData))]
+        public async Task ListJudgesByHackathon(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity();
+            List<JudgeEntity> judges = new List<JudgeEntity> {
+                new JudgeEntity { PartitionKey = "pk", RowKey = "uid" }
+            };
+            var user = new UserInfo { Website = "https://website" };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.ListPaginatedJudgesAsync("hack", It.Is<JudgeQueryOptions>(o => o.Top == pagination.top), default))
+                .Callback<string, JudgeQueryOptions, CancellationToken>((h, opt, c) => { opt.Next = next; })
+                .ReturnsAsync(judges);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+
+            // run
+            var controller = new JudgeController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+            };
+            var result = await controller.ListJudgesByHackathon("Hack", pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, judgeManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<JudgeList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("uid", list.value[0].userId);
+            Assert.AreEqual("https://website", list.value[0].user.Website);
+        }
         #endregion
     }
 }

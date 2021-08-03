@@ -972,7 +972,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
         #endregion
 
-        #region ListAssignmentsByAward
+        #region ListAssignmentsByHackathon
         private static IEnumerable ListAssignmentsByHackathonTestData()
         {
             // arg0: pagination
