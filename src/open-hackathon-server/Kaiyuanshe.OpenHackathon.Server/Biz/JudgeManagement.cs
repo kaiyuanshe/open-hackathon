@@ -14,6 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     public interface IJudgeManagement
     {
         Task<JudgeEntity> CreateJudgeAsync(Judge parameter, CancellationToken cancellationToken);
+        Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken);
         Task<JudgeEntity> GetJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
         Task<IEnumerable<JudgeEntity>> ListPaginatedJudgesAsync(string hackathonName, JudgeQueryOptions options, CancellationToken cancellationToken = default);
     }
@@ -61,6 +62,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             await StorageContext.JudgeTable.InsertOrReplaceAsync(entity, cancellationToken);
             InvalidateCachedJudges(parameter.hackathonName);
             return entity;
+        }
+        #endregion
+
+        #region Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken);
+        public async Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken)
+        {
+            if (exising == null || parameter == null)
+                return exising;
+
+            exising.Description = parameter.description ?? exising.Description;
+            await StorageContext.JudgeTable.MergeAsync(exising, cancellationToken);
+            InvalidateCachedJudges(parameter.hackathonName);
+            return exising;
         }
         #endregion
 

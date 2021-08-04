@@ -63,6 +63,55 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
+        #region UpdateJudge
+        /// <summary>
+        /// Update a judge
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <response code="200">Success. The response describes a judge.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Judge), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/judge/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> UpdateJudge(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            [FromBody] Judge parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate user
+            var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                return NotFound(Resources.User_NotFound);
+            }
+
+            // query and update judge
+            var entity = await JudgeManagement.GetJudgeAsync(hackathonName.ToLower(), userId, cancellationToken);
+            if (entity == null)
+            {
+                return NotFound(Resources.Judge_NotFound);
+            }
+            entity = await JudgeManagement.UpdateJudgeAsync(entity, parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildJudge(entity, user));
+        }
+        #endregion
+
         #region GetJudge
         /// <summary>
         /// Query a judge
