@@ -60,6 +60,38 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateJudgeAsync
+        [TestCase(null, "desc")]
+        [TestCase("desc2", "desc2")]
+        public async Task UpdateJudgeAsync(string requestedDesc, string expectedDesc)
+        {
+            JudgeEntity existing = new JudgeEntity { Description = "desc" };
+            Judge parameter = new Judge { hackathonName = "hack", description = requestedDesc };
+
+            var logger = new Mock<ILogger<JudgeManagement>>();
+            var judgeTable = new Mock<IJudgeTable>();
+            judgeTable.Setup(j => j.MergeAsync(It.Is<JudgeEntity>(en => en.Description == expectedDesc), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.JudgeTable).Returns(judgeTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Judge-hack"));
+
+            var judgeManagement = new JudgeManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await judgeManagement.UpdateJudgeAsync(existing, parameter, default);
+
+            Mock.VerifyAll(judgeTable, storageContext, cache);
+            judgeTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedDesc, result.Description);
+        }
+        #endregion
+
         #region GetJudgeAsync
         [Test]
         public async Task GetJudgeAsync()
@@ -202,6 +234,28 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 Assert.AreEqual(expectedNext.NextPartitionKey, options.Next.NextPartitionKey);
                 Assert.AreEqual(expectedNext.NextRowKey, options.Next.NextRowKey);
             }
+        }
+        #endregion
+
+        #region DeleteJudgeAsync
+        [Test]
+        public async Task DeleteJudgeAsync()
+        {
+            var logger = new Mock<ILogger<JudgeManagement>>();
+            var judgeTable = new Mock<IJudgeTable>();
+            judgeTable.Setup(j => j.DeleteAsync("hack", "uid", default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.JudgeTable).Returns(judgeTable.Object);
+
+            var judgeManagement = new JudgeManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await judgeManagement.DeleteJudgeAsync("hack", "uid", default);
+
+            Mock.VerifyAll(judgeTable, storageContext);
+            judgeTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
         }
         #endregion
     }

@@ -14,8 +14,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     public interface IJudgeManagement
     {
         Task<JudgeEntity> CreateJudgeAsync(Judge parameter, CancellationToken cancellationToken);
+        Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken);
         Task<JudgeEntity> GetJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
         Task<IEnumerable<JudgeEntity>> ListPaginatedJudgesAsync(string hackathonName, JudgeQueryOptions options, CancellationToken cancellationToken = default);
+        Task DeleteJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
     }
 
     public class JudgeManagement : ManagementClientBase, IJudgeManagement
@@ -64,6 +66,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
+        #region Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken);
+        public async Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken)
+        {
+            if (exising == null || parameter == null)
+                return exising;
+
+            exising.Description = parameter.description ?? exising.Description;
+            await StorageContext.JudgeTable.MergeAsync(exising, cancellationToken);
+            InvalidateCachedJudges(parameter.hackathonName);
+            return exising;
+        }
+        #endregion
+
         #region Task<JudgeEntity> GetJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
         public async Task<JudgeEntity> GetJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken)
         {
@@ -96,6 +111,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return judges;
+        }
+        #endregion
+
+        #region Task DeleteJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
+        public async Task DeleteJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(userId))
+                return;
+
+            await StorageContext.JudgeTable.DeleteAsync(hackathonName, userId, cancellationToken);
         }
         #endregion
     }
