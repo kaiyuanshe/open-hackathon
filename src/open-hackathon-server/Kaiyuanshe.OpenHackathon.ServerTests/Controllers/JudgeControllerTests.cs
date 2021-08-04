@@ -345,5 +345,47 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("https://website", list.value[0].user.Website);
         }
         #endregion
+
+        #region DeleteJudge
+        [TestCase(false)]
+        [TestCase(true)]
+        public async Task DeleteJudge(bool firstTime)
+        {
+            var hackathon = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            UserInfo user = new UserInfo { };
+            JudgeEntity entity = firstTime ? new JudgeEntity() : null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.GetJudgeAsync("hack", "uid", default)).ReturnsAsync(entity);
+            if (firstTime)
+            {
+                judgeManagement.Setup(j => j.DeleteJudgeAsync("hack", "uid", default));
+            }
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                UserManagement = userManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+            };
+            var result = await controller.DeleteJudge("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, judgeManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }
