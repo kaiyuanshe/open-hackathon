@@ -118,6 +118,47 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region IsJudgeAsync
+        private static IEnumerable IsJudgeAsyncTestData()
+        {
+            var a1 = new JudgeEntity { RowKey = "user1", };
+            var a2 = new JudgeEntity { RowKey = "user2", };
+            var a3 = new JudgeEntity { RowKey = "user3", };
+            // arg0: judges
+            // arg1: userId
+            // arg2: expected result
+            yield return new TestCaseData(
+                new List<JudgeEntity> { a1, a2, a3 },
+                "user1",
+                true
+                );
+
+            yield return new TestCaseData(
+                new List<JudgeEntity> { a1, a2, a3 },
+                "user4",
+                false
+                );
+        }
+
+        [Test, TestCaseSource(nameof(IsJudgeAsyncTestData))]
+        public async Task IsJudgeAsync(List<JudgeEntity> judges, string userId, bool expectedResult)
+        {
+            var logger = new Mock<ILogger<JudgeManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<JudgeEntity>>>(c => c.CacheKey == "Judge-hack"), default)).ReturnsAsync(judges);
+
+            var judgeManagement = new JudgeManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await judgeManagement.IsJudgeAsync("hack", userId, default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region ListPaginatedJudgesAsync
 
         private static IEnumerable ListPaginatedJudgesAsyncTestData()

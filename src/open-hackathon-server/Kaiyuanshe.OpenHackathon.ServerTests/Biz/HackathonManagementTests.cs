@@ -95,6 +95,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateHackathonStatusAsync
         [TestCase(HackathonStatus.planning, HackathonStatus.planning)]
         [TestCase(HackathonStatus.pendingApproval, HackathonStatus.pendingApproval)]
         [TestCase(HackathonStatus.online, HackathonStatus.online)]
@@ -152,7 +153,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(target, captured.Status);
             Assert.AreEqual(target, updated.Status);
         }
+        #endregion
 
+        #region GetHackathonEntityByNameAsync
         [Test]
         public async Task GetHackathonEntityByNameAsyncTest()
         {
@@ -182,6 +185,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             Assert.AreEqual("loc", result.Location);
         }
+        #endregion
 
         #region ListPaginatedHackathonsAsync
 
@@ -955,10 +959,15 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(hackathons.ElementAt(0), "uid", default)).ReturnsAsync(false);
             enrollmentManagement.Setup(e => e.IsUserEnrolledAsync(hackathons.ElementAt(1), "uid", default)).ReturnsAsync(true);
 
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.IsJudgeAsync("hack1", "uid", default)).ReturnsAsync(false);
+            judgeManagement.Setup(j => j.IsJudgeAsync("hack2", "uid", default)).ReturnsAsync(true);
+
             var hackathonManagement = new HackathonManagement(null)
             {
                 HackathonAdminManagement = hackathonAdminManagement.Object,
                 EnrollmentManagement = enrollmentManagement.Object,
+                JudgeManagement = judgeManagement.Object,
             };
 
             var result = await hackathonManagement.ListHackathonRolesAsync(hackathons, user, default);
@@ -966,12 +975,167 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Mock.VerifyAll(hackathonAdminManagement, enrollmentManagement);
             hackathonAdminManagement.VerifyNoOtherCalls();
             enrollmentManagement.VerifyNoOtherCalls();
+            
             Assert.IsFalse(result.ElementAt(0).Item2.isAdmin);
             Assert.IsFalse(result.ElementAt(0).Item2.isEnrolled);
             Assert.IsFalse(result.ElementAt(0).Item2.isJudge);
+
             Assert.IsTrue(result.ElementAt(1).Item2.isAdmin);
             Assert.IsTrue(result.ElementAt(1).Item2.isEnrolled);
-            Assert.IsFalse(result.ElementAt(1).Item2.isJudge);
+            Assert.IsTrue(result.ElementAt(1).Item2.isJudge);
+        }
+        #endregion
+
+        #region GetHackathonRolesAsync
+        [Test]
+        public async Task GetHackathonRolesAsyncTest_NoUserIdClaim()
+        {
+            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack" };
+            ClaimsPrincipal user = new ClaimsPrincipal();
+            ClaimsPrincipal user2 = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            {
+                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+            }));
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var hackathonManagement = new HackathonManagement(null);
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, null, cancellationToken));
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, user, cancellationToken));
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, user2, cancellationToken));
+            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(null, user, cancellationToken));
+        }
+
+        private static IEnumerable GetHackathonRolesAsyncTestData()
+        {
+            // arg0: user
+            // arg1: admins
+            // arg2: enrolled
+            // arg3: isJudge
+            // expected roles
+
+            // platform admin
+            yield return new TestCaseData(
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+                })),
+                null,
+                false,
+                false,
+                new HackathonRoles
+                {
+                    isAdmin = true,
+                    isEnrolled = false,
+                    isJudge = false
+                });
+
+            // hack admin
+            yield return new TestCaseData(
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                })),
+                new List<HackathonAdminEntity>
+                {
+                    new HackathonAdminEntity { PartitionKey="hack", RowKey="uid" },
+                },
+                false,
+                false,
+                new HackathonRoles
+                {
+                    isAdmin = true,
+                    isEnrolled = false,
+                    isJudge = false
+                });
+
+            // neither platform nor hack admin
+            yield return new TestCaseData(
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                })),
+                new List<HackathonAdminEntity>
+                {
+                    new HackathonAdminEntity { PartitionKey="hack", RowKey="other" },
+                    new HackathonAdminEntity { PartitionKey="hack", RowKey="other2" }
+                },
+                false,
+                false,
+                new HackathonRoles
+                {
+                    isAdmin = false,
+                    isEnrolled = false,
+                    isJudge = false
+                });
+
+            // enrolled
+            yield return new TestCaseData(
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+                })),
+                null,
+                true,
+                false,
+                new HackathonRoles
+                {
+                    isAdmin = true,
+                    isEnrolled = true,
+                    isJudge = false
+                });
+
+            // judge
+            yield return new TestCaseData(
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
+                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
+                })),
+                null,
+                false,
+                true,
+                new HackathonRoles
+                {
+                    isAdmin = true,
+                    isEnrolled = false,
+                    isJudge = true
+                });
+        }
+
+        [Test, TestCaseSource(nameof(GetHackathonRolesAsyncTestData))]
+        public async Task GetHackathonRolesAsync(ClaimsPrincipal user, IEnumerable<HackathonAdminEntity> admins, bool enrolled, bool isJudge, HackathonRoles expectedRoles)
+        {
+            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack" };
+
+            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
+            if (admins != null)
+            {
+                hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackathon.Name, default)).ReturnsAsync(admins);
+            }
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(h => h.IsUserEnrolledAsync(hackathon, "uid", default)).ReturnsAsync(enrolled);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.IsJudgeAsync("hack", "uid", default)).ReturnsAsync(isJudge);
+
+            var hackathonManagement = new HackathonManagement(null)
+            {
+                EnrollmentManagement = enrollmentManagement.Object,
+                HackathonAdminManagement = hackathonAdminManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+            };
+            var role = await hackathonManagement.GetHackathonRolesAsync(hackathon, user, default);
+
+
+            Mock.VerifyAll(enrollmentManagement, hackathonAdminManagement, judgeManagement);
+            enrollmentManagement.VerifyNoOtherCalls();
+            hackathonAdminManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedRoles.isAdmin, role.isAdmin);
+            Assert.AreEqual(expectedRoles.isEnrolled, role.isEnrolled);
+            Assert.AreEqual(expectedRoles.isJudge, role.isJudge);
         }
         #endregion
     }
