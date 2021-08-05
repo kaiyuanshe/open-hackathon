@@ -719,6 +719,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(EnrollmentStatus.pendingApproval, enrollment.status);
         }
 
+        #region ListEnrollments
         [Test]
         public async Task ListEnrollmentsTest_HackNotFound()
         {
@@ -857,132 +858,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
             Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
-        }
-
-        #region GetHackathonRolesAsync
-        [Test]
-        public async Task GetHackathonRolesAsyncTest_NoUserIdClaim()
-        {
-            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack" };
-            ClaimsPrincipal user = new ClaimsPrincipal();
-            ClaimsPrincipal user2 = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-            {
-                new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
-            }));
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            var hackathonManagement = new HackathonManagement(null);
-            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, null, cancellationToken));
-            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, user, cancellationToken));
-            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(hackathon, user2, cancellationToken));
-            Assert.IsNull(await hackathonManagement.GetHackathonRolesAsync(null, user, cancellationToken));
-        }
-
-        private static IEnumerable GetHackathonRolesAsyncTestData()
-        {
-            // arg0: user
-            // arg1: admins
-            // arg2: enrolled
-            // expected roles
-
-            // platform admin
-            yield return new TestCaseData(
-                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
-                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
-                })),
-                null,
-                false,
-                new HackathonRoles
-                {
-                    isAdmin = true,
-                    isEnrolled = false,
-                    isJudge = false
-                });
-
-            // hack admin
-            yield return new TestCaseData(
-                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
-                })),
-                new List<HackathonAdminEntity>
-                {
-                    new HackathonAdminEntity { PartitionKey="hack", RowKey="uid" },
-                },
-                false,
-                new HackathonRoles
-                {
-                    isAdmin = true,
-                    isEnrolled = false,
-                    isJudge = false
-                });
-
-            // neither platform nor hack admin
-            yield return new TestCaseData(
-                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
-                })),
-                new List<HackathonAdminEntity>
-                {
-                    new HackathonAdminEntity { PartitionKey="hack", RowKey="other" },
-                    new HackathonAdminEntity { PartitionKey="hack", RowKey="other2" }
-                },
-                false,
-                new HackathonRoles
-                {
-                    isAdmin = false,
-                    isEnrolled = false,
-                    isJudge = false
-                });
-
-            // enrolled
-            yield return new TestCaseData(
-                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(AuthConstant.ClaimType.UserId, "uid"),
-                    new Claim(AuthConstant.ClaimType.PlatformAdministrator, "uid"),
-                })),
-                null,
-                true,
-                new HackathonRoles
-                {
-                    isAdmin = true,
-                    isEnrolled = true,
-                    isJudge = false
-                });
-        }
-
-        [Test, TestCaseSource(nameof(GetHackathonRolesAsyncTestData))]
-        public async Task GetHackathonRolesAsync(ClaimsPrincipal user, IEnumerable<HackathonAdminEntity> admins, bool enrolled, HackathonRoles expectedRoles)
-        {
-            HackathonEntity hackathon = new HackathonEntity { PartitionKey = "hack" };
-
-            var hackathonAdminManagement = new Mock<IHackathonAdminManagement>();
-            if (admins != null)
-            {
-                hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync(hackathon.Name, default)).ReturnsAsync(admins);
-            }
-            var enrollmentManagement = new Mock<IEnrollmentManagement>();
-            enrollmentManagement.Setup(h => h.IsUserEnrolledAsync(hackathon, "uid", default)).ReturnsAsync(enrolled);
-
-            var hackathonManagement = new HackathonManagement(null)
-            {
-                EnrollmentManagement = enrollmentManagement.Object,
-                HackathonAdminManagement = hackathonAdminManagement.Object,
-            };
-            var role = await hackathonManagement.GetHackathonRolesAsync(hackathon, user, default);
-
-            Mock.VerifyAll(enrollmentManagement, hackathonAdminManagement);
-            enrollmentManagement.VerifyNoOtherCalls();
-            hackathonAdminManagement.VerifyNoOtherCalls();
-
-            Assert.AreEqual(expectedRoles.isAdmin, role.isAdmin);
-            Assert.AreEqual(expectedRoles.isEnrolled, role.isEnrolled);
-            Assert.AreEqual(expectedRoles.isJudge, role.isJudge);
-        }
+        } 
         #endregion
     }
 }

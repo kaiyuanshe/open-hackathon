@@ -89,6 +89,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         public IEnrollmentManagement EnrollmentManagement { get; set; }
 
+        public IJudgeManagement JudgeManagement { get; set; }
+
         public HackathonManagement(ILogger<HackathonManagement> logger)
         {
             this.logger = logger;
@@ -380,7 +382,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             // enrollment
             isEnrolled = await EnrollmentManagement.IsUserEnrolledAsync(hackathon, userId, cancellationToken);
 
-            // todo judge
+            // judge
+            isJudge = await JudgeManagement.IsJudgeAsync(hackathon.Name, userId, cancellationToken);
 
             return new HackathonRoles
             {
