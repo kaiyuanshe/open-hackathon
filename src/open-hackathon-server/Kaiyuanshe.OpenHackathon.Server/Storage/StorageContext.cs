@@ -13,6 +13,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IHackathonTable HackathonTable { get; }
         IHackathonAdminTable HackathonAdminTable { get; }
         IJudgeTable JudgeTable { get; }
+        IRatingKindTable RatingKindTable { get; }
         ITeamTable TeamTable { get; }
         ITeamMemberTable TeamMemberTable { get; }
         ITeamWorkTable TeamWorkTable { get; }
@@ -32,6 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public IHackathonAdminTable HackathonAdminTable { get; }
         public IHackathonTable HackathonTable { get; }
         public IJudgeTable JudgeTable { get; }
+        public IRatingKindTable RatingKindTable { get; }
         public ITeamTable TeamTable { get; }
         public ITeamMemberTable TeamMemberTable { get; }
         public ITeamWorkTable TeamWorkTable { get; }
@@ -51,6 +53,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
             JudgeTable = new JudgeTable(storageAccount, TableNames.Judge);
+            RatingKindTable = new RatingKindTable(storageAccount, TableNames.RatingKind);
             TeamTable = new TeamTable(storageAccount, TableNames.Team);
             TeamMemberTable = new TeamMemberTable(storageAccount, TableNames.TeamMember);
             TeamWorkTable = new TeamWorkTable(storageAccount, TableNames.TeamWork);
