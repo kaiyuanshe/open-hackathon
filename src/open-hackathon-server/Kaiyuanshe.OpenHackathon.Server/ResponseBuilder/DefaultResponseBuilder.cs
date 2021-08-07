@@ -26,6 +26,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Judge BuildJudge(JudgeEntity judgeEntity, UserInfo userInfo);
 
+        RatingKind BuildRatingKind(RatingKindEntity ratingKindEntity);
+
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(
             IEnumerable<TSrcItem> items,
             Func<TSrcItem, TResultItem> converter,
@@ -65,7 +67,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return hackathonEntity.As<Hackathon>(h =>
             {
-                h.updatedAt = hackathonEntity.Timestamp.DateTime;
+                h.updatedAt = hackathonEntity.Timestamp.UtcDateTime;
                 h.roles = roles;
             });
         }
@@ -74,7 +76,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return enrollment.As<Enrollment>(p =>
             {
-                p.updatedAt = enrollment.Timestamp.DateTime;
+                p.updatedAt = enrollment.Timestamp.UtcDateTime;
                 p.user = userInfo;
             });
         }
@@ -83,7 +85,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return teamEntity.As<Team>(p =>
             {
-                p.updatedAt = teamEntity.Timestamp.DateTime;
+                p.updatedAt = teamEntity.Timestamp.UtcDateTime;
                 p.creator = creator;
             });
         }
@@ -92,7 +94,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return teamMemberEntity.As<TeamMember>(p =>
             {
-                p.updatedAt = teamMemberEntity.Timestamp.DateTime;
+                p.updatedAt = teamMemberEntity.Timestamp.UtcDateTime;
                 p.user = member;
             });
         }
@@ -101,7 +103,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return teamWorkEntity.As<TeamWork>(p =>
             {
-                p.updatedAt = teamWorkEntity.Timestamp.DateTime;
+                p.updatedAt = teamWorkEntity.Timestamp.UtcDateTime;
             });
         }
 
@@ -109,7 +111,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return awardEntity.As<Award>(p =>
             {
-                p.updatedAt = awardEntity.Timestamp.DateTime;
+                p.updatedAt = awardEntity.Timestamp.UtcDateTime;
             });
         }
 
@@ -117,7 +119,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return awardAssignmentEntity.As<AwardAssignment>((p) =>
             {
-                p.updatedAt = awardAssignmentEntity.Timestamp.DateTime;
+                p.updatedAt = awardAssignmentEntity.Timestamp.UtcDateTime;
                 p.user = user;
                 p.team = team;
             });
@@ -127,8 +129,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         {
             return judgeEntity.As<Judge>((p) =>
             {
-                p.updatedAt = judgeEntity.Timestamp.DateTime;
+                p.updatedAt = judgeEntity.Timestamp.UtcDateTime;
                 p.user = userInfo;
+            });
+        }
+
+        public RatingKind BuildRatingKind(RatingKindEntity ratingKindEntity)
+        {
+            return ratingKindEntity.As<RatingKind>((p) =>
+            {
+                p.updatedAt = ratingKindEntity.Timestamp.UtcDateTime;
             });
         }
 

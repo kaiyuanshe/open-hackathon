@@ -57,8 +57,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 PartitionKey = "hack",
                 RowKey = "uid",
                 Status = EnrollmentStatus.approved,
-                CreatedAt = DateTime.Now,
-                Timestamp = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow,
             };
             UserInfo userInfo = new UserInfo
             {
@@ -76,6 +76,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("name", enrollment.user.Name);
         }
 
+        #region BuildTeamTest
         [Test]
         public void BuildTeamTest()
         {
@@ -87,8 +88,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatorId = "uid",
                 Description = "desc",
                 DisplayName = "dp",
-                CreatedAt = DateTime.Now,
-                Timestamp = DateTime.Now
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             };
             var userInfo = new UserInfo
             {
@@ -108,7 +109,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(entity.Timestamp.DateTime, team.updatedAt);
             Assert.AreEqual("male", team.creator.Gender);
         }
+        #endregion
 
+        #region BuildTeamMemberTest
         [Test]
         public void BuildTeamMemberTest()
         {
@@ -120,8 +123,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Description = "desc",
                 Role = TeamMemberRole.Admin,
                 Status = TeamMemberStatus.pendingApproval,
-                CreatedAt = DateTime.Now,
-                Timestamp = DateTime.Now
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             };
             var user = new UserInfo
             {
@@ -141,6 +144,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(entity.Timestamp.DateTime, teamMember.updatedAt);
             Assert.AreEqual("city", teamMember.user.City);
         }
+        #endregion
 
         #region BuildTeamWorkTest
         [Test]
@@ -155,8 +159,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 Title = "title",
                 Type = TeamWorkType.word,
                 Url = "url",
-                CreatedAt = DateTime.Now,
-                Timestamp = DateTime.Now
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             };
 
             var respBuilder = new DefaultResponseBuilder();
@@ -229,6 +233,34 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(entity.CreatedAt, result.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, result.updatedAt);
             Assert.AreEqual("mn", result.user.MiddleName);
+        }
+        #endregion
+
+        #region BuildRatingKind
+        [Test]
+        public void BuildRatingKind()
+        {
+            RatingKindEntity entity = new RatingKindEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                Description = "desc",
+                Name = "name",
+                MaximumRating = 20,
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+
+            var responseBuilder = new DefaultResponseBuilder();
+            var result = responseBuilder.BuildRatingKind(entity);
+
+            Assert.AreEqual("pk", result.hackathonName);
+            Assert.AreEqual("rk", result.id);
+            Assert.AreEqual("desc", result.description);
+            Assert.AreEqual("name", result.name);
+            Assert.AreEqual(20, result.maximumRating);
+            Assert.AreEqual(entity.CreatedAt, result.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, result.updatedAt);
         }
         #endregion
 

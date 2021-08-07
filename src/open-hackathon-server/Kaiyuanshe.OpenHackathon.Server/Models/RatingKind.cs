@@ -28,6 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>创意性</example>
         [MaxLength(64)]
+        [Required]
         public string name { get; set; }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// maximum rating accepted. default to 10. Ratings given by judges must be between 0 and this maximum value.
         /// </summary>
-        /// <example>0</example>
+        /// <example>10</example>
         [Range(1, 10_000)]
         public int? maximumRating { get; set; }
     }

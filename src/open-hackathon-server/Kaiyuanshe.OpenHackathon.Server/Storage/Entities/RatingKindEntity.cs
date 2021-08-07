@@ -3,7 +3,9 @@
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     /// <summary>
-    /// Entity for rating kinds
+    /// Entity for rating kinds. 
+    /// PK: hackathonName.
+    /// RK: Auto-generated Guid.
     /// </summary>
     public class RatingKindEntity : AdvancedTableEntity
     {
