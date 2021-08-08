@@ -26,5 +26,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         TeamMember,
         TeamWork,
         Judge,
+        RatingKind,
     }
 }

@@ -1,12 +1,17 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
@@ -37,16 +42,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 en.CreatedAt > DateTime.UtcNow.AddMinutes(-1)), default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(s => s.RatingKindTable).Returns(ratingKindTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("RatingKind-hack"));
 
             var ratingManagement = new RatingManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             var result = await ratingManagement.CreateRatingKindAsync(parameter, default);
 
-            Mock.VerifyAll(storageContext, ratingKindTable);
+            Mock.VerifyAll(storageContext, ratingKindTable, cache);
             ratingKindTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
 
             Assert.AreEqual("name", result.Name);
             Assert.AreEqual("desc", result.Description);
@@ -78,6 +87,110 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
 
             Assert.AreEqual("pk", result.HackathonName);
+        }
+        #endregion
+
+        #region ListPaginatedRatingKindsAsync
+
+        private static IEnumerable ListPaginatedRatingKindsAsyncTestData()
+        {
+            var a1 = new RatingKindEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            var a2 = new RatingKindEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(3),
+            };
+            var a3 = new RatingKindEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(2),
+            };
+            var a4 = new RatingKindEntity
+            {
+                RowKey = "a1",
+                CreatedAt = DateTime.UtcNow.AddDays(4),
+            };
+
+            // arg0: options
+            // arg1: all kinds
+            // arg2: expected result
+            // arg3: expected Next
+
+            // minimal
+            yield return new TestCaseData(
+                new RatingKindQueryOptions { },
+                new List<RatingKindEntity> { a1, a2, a3, a4 },
+                new List<RatingKindEntity> { a4, a2, a3, a1 },
+                null
+                );
+
+            // top
+            yield return new TestCaseData(
+                new RatingKindQueryOptions { Top = 2 },
+                new List<RatingKindEntity> { a1, a2, a3, a4 },
+                new List<RatingKindEntity> { a4, a2, },
+                new TableContinuationToken { NextPartitionKey = "2", NextRowKey = "2" }
+                );
+
+            // paging
+            yield return new TestCaseData(
+                new RatingKindQueryOptions
+                {
+                    Top = 2,
+                    TableContinuationToken = new TableContinuationToken
+                    {
+                        NextPartitionKey = "1",
+                        NextRowKey = "1"
+                    }
+                },
+                new List<RatingKindEntity> { a1, a2, a3, a4 },
+                new List<RatingKindEntity> { a2, a3, },
+                new TableContinuationToken { NextPartitionKey = "3", NextRowKey = "3" }
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedRatingKindsAsyncTestData))]
+        public async Task ListPaginatedAwardsAsync_Options(
+            RatingKindQueryOptions options,
+            IEnumerable<RatingKindEntity> allAwards,
+            IEnumerable<RatingKindEntity> expectedResult,
+            TableContinuationToken expectedNext)
+        {
+            string hackName = "foo";
+
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<RatingKindEntity>>>(c => c.CacheKey == "RatingKind-foo"), default))
+                .ReturnsAsync(allAwards);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await ratingManagement.ListPaginatedRatingKindsAsync(hackName, options, default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult.Count(), result.Count());
+            for (int i = 0; i < expectedResult.Count(); i++)
+            {
+                Assert.AreEqual(expectedResult.ElementAt(i).Id, result.ElementAt(i).Id);
+            }
+            if (expectedNext == null)
+            {
+                Assert.IsNull(options.Next);
+            }
+            else
+            {
+                Assert.IsNotNull(options.Next);
+                Assert.AreEqual(expectedNext.NextPartitionKey, options.Next.NextPartitionKey);
+                Assert.AreEqual(expectedNext.NextRowKey, options.Next.NextRowKey);
+            }
         }
         #endregion
     }

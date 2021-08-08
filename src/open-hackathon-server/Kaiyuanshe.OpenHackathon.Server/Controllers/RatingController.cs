@@ -1,10 +1,13 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Models.Validations;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,6 +91,56 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(Resources.Rating_KindNotFound);
             }
             return Ok(ResponseBuilder.BuildRatingKind(ratingKindEntity));
+        }
+        #endregion
+
+        #region ListRatingKinds
+        /// <summary>
+        /// List paginated rating kinds of a hackathon.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>the response contains a list of ratingKinds and a nextLink if there are more results.</returns>
+        /// <response code="200">Success.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(RatingKindList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/ratingKinds")]
+        public async Task<object> ListRatingKinds(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // query
+            var ratingKindQueryOptions = new RatingKindQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top
+            };
+
+            var ratingKinds = await RatingManagement.ListPaginatedRatingKindsAsync(hackathonName.ToLower(), ratingKindQueryOptions, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, ratingKindQueryOptions.Next);
+            return Ok(ResponseBuilder.BuildResourceList<RatingKindEntity, RatingKind, RatingKindList>(
+                    ratingKinds,
+                    ResponseBuilder.BuildRatingKind,
+                    nextLink));
         }
         #endregion
     }

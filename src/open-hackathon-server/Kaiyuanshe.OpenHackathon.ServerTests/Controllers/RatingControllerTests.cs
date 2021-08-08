@@ -6,9 +6,13 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
@@ -128,6 +132,102 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             RatingKind resp = AssertHelper.AssertOKResult<RatingKind>(result);
             Assert.AreEqual("rk", resp.id);
+        }
+        #endregion
+
+        #region ListRatingKinds
+        private static IEnumerable ListRatingKindsTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListRatingKindsTestData))]
+        public async Task ListRatingKinds(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            var hackName = "Hack";
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var awards = new List<RatingKindEntity>
+            {
+                new RatingKindEntity
+                {
+                    PartitionKey = "pk",
+                    RowKey = "rk",
+                }
+            };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default))
+                .ReturnsAsync(hackathonEntity);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(p => p.ListPaginatedRatingKindsAsync("hack", It.IsAny<RatingKindQueryOptions>(), default))
+                .Callback<string, RatingKindQueryOptions, CancellationToken>((n, o, t) =>
+                {
+                    o.Next = next;
+                })
+                .ReturnsAsync(awards);
+
+            // run
+            var controller = new RatingController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.ListRatingKinds(hackName, pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<RatingKindList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].id);
         }
         #endregion
     }
