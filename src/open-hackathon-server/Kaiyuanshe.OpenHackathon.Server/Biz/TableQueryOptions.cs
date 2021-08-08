@@ -76,4 +76,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
 
     }
+
+    public class RatingKindQueryOptions : TableQueryOptions
+    {
+
+    }
 }
