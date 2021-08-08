@@ -27,7 +27,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success. The response describes a rating kind.</response>
         [HttpPut]
         [ProducesResponseType(typeof(RatingKind), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 404)]
+        [SwaggerErrorResponse(400, 404, 412)]
         [Route("hackathon/{hackathonName}/ratingKind")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateRatingKind(
@@ -50,6 +50,52 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             // create rating kind
             parameter.hackathonName = hackathonName.ToLower();
             var ratingKindEntity = await RatingManagement.CreateRatingKindAsync(parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildRatingKind(ratingKindEntity));
+        }
+        #endregion
+
+        #region UpdateRatingKind
+        /// <summary>
+        /// Update a kind of rating.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="kindId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">Auto-generated Guid of a kind.</param>
+        /// <returns>The rating kind</returns>
+        /// <response code="200">Success. The response describes a rating kind.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(RatingKind), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("hackathon/{hackathonName}/ratingKind/{kindId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> UpdateRatingKind(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string kindId,
+            [FromBody] RatingKind parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Query Rating Kind
+            var ratingKindEntity = await RatingManagement.GetRatingKindAsync(hackathonName.ToLower(), kindId, cancellationToken);
+            if (ratingKindEntity == null)
+            {
+                return NotFound(Resources.Rating_KindNotFound);
+            }
+
+            // Update rating kind
+            ratingKindEntity = await RatingManagement.UpdateRatingKindAsync(ratingKindEntity, parameter, cancellationToken);
             return Ok(ResponseBuilder.BuildRatingKind(ratingKindEntity));
         }
         #endregion

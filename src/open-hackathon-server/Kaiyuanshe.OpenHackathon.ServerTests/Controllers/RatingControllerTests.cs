@@ -72,6 +72,73 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
         #endregion
 
+        #region UpdateRatingKind
+        [Test]
+        public async Task UpdateRatingKind_KindNotFound()
+        {
+            var hackathon = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            var parameter = new RatingKind();
+            RatingKindEntity entity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.GetRatingKindAsync("hack", "kid", default)).ReturnsAsync(entity);
+
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.UpdateRatingKind("Hack", "kid", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.Rating_KindNotFound);
+        }
+
+        [Test]
+        public async Task UpdateRatingKind_Updated()
+        {
+            var hackathon = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            var parameter = new RatingKind();
+            RatingKindEntity entity = new RatingKindEntity { PartitionKey = "pk" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingKindAsync("hack", "kid", default)).ReturnsAsync(entity);
+            ratingManagement.Setup(r => r.UpdateRatingKindAsync(entity, parameter, default)).ReturnsAsync(entity);
+
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.UpdateRatingKind("Hack", "kid", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<RatingKind>(result);
+            Assert.AreEqual("pk", resp.hackathonName);
+        }
+        #endregion
+
         #region GetRatingKind
         [Test]
         public async Task GetRatingKind_NotFound()
