@@ -64,6 +64,50 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateRatingKindAsync
+        [TestCase(null, 4)]
+        [TestCase(8, 8)]
+        public async Task UpdateRatingKindAsync(int? newMaxRating, int expectedNewValue)
+        {
+            RatingKindEntity existing = new RatingKindEntity
+            {
+                PartitionKey = "pk",
+                Name = "n1",
+                Description = "d1",
+                MaximumRating = 4
+            };
+            RatingKind parameter = new RatingKind { name = "n2", description = "d2", maximumRating = newMaxRating };
+
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var ratingKindTable = new Mock<IRatingKindTable>();
+            ratingKindTable.Setup(t => t.MergeAsync(It.Is<RatingKindEntity>(en =>
+                en.Name == "n2" &&
+                en.Description == "d2" &&
+                en.MaximumRating == expectedNewValue), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(s => s.RatingKindTable).Returns(ratingKindTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("RatingKind-pk"));
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            var result = await ratingManagement.UpdateRatingKindAsync(existing, parameter, default);
+
+            Mock.VerifyAll(storageContext, ratingKindTable, cache);
+            ratingKindTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual("n2", result.Name);
+            Assert.AreEqual("d2", result.Description);
+            Assert.AreEqual("pk", result.HackathonName);
+            Assert.AreEqual(expectedNewValue, result.MaximumRating);
+        }
+        #endregion
+
         #region GetRatingKindAsync
         [Test]
         public async Task GetRatingKindAsync()
