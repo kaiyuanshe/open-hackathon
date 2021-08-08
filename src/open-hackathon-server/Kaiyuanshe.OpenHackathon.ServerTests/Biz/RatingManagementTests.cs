@@ -54,5 +54,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual(expectedMaxRating, result.MaximumRating);
         }
         #endregion
+
+        #region GetRatingKindAsync
+        [Test]
+        public async Task GetRatingKindAsync()
+        {
+            RatingKindEntity kind = new RatingKindEntity { PartitionKey = "pk" };
+
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var ratingKindTable = new Mock<IRatingKindTable>();
+            ratingKindTable.Setup(t => t.RetrieveAsync("hack", "kid", default)).ReturnsAsync(kind);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(s => s.RatingKindTable).Returns(ratingKindTable.Object);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await ratingManagement.GetRatingKindAsync("hack", "kid", default);
+
+            Mock.VerifyAll(storageContext, ratingKindTable);
+            ratingKindTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("pk", result.HackathonName);
+        }
+        #endregion
     }
 }
