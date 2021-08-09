@@ -189,5 +189,45 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                     nextLink));
         }
         #endregion
+
+        #region DeleteRatingKind
+        /// <summary>
+        /// Delete a rating kind. Please make sure all related ratings are already deleted.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="kindId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">Auto-generated Guid of a kind.</param>
+        /// <response code="204">Deleted</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("hackathon/{hackathonName}/ratingKind/{kindId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> DeleteRatingKind(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string kindId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // query and delete judge
+            var entity = await RatingManagement.GetRatingKindAsync(hackathonName.ToLower(), kindId, cancellationToken);
+            if (entity == null)
+            {
+                return NoContent();
+            }
+            await RatingManagement.DeleteRatingKindAsync(hackathonName.ToLower(), kindId, cancellationToken);
+            return NoContent();
+        }
+        #endregion
     }
 }
