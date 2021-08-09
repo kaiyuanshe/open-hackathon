@@ -96,7 +96,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                ControllerContext.ActionDescriptor.ActionName,
                ControllerContext.ActionDescriptor.ControllerName,
                routeValues,
-               Request.Scheme,
+               "https", // Request.Scheme doesn't work well on App Service containers. TLS terminates on front end, the traffic to containers are always http.
                Request.Host.Value);
         }
 

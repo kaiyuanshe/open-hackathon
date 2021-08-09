@@ -219,7 +219,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
         #region DeleteJudge
         /// <summary>
-        /// Delete a judge. Please make sure all submitted ratings are already deleted.
+        /// Delete a judge. Please make sure all related ratings are already deleted.
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>

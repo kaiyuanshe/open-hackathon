@@ -17,6 +17,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<RatingKindEntity> UpdateRatingKindAsync(RatingKindEntity existing, RatingKind parameter, CancellationToken cancellationToken);
         Task<RatingKindEntity> GetRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
         Task<IEnumerable<RatingKindEntity>> ListPaginatedRatingKindsAsync(string hackathonName, RatingKindQueryOptions options, CancellationToken cancellationToken = default);
+        Task DeleteRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
     }
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
@@ -124,6 +125,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return kinds;
+        }
+        #endregion
+
+        #region Task DeleteJudgeAsync(string hackathonName, string kindId, CancellationToken cancellationToken)
+        public async Task DeleteRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(kindId))
+                return;
+
+            await StorageContext.RatingKindTable.DeleteAsync(hackathonName, kindId, cancellationToken);
+            InvalidateCachedRatingKinds(hackathonName);
         }
         #endregion
     }

@@ -237,5 +237,31 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             }
         }
         #endregion
+
+        #region DeleteJudgeAsync
+        [Test]
+        public async Task DeleteJudgeAsync()
+        {
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var ratingKindTable = new Mock<IRatingKindTable>();
+            ratingKindTable.Setup(j => j.DeleteAsync("hack", "kid", default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingKindTable).Returns(ratingKindTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("RatingKind-hack"));
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
+            };
+            await ratingManagement.DeleteRatingKindAsync("hack", "kid", default);
+
+            Mock.VerifyAll(ratingKindTable, storageContext, cache);
+            ratingKindTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+        }
+        #endregion
     }
 }
