@@ -61,7 +61,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="parameter"></param>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="kindId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">Auto-generated Guid of a kind.</param>
+        /// <param name="kindId" example="e4576366-fa87-451d-8e4d-ef6d1b6cee05">Auto-generated Guid of a kind.</param>
         /// <returns>The rating kind</returns>
         /// <response code="200">Success. The response describes a rating kind.</response>
         [HttpPatch]
@@ -106,7 +106,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="kindId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">Auto-generated Guid of a kind.</param>
+        /// <param name="kindId" example="e4576366-fa87-451d-8e4d-ef6d1b6cee05">Auto-generated Guid of a kind.</param>
         /// <returns>The rating kind</returns>
         /// <response code="200">Success. The response describes a rating kind.</response>
         [HttpGet]
@@ -196,7 +196,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// </summary>
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
-        /// <param name="kindId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">Auto-generated Guid of a kind.</param>
+        /// <param name="kindId" example="e4576366-fa87-451d-8e4d-ef6d1b6cee05">Auto-generated Guid of a kind.</param>
         /// <response code="204">Deleted</response>
         [HttpDelete]
         [SwaggerErrorResponse(400, 404, 412)]
