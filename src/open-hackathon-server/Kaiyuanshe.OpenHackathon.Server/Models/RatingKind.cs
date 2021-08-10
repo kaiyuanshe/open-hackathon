@@ -20,7 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// auto-generated id of the kind.
         /// </summary>
-        /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
+        /// <example>e4576366-fa87-451d-8e4d-ef6d1b6cee05</example>
         public string id { get; internal set; }
 
         /// <summary>
