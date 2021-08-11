@@ -142,6 +142,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
         {
             services.AddSingleton<IAuthorizationHandler, PlatformAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, HackathonAdministratorHandler>();
+            services.AddSingleton<IAuthorizationHandler, HackathonJudgeHandler>();
             services.AddSingleton<IAuthorizationHandler, TeamAdministratorHandler>();
             services.AddSingleton<IAuthorizationHandler, TeamMemberHandler>();
             services.AddSingleton<IAuthorizationHandler, NoRequirementHandler>();
@@ -168,6 +169,10 @@ namespace Kaiyuanshe.OpenHackathon.Server
                 {
                     policy.Requirements.Add(new HackathonAdministratorRequirement());
                 });
+                options.AddPolicy(AuthConstant.Policy.HackathonJudge, policy =>
+                {
+                    policy.Requirements.Add(new HackathonJudgeRequirement());
+                });
                 options.AddPolicy(AuthConstant.Policy.TeamAdministrator, policy =>
                 {
                     policy.Requirements.Add(new TeamAdministratorRequirement());
@@ -179,6 +184,7 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
                 // empty policies to make swagger UI happy
                 options.AddPolicy(AuthConstant.PolicyForSwagger.HackathonAdministrator, noRequirementPolicy);
+                options.AddPolicy(AuthConstant.PolicyForSwagger.HackathonJudge, noRequirementPolicy);
                 options.AddPolicy(AuthConstant.PolicyForSwagger.TeamAdministrator, noRequirementPolicy);
                 options.AddPolicy(AuthConstant.PolicyForSwagger.TeamMember, noRequirementPolicy);
                 options.AddPolicy(AuthConstant.PolicyForSwagger.LoginUser, noRequirementPolicy);

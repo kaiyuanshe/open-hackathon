@@ -42,6 +42,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             public const string HackathonAdministrator = "HackathonAdministratorReal";
 
             /// <summary>
+            /// Policy to rate a team and its works.
+            /// </summary>
+            public const string HackathonJudge = "HackathonJudgeReal";
+
+            /// <summary>
             /// Administrator of the OPH platform.
             /// </summary>
             public const string PlatformAdministrator = "PlatformAdministrator";
@@ -68,6 +73,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
             /// Policy to administrate a hackathon.
             /// </summary>
             public const string HackathonAdministrator = "HackathonAdministrator";
+
+            /// <summary>
+            /// Policy to rate a team and its works.
+            /// </summary>
+            public const string HackathonJudge = "HackathonJudge";
 
             /// <summary>
             /// Policy to administrate a team.
