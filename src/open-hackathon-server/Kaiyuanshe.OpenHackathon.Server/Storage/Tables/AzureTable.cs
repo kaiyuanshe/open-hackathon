@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +24,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         Task<TableResult> DeleteAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
 
         Task<TEntity> RetrieveAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<TEntity>> ExecuteQueryAsync(
+            TableQuery<TEntity> query, CancellationToken cancellationToken = default);
 
         Task<TableQuerySegment<TEntity>> ExecuteQuerySegmentedAsync(
             TableQuery<TEntity> query, TableContinuationToken continuationToken, CancellationToken cancellationToken = default);
@@ -167,6 +171,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
             TableOperation retrieveOperation = TableOperation.Retrieve<TEntity>(partitionKey, rowKey);
             TableResult retrieveResult = await ExecuteAsync(retrieveOperation, cancellationToken);
             return (TEntity)retrieveResult.Result;
+        }
+
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(
+            TableQuery<TEntity> query, CancellationToken cancellationToken = default)
+        {
+            List<TEntity> list = new List<TEntity>();
+            await ExecuteQuerySegmentedAsync(query, (segment) =>
+            {
+                list.AddRange(segment);
+            }, cancellationToken);
+
+            return list;
         }
 
         /// <summary>

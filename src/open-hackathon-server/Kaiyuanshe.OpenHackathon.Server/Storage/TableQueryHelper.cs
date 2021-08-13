@@ -4,6 +4,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public static class TableQueryHelper
     {
+        public static string PartitionKeyFilter(string partitionKey)
+        {
+            return TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
+        }
+
         public static string And(params string[] filters)
         {
             if (filters == null || filters.Length == 0)
