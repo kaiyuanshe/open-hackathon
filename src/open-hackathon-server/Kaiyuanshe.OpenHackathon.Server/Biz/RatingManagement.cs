@@ -1,5 +1,6 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -18,6 +19,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<RatingKindEntity> GetRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
         Task<IEnumerable<RatingKindEntity>> ListPaginatedRatingKindsAsync(string hackathonName, RatingKindQueryOptions options, CancellationToken cancellationToken = default);
         Task DeleteRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
+        Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken);
+        Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken);
     }
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
@@ -136,6 +139,34 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             await StorageContext.RatingKindTable.DeleteAsync(hackathonName, kindId, cancellationToken);
             InvalidateCachedRatingKinds(hackathonName);
+        }
+        #endregion
+
+        #region Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken);
+        public async Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken)
+        public async Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName)
+                || string.IsNullOrWhiteSpace(judgeId)
+                || string.IsNullOrWhiteSpace(teamId)
+                || string.IsNullOrWhiteSpace(kindId))
+                return null;
+
+            var filter = TableQueryHelper.And(
+                TableQueryHelper.PartitionKeyFilter(hackathonName),
+                TableQuery.GenerateFilterCondition(nameof(RatingEntity.JudgeId), QueryComparisons.Equal, judgeId),
+                TableQuery.GenerateFilterCondition(nameof(RatingEntity.TeamId), QueryComparisons.Equal, teamId),
+                TableQuery.GenerateFilterCondition(nameof(RatingEntity.RatingKindId), QueryComparisons.Equal, kindId));
+
+            TableQuery<RatingEntity> query = new TableQuery<RatingEntity>().Where(filter).Take(1);
+            var results = await StorageContext.RatingTable.ExecuteQueryAsync(query, cancellationToken);
+            return results.FirstOrDefault();
         }
         #endregion
     }

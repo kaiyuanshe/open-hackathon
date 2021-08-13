@@ -263,5 +263,34 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             cache.VerifyNoOtherCalls();
         }
         #endregion
+
+        #region GetRatingAsync
+        [Test]
+        public async Task GetRatingAsync_ForCreate()
+        {
+            var entities = new List<RatingEntity> { new RatingEntity { description = "desc" } };
+
+            var ratingTable = new Mock<IRatingTable> { };
+            ratingTable.Setup(t => t.ExecuteQueryAsync(It.Is<TableQuery<RatingEntity>>(r => r.TakeCount == 1
+                && r.FilterString == "(((PartitionKey eq 'hack') and (JudgeId eq 'jid')) and (TeamId eq 'tid')) and (RatingKindId eq 'kid')"
+            ), default)).ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
+            var logger = new Mock<ILogger<RatingManagement>>();
+
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await ratingManagement.GetRatingAsync("hack", "jid", "tid", "kid", default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("desc", result.description);
+        }
+        #endregion
     }
 }
