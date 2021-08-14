@@ -188,6 +188,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool EnrollmentNotFullRequired { get; set; }
             public bool HackathonOpenRequired { get; set; }
             public bool HackAdminRequird { get; set; }
+            public bool HackJudgeRequird { get; set; }
             public bool OnlineRequired { get; set; }
             public bool NotDeletedRequired { get; set; }
         }
@@ -303,6 +304,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (!authorizationResult.Succeeded)
                 {
                     options.ValidateResult = Forbidden(Resources.Hackathon_NotAdmin);
+                    return false;
+                }
+            }
+
+            if (options.HackJudgeRequird)
+            {
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(User, hackathon, AuthConstant.Policy.HackathonJudge);
+                if (!authorizationResult.Succeeded)
+                {
+                    options.ValidateResult = Forbidden(Resources.Hackathon_NotJudge);
                     return false;
                 }
             }

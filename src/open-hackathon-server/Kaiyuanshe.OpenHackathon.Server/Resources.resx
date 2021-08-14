@@ -183,6 +183,9 @@
   <data name="Hackathon_NotFound" xml:space="preserve">
     <value>Hackathon with name `{0}` not found. Try PUT to create a new one.</value>
   </data>
+  <data name="Hackathon_NotJudge" xml:space="preserve">
+    <value>Access denied. Only the judges of the hackathon are allowed. Please contact the admin to request access.</value>
+  </data>
   <data name="Hackathon_NotStarted" xml:space="preserve">
     <value>The hackathon is not started yet. </value>
   </data>
