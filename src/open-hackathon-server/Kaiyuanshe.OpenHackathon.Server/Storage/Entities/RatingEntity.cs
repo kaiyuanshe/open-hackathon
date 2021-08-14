@@ -8,7 +8,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     /// <summary>
     /// entity for ratings. 
-    /// PK: hackathon. 
+    /// PK: hackathon name. 
     /// RK: auto-generated Guid.
     /// </summary>
     public class RatingEntity : AdvancedTableEntity
@@ -55,12 +55,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// rating(score). an integer between 0 and allowed maximum value.
         /// </summary>
-        public int score { get; set; }
+        public int Score { get; set; }
 
         /// <summary>
         /// description of the rating
         /// </summary>
         /// <example>amazing team</example>
-        public string description { get; set; }
+        public string Description { get; set; }
     }
 }

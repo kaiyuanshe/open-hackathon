@@ -16,5 +16,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
             Assert.AreEqual(expected, DigestHelper.SHA512Digest(Encoding.UTF8.GetBytes(original)));
             Assert.AreEqual(expected, DigestHelper.SHA512Digest(original));
         }
+
+        [TestCase("a", "b975c10c-f1c0-a8b6-31c3-99e269772661")]
+        [TestCase("whatever", "26598c00-86ca-2310-c1d2-a36653fd88e2")]
+        public void String2Guid(string input, string expectedGuid)
+        {
+            var guid = DigestHelper.String2Guid(input);
+            Assert.AreEqual(expectedGuid, guid.ToString());
+        }
     }
 }

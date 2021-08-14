@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// user id of judge
         /// </summary>
         /// <example>1</example>
-        public string judgeId { get; internal set; }
+        public string judgeId { get; set; }
 
         /// <summary>
         /// user info of the judge.
@@ -36,7 +36,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// id of rating kind
         /// </summary>
         /// <example>e4576366-fa87-451d-8e4d-ef6d1b6cee05</example>
-        public string ratingKindId { get; internal set; }
+        public string ratingKindId { get; set; }
+
+        /// <summary>
+        /// detail of the rating kind
+        /// </summary>
+        public RatingKind ratingKind { get; internal set; }
 
         /// <summary>
         /// id of the team. Required for first time create(PUT) request.

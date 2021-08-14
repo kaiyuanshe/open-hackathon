@@ -57,7 +57,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = Guid.NewGuid().ToString(),
                 CreatedAt = DateTime.UtcNow,
                 Description = parameter.description,
-                MaximumRating = parameter.maximumRating.GetValueOrDefault(10),
+                MaximumScore = parameter.maximumScore.GetValueOrDefault(10),
                 Name = parameter.name,
             };
             await StorageContext.RatingKindTable.InsertAsync(entity, cancellationToken);
@@ -74,7 +74,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             existing.Name = parameter.name ?? existing.Name;
             existing.Description = parameter.description ?? existing.Description;
-            existing.MaximumRating = parameter.maximumRating.GetValueOrDefault(existing.MaximumRating);
+            existing.MaximumScore = parameter.maximumScore.GetValueOrDefault(existing.MaximumScore);
             await StorageContext.RatingKindTable.MergeAsync(existing, cancellationToken);
             InvalidateCachedRatingKinds(existing.HackathonName);
 
@@ -145,7 +145,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #region Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken);
         public async Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var ratingEntity = new RatingEntity
+            {
+                PartitionKey = parameter.hackathonName,
+                RowKey = GenerateRatingEntityRowKey(parameter.judgeId, parameter.teamId, parameter.ratingKindId),
+                CreatedAt = DateTime.UtcNow,
+                Description = parameter.description,
+                JudgeId = parameter.judgeId,
+                RatingKindId = parameter.ratingKindId,
+                Score = parameter.score.GetValueOrDefault(0),
+                TeamId = parameter.teamId,
+            };
+
+            await StorageContext.RatingTable.InsertAsync(ratingEntity, cancellationToken);
+            return ratingEntity;
         }
         #endregion
 
@@ -158,16 +171,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 || string.IsNullOrWhiteSpace(kindId))
                 return null;
 
-            var filter = TableQueryHelper.And(
-                TableQueryHelper.PartitionKeyFilter(hackathonName),
-                TableQuery.GenerateFilterCondition(nameof(RatingEntity.JudgeId), QueryComparisons.Equal, judgeId),
-                TableQuery.GenerateFilterCondition(nameof(RatingEntity.TeamId), QueryComparisons.Equal, teamId),
-                TableQuery.GenerateFilterCondition(nameof(RatingEntity.RatingKindId), QueryComparisons.Equal, kindId));
-
-            TableQuery<RatingEntity> query = new TableQuery<RatingEntity>().Where(filter).Take(1);
-            var results = await StorageContext.RatingTable.ExecuteQueryAsync(query, cancellationToken);
-            return results.FirstOrDefault();
+            var rowKey = GenerateRatingEntityRowKey(judgeId, teamId, kindId);
+            return await StorageContext.RatingTable.RetrieveAsync(hackathonName, rowKey, cancellationToken);
         }
         #endregion
+
+        private string GenerateRatingEntityRowKey(string judgeId, string teamId, string kindId)
+        {
+            string input = $"{judgeId}-{teamId}-{kindId}".ToLower();
+            var guid = DigestHelper.String2Guid(input);
+            return guid.ToString();
+        }
     }
 }

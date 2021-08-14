@@ -246,7 +246,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 RowKey = "rk",
                 Description = "desc",
                 Name = "name",
-                MaximumRating = 20,
+                MaximumScore = 20,
                 CreatedAt = DateTime.UtcNow,
                 Timestamp = DateTimeOffset.UtcNow
             };
@@ -258,7 +258,45 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("rk", result.id);
             Assert.AreEqual("desc", result.description);
             Assert.AreEqual("name", result.name);
-            Assert.AreEqual(20, result.maximumRating);
+            Assert.AreEqual(20, result.maximumScore);
+            Assert.AreEqual(entity.CreatedAt, result.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, result.updatedAt);
+        }
+        #endregion
+
+        #region BuildRating
+        [Test]
+        public void BuildRating()
+        {
+            RatingEntity entity = new RatingEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                Description = "desc",
+                JudgeId = "jid",
+                RatingKindId = "kid",
+                TeamId = "tid",
+                Score = 5,
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+            UserInfo judge = new UserInfo { Country = "country" };
+            Team team = new Team { displayName = "myteam" };
+            RatingKind kind = new RatingKind { maximumScore = 10 };
+
+            var responseBuilder = new DefaultResponseBuilder();
+            var result = responseBuilder.BuildRating(entity, judge, team, kind);
+
+            Assert.AreEqual("pk", result.hackathonName);
+            Assert.AreEqual("rk", result.id);
+            Assert.AreEqual("desc", result.description);
+            Assert.AreEqual("jid", result.judgeId);
+            Assert.AreEqual("country", result.judge.Country);
+            Assert.AreEqual("kid", result.ratingKindId);
+            Assert.AreEqual(10, result.ratingKind.maximumScore);
+            Assert.AreEqual("tid", result.teamId);
+            Assert.AreEqual("myteam", result.team.displayName);
+            Assert.AreEqual(5, result.score);
             Assert.AreEqual(entity.CreatedAt, result.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, result.updatedAt);
         }

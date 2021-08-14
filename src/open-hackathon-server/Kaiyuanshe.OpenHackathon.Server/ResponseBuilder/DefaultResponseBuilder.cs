@@ -28,6 +28,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         RatingKind BuildRatingKind(RatingKindEntity ratingKindEntity);
 
+        Rating BuildRating(RatingEntity ratingEntity, UserInfo judge, Team team, RatingKind ratingKind);
+
         TResult BuildResourceList<TSrcItem, TResultItem, TResult>(
             IEnumerable<TSrcItem> items,
             Func<TSrcItem, TResultItem> converter,
@@ -139,6 +141,17 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             return ratingKindEntity.As<RatingKind>((p) =>
             {
                 p.updatedAt = ratingKindEntity.Timestamp.UtcDateTime;
+            });
+        }
+
+        public Rating BuildRating(RatingEntity ratingEntity, UserInfo judge, Team team, RatingKind ratingKind)
+        {
+            return ratingEntity.As<Rating>((p) =>
+            {
+                p.updatedAt = ratingEntity.Timestamp.UtcDateTime;
+                p.judge = judge;
+                p.team = team;
+                p.ratingKind = ratingKind;
             });
         }
 
