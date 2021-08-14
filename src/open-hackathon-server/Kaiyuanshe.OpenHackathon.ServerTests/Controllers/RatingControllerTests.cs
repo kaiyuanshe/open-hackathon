@@ -33,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 PartitionKey = "pk",
                 RowKey = "rk",
                 Description = "desc",
-                MaximumRating = 5,
+                MaximumScore = 5,
             };
             var authResult = AuthorizationResult.Success();
 
@@ -68,7 +68,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("pk", resp.hackathonName);
             Assert.AreEqual("rk", resp.id);
             Assert.AreEqual("n", resp.name);
-            Assert.AreEqual(5, resp.maximumRating);
+            Assert.AreEqual(5, resp.maximumScore);
         }
         #endregion
 

@@ -28,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 name = "name",
                 description = "desc",
                 hackathonName = "hack",
-                maximumRating = maxRating,
+                maximumScore = maxRating,
             };
 
             var logger = new Mock<ILogger<RatingManagement>>();
@@ -37,7 +37,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 en.Name == "name" &&
                 en.Description == "desc" &&
                 en.PartitionKey == "hack" &&
-                en.MaximumRating == expectedMaxRating &&
+                en.MaximumScore == expectedMaxRating &&
                 !string.IsNullOrWhiteSpace(en.Id) &&
                 en.CreatedAt > DateTime.UtcNow.AddMinutes(-1)), default));
             var storageContext = new Mock<IStorageContext>();
@@ -60,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("name", result.Name);
             Assert.AreEqual("desc", result.Description);
             Assert.AreEqual("hack", result.HackathonName);
-            Assert.AreEqual(expectedMaxRating, result.MaximumRating);
+            Assert.AreEqual(expectedMaxRating, result.MaximumScore);
         }
         #endregion
 
@@ -74,16 +74,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 PartitionKey = "pk",
                 Name = "n1",
                 Description = "d1",
-                MaximumRating = 4
+                MaximumScore = 4
             };
-            RatingKind parameter = new RatingKind { name = "n2", description = "d2", maximumRating = newMaxRating };
+            RatingKind parameter = new RatingKind { name = "n2", description = "d2", maximumScore = newMaxRating };
 
             var logger = new Mock<ILogger<RatingManagement>>();
             var ratingKindTable = new Mock<IRatingKindTable>();
             ratingKindTable.Setup(t => t.MergeAsync(It.Is<RatingKindEntity>(en =>
                 en.Name == "n2" &&
                 en.Description == "d2" &&
-                en.MaximumRating == expectedNewValue), default));
+                en.MaximumScore == expectedNewValue), default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(s => s.RatingKindTable).Returns(ratingKindTable.Object);
             var cache = new Mock<ICacheProvider>();
@@ -104,7 +104,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("n2", result.Name);
             Assert.AreEqual("d2", result.Description);
             Assert.AreEqual("pk", result.HackathonName);
-            Assert.AreEqual(expectedNewValue, result.MaximumRating);
+            Assert.AreEqual(expectedNewValue, result.MaximumScore);
         }
         #endregion
 
@@ -264,20 +264,60 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
-        #region GetRatingAsync
+        #region CreateRatingAsync
         [Test]
-        public async Task GetRatingAsync_ForCreate()
+        public async Task CreateRatingAsync()
         {
-            var entities = new List<RatingEntity> { new RatingEntity { description = "desc" } };
+            var parameter = new Rating
+            {
+                hackathonName = "hack",
+                description = "desc",
+                judgeId = "jid",
+                ratingKindId = "kid",
+                score = 5,
+                teamId = "tid",
+            };
 
             var ratingTable = new Mock<IRatingTable> { };
-            ratingTable.Setup(t => t.ExecuteQueryAsync(It.Is<TableQuery<RatingEntity>>(r => r.TakeCount == 1
-                && r.FilterString == "(((PartitionKey eq 'hack') and (JudgeId eq 'jid')) and (TeamId eq 'tid')) and (RatingKindId eq 'kid')"
-            ), default)).ReturnsAsync(entities);
+            ratingTable.Setup(t => t.InsertAsync(It.Is<RatingEntity>(r =>
+                  r.CreatedAt > DateTime.UtcNow.AddMinutes(-1) &&
+                  r.Description == "desc" &&
+                  r.HackathonName == "hack" &&
+                  r.Id == "2f4291c6-d890-8fa1-316b-8c2b08256b25" &&
+                  r.JudgeId == "jid" &&
+                  r.RatingKindId == "kid" &&
+                  r.Score == 5 &&
+                  r.TeamId == "tid"
+                ), default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
             var logger = new Mock<ILogger<RatingManagement>>();
 
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await ratingManagement.CreateRatingAsync(parameter, default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("desc", result.Description);
+        }
+        #endregion
+
+        #region GetRatingAsync
+        [Test]
+        public async Task GetRatingAsync_ForCreate()
+        {
+            var entity = new RatingEntity { Description = "desc" };
+
+            var ratingTable = new Mock<IRatingTable> { };
+            ratingTable.Setup(t => t.RetrieveAsync("hack", "2f4291c6-d890-8fa1-316b-8c2b08256b25", default)).ReturnsAsync(entity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
+            var logger = new Mock<ILogger<RatingManagement>>();
 
             var ratingManagement = new RatingManagement(logger.Object)
             {
@@ -289,7 +329,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             ratingTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
 
-            Assert.AreEqual("desc", result.description);
+            Assert.AreEqual("desc", result.Description);
         }
         #endregion
     }

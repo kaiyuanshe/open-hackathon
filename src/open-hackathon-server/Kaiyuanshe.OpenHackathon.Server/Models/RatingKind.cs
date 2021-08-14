@@ -39,11 +39,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string description { get; set; }
 
         /// <summary>
-        /// maximum rating accepted. default to 10. Ratings given by judges must be between 0 and this maximum value.
+        /// maximum score accepted. default to 10. Ratings given by judges must be between 0 and this maximum value.
         /// </summary>
         /// <example>10</example>
         [Range(1, 10_000)]
-        public int? maximumRating { get; set; }
+        public int? maximumScore { get; set; }
     }
 
     /// <summary>
