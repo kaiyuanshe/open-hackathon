@@ -259,6 +259,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access denied. Only the judges of the hackathon are allowed. Please contact the admin to request access..
+        /// </summary>
+        internal static string Hackathon_NotJudge {
+            get {
+                return ResourceManager.GetString("Hackathon_NotJudge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The hackathon is not started yet. .
         /// </summary>
         internal static string Hackathon_NotStarted {
