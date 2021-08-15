@@ -240,29 +240,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         #endregion
 
+        private string GenerateAssignmentId(string awardId, string assigneeId)
+        {
+            return DigestHelper.String2Guid($"{awardId}-{assigneeId}").ToString();
+        }
+
         #region CreateOrUpdateAssignmentAsync
         public async Task<AwardAssignmentEntity> CreateOrUpdateAssignmentAsync(AwardAssignment request, CancellationToken cancellationToken = default)
         {
-            var awardAssignments = await ListByAwardAsync(request.hackathonName, request.awardId, cancellationToken);
-            var assignment = awardAssignments.SingleOrDefault(a => a.AssigneeId == request.assigneeId);
-            if (assignment == null)
+            string assignmentId = GenerateAssignmentId(request.awardId, request.assigneeId);
+            var assignment = new AwardAssignmentEntity
             {
-                assignment = new AwardAssignmentEntity
-                {
-                    PartitionKey = request.hackathonName,
-                    RowKey = Guid.NewGuid().ToString(),
-                    AssigneeId = request.assigneeId,
-                    AwardId = request.awardId,
-                    CreatedAt = DateTime.UtcNow,
-                    Description = request.description,
-                };
-                await StorageContext.AwardAssignmentTable.InsertAsync(assignment, cancellationToken);
-            }
-            else
-            {
-                assignment.Description = request.description;
-                await StorageContext.AwardAssignmentTable.MergeAsync(assignment, cancellationToken);
-            }
+                PartitionKey = request.hackathonName,
+                RowKey = GenerateAssignmentId(request.awardId, request.assigneeId),
+                AssigneeId = request.assigneeId,
+                AwardId = request.awardId,
+                CreatedAt = DateTime.UtcNow,
+                Description = request.description,
+            };
+            await StorageContext.AwardAssignmentTable.InsertOrReplaceAsync(assignment, cancellationToken);
 
             return assignment;
         }

@@ -24,12 +24,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Models.Validations
             yield return new TestCaseData(
                 new Rating(),
                 false,
-                new List<string> { "judgeId", "teamId", "ratingKindId" });
+                new List<string> { "teamId", "ratingKindId", "score" });
 
             yield return new TestCaseData(
-                new Rating { judgeId = "jid" },
+                new Rating { teamId = "tid", score = 5 },
                 false,
-                new List<string> { "teamId", "ratingKindId" });
+                new List<string> { "ratingKindId" });
         }
 
         [Test, TestCaseSource(nameof(IsValidTestData))]

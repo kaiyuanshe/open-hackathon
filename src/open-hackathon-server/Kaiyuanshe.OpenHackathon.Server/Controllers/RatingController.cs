@@ -230,5 +230,96 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         }
         #endregion
 
+        private async Task<Rating> BuildRatingResp(RatingEntity ratingEntity,
+            UserInfo judge = null,
+            TeamEntity teamEntity = null,
+            RatingKindEntity ratingKindEntity = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (judge == null)
+            {
+                judge = await UserManagement.GetUserByIdAsync(ratingEntity.JudgeId, cancellationToken);
+            }
+
+            if (teamEntity == null)
+            {
+                teamEntity = await TeamManagement.GetTeamByIdAsync(ratingEntity.HackathonName, ratingEntity.TeamId, cancellationToken);
+            }
+            var teamCreator = await UserManagement.GetUserByIdAsync(teamEntity.CreatorId, cancellationToken);
+            var team = ResponseBuilder.BuildTeam(teamEntity, teamCreator);
+
+            if (ratingKindEntity == null)
+            {
+                ratingKindEntity = await RatingManagement.GetRatingKindAsync(ratingEntity.HackathonName, ratingEntity.RatingKindId, cancellationToken);
+            }
+            var kind = ResponseBuilder.BuildRatingKind(ratingKindEntity);
+
+            var rating = ResponseBuilder.BuildRating(ratingEntity, judge, team, kind);
+            return rating;
+        }
+
+        #region CreateRating
+        /// <summary>
+        /// Create a new rating.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>The rating</returns>
+        /// <response code="200">Success. The response describes a rating.</response>
+        [HttpPut]
+        [ProducesResponseType(typeof(Rating), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("hackathon/{hackathonName}/rating")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonJudge)]
+        public async Task<object> CreateRating(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromBody, HttpPutPolicy] Rating parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackJudgeRequird = true,
+                OnlineRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate team
+            var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), parameter.teamId, cancellationToken);
+            var validateTeamOptions = new ValidateTeamOptions
+            {
+                HackathonName = hackathonName,
+            };
+            if (await ValidateTeam(team, validateTeamOptions, cancellationToken) == false)
+            {
+                return validateTeamOptions.ValidateResult;
+            }
+
+            // validate kind
+            var kind = await RatingManagement.GetRatingKindAsync(hackathonName.ToLower(), parameter.ratingKindId, cancellationToken);
+            var validateKindOptions = new ValidateRatingKindOptions
+            {
+                ScoreInRangeRequired = true,
+                ScoreInRequest = parameter.score.GetValueOrDefault(0)
+            };
+            if (ValidateRatingKind(kind, validateKindOptions) == false)
+            {
+                return validateKindOptions.ValidateResult;
+            }
+
+            // create
+            parameter.hackathonName = hackathonName.ToLower();
+            parameter.judgeId = CurrentUserId;
+            var ratingEntity = await RatingManagement.CreateRatingAsync(parameter, cancellationToken);
+            var ratingResponse = await BuildRatingResp(ratingEntity, null, team, kind, cancellationToken);
+            return Ok(ratingResponse);
+        }
+        #endregion
     }
 }

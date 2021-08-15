@@ -279,7 +279,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
 
             var ratingTable = new Mock<IRatingTable> { };
-            ratingTable.Setup(t => t.InsertAsync(It.Is<RatingEntity>(r =>
+            ratingTable.Setup(t => t.InsertOrReplaceAsync(It.Is<RatingEntity>(r =>
                   r.CreatedAt > DateTime.UtcNow.AddMinutes(-1) &&
                   r.Description == "desc" &&
                   r.HackathonName == "hack" &&

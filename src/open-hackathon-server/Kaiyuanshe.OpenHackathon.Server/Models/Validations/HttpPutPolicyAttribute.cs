@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models.Validations
 {
@@ -41,7 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models.Validations
             }
             if (missingMembers.Count > 0)
             {
-                return new ValidationResult("Required member(s) are missing", missingMembers);
+                return new ValidationResult("The member is required.", missingMembers);
             }
 
             return ValidationResult.Success;

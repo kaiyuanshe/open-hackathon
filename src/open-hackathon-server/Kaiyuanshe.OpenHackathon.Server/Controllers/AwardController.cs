@@ -285,7 +285,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         public async Task<object> CreateAwardAssignment(
             [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
             [FromRoute, Required, Guid] string awardId,
-            [FromBody] AwardAssignment parameter,
+            [FromBody, HttpPutPolicy] AwardAssignment parameter,
             CancellationToken cancellationToken)
         {
             // validate hackathon

@@ -22,12 +22,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string id { get; internal set; }
 
         /// <summary>
-        /// user id of judge
+        /// user id of judge.
         /// </summary>
         /// <example>1</example>
-        [RequiredIfPut]
-        [Guid]
-        public string judgeId { get; set; }
+        public string judgeId { get; internal set; }
 
         /// <summary>
         /// user info of the judge.
@@ -35,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public UserInfo judge { get; internal set; }
 
         /// <summary>
-        /// id of rating kind
+        /// id of rating kind. Cannot be updated.
         /// </summary>
         /// <example>e4576366-fa87-451d-8e4d-ef6d1b6cee05</example>
         [RequiredIfPut]
@@ -48,7 +46,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public RatingKind ratingKind { get; internal set; }
 
         /// <summary>
-        /// id of the team. Required for first time create(PUT) request.
+        /// id of the team. Required for first time create(PUT) request. Cannot be updated.
         /// </summary>
         /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
         [Guid]
@@ -65,6 +63,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>5</example>
         [Range(0, 10000)]
+        [RequiredIfPut]
         public int? score { get; set; }
 
         /// <summary>
