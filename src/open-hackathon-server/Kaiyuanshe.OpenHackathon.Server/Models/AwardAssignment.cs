@@ -25,7 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// id of the assignee. userId if award target is individual, or teamId if award target is team.
         /// </summary>
         /// <example>d1e40c38-cc2a-445f-9eab-60c253256c57</example>
-        [Required]
+        [RequiredIfPut]
         [MaxLength(128)]
         public string assigneeId { get; set; }
 

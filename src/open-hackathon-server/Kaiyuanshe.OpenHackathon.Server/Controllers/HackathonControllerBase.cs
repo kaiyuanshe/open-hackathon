@@ -223,6 +223,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             public bool AssigneeExistRequired { get; set; }
         }
 
+        public class ValidateRatingKindOptions : ControllerValiationOptions
+        {
+            public int ScoreInRequest { get; set; }
+            public bool ScoreInRangeRequired { get; set; }
+        }
+
         #region ValidateHackathon
         protected async Task<bool> ValidateHackathon(HackathonEntity hackathon,
             ValidateHackathonOptions options,
@@ -458,6 +464,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                         break;
                     default:
                         break;
+                }
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region ValidateRatingKind
+        protected bool ValidateRatingKind(RatingKindEntity ratingKindEntity, ValidateRatingKindOptions options)
+        {
+            if (ratingKindEntity == null)
+            {
+                options.ValidateResult = NotFound(Resources.Rating_KindNotFound);
+                return false;
+            }
+
+            if (options.ScoreInRangeRequired)
+            {
+                if (options.ScoreInRequest > ratingKindEntity.MaximumScore)
+                {
+                    options.ValidateResult = BadRequest(string.Format(Resources.Rating_ScoreNotInRange, ratingKindEntity.MaximumScore));
+                    return false;
                 }
             }
 

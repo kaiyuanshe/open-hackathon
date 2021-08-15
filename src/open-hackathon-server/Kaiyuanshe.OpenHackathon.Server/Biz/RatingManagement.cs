@@ -157,7 +157,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 TeamId = parameter.teamId,
             };
 
-            await StorageContext.RatingTable.InsertAsync(ratingEntity, cancellationToken);
+            await StorageContext.RatingTable.InsertOrReplaceAsync(ratingEntity, cancellationToken);
             return ratingEntity;
         }
         #endregion

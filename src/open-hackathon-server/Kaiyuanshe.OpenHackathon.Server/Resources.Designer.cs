@@ -322,6 +322,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The score must be not greater than {0}..
+        /// </summary>
+        internal static string Rating_ScoreNotInRange {
+            get {
+                return ResourceManager.GetString("Rating_ScoreNotInRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot delete the team for awards are assigned to this team. Please delete the award assignments first..
         /// </summary>
         internal static string Team_HasAward {
