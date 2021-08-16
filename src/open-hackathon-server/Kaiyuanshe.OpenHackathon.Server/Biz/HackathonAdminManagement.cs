@@ -1,9 +1,12 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Cache;
+﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,6 +29,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string hackathonName, CancellationToken cancellationToken = default);
+        Task<bool> IsHackathonAdmin(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
     }
 
     public class HackathonAdminManagement : ManagementClientBase, IHackathonAdminManagement
@@ -73,6 +77,25 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(hackathonName, token);
                 }, true, cancellationToken);
+        }
+        #endregion
+
+        #region Task<bool> IsHackathonAdmin(string hackathonName, string userId, CancellationToken cancellationToken = default);
+        public async Task<bool> IsHackathonAdmin(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+        {
+            string userId = ClaimsHelper.GetUserId(user);
+            if (string.IsNullOrWhiteSpace(userId))
+                return false;
+
+            if (ClaimsHelper.IsPlatformAdministrator(user))
+            {
+                return true;
+            }
+            else
+            {
+                var admins = await ListHackathonAdminAsync(hackathonName, cancellationToken);
+                return admins.Any(a => a.UserId == userId);
+            }
         }
         #endregion
     }

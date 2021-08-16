@@ -307,6 +307,44 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateRatingAsync
+        [Test]
+        public async Task UpdateRatingAsync()
+        {
+            var existing = new RatingEntity { PartitionKey = "h1", Score = 1, Description = "d1", TeamId = "t1" };
+            var parameter = new Rating
+            {
+                hackathonName = "h2",
+                description = "d2",
+                score = 2,
+                teamId = "t2",
+            };
+
+            var ratingTable = new Mock<IRatingTable> { };
+            ratingTable.Setup(t => t.MergeAsync(It.Is<RatingEntity>(r =>
+                  r.Description == "d2" &&
+                  r.HackathonName == "h1" &&
+                  r.Score == 2 &&
+                  r.TeamId == "t1"
+                ), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
+            var logger = new Mock<ILogger<RatingManagement>>();
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await ratingManagement.UpdateRatingAsync(existing, parameter, default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("d2", result.Description);
+        }
+        #endregion
+
         #region GetRatingAsync
         [Test]
         public async Task GetRatingAsync_ForCreate()
@@ -324,6 +362,30 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 StorageContext = storageContext.Object,
             };
             var result = await ratingManagement.GetRatingAsync("hack", "jid", "tid", "kid", default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("desc", result.Description);
+        }
+
+        [Test]
+        public async Task GetRatingAsync()
+        {
+            var entity = new RatingEntity { Description = "desc" };
+
+            var ratingTable = new Mock<IRatingTable> { };
+            ratingTable.Setup(t => t.RetrieveAsync("hack", "rid", default)).ReturnsAsync(entity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
+            var logger = new Mock<ILogger<RatingManagement>>();
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await ratingManagement.GetRatingAsync("hack", "rid", default);
 
             Mock.VerifyAll(ratingTable, storageContext);
             ratingTable.VerifyNoOtherCalls();

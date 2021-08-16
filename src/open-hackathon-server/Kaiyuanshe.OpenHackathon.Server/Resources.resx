@@ -204,6 +204,12 @@
   <data name="Rating_KindNotFound" xml:space="preserve">
     <value>The rating kind of specified Id doesn't exist.</value>
   </data>
+  <data name="Rating_NotFound" xml:space="preserve">
+    <value>The rating is not found.</value>
+  </data>
+  <data name="Rating_OnlyCreator" xml:space="preserve">
+    <value>Access denied. The rating is created by another person.</value>
+  </data>
   <data name="Rating_ScoreNotInRange" xml:space="preserve">
     <value>The score must be not greater than {0}.</value>
   </data>
