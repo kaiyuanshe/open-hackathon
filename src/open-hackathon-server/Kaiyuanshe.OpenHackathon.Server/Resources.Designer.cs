@@ -322,6 +322,24 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The rating is not found..
+        /// </summary>
+        internal static string Rating_NotFound {
+            get {
+                return ResourceManager.GetString("Rating_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access denied. The rating is created by another person..
+        /// </summary>
+        internal static string Rating_OnlyCreator {
+            get {
+                return ResourceManager.GetString("Rating_OnlyCreator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The score must be not greater than {0}..
         /// </summary>
         internal static string Rating_ScoreNotInRange {

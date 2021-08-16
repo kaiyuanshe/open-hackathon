@@ -242,7 +242,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
         private string GenerateAssignmentId(string awardId, string assigneeId)
         {
-            return DigestHelper.String2Guid($"{awardId}-{assigneeId}").ToString();
+            return DigestHelper.String2Guid($"{awardId}-{assigneeId}".ToLower()).ToString();
         }
 
         #region CreateOrUpdateAssignmentAsync

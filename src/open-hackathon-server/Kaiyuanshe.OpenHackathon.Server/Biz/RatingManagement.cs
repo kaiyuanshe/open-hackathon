@@ -20,7 +20,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<IEnumerable<RatingKindEntity>> ListPaginatedRatingKindsAsync(string hackathonName, RatingKindQueryOptions options, CancellationToken cancellationToken = default);
         Task DeleteRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
         Task<RatingEntity> CreateRatingAsync(Rating parameter, CancellationToken cancellationToken);
+        Task<RatingEntity> UpdateRatingAsync(RatingEntity existing, Rating parameter, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken);
+        Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
     }
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
@@ -162,6 +164,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
+        #region Task<RatingEntity> UpdateRatingAsync(RatingEntity exiting, Rating parameter, CancellationToken cancellationToken)
+        public async Task<RatingEntity> UpdateRatingAsync(RatingEntity existing, Rating parameter, CancellationToken cancellationToken)
+        {
+            if (existing == null || parameter == null)
+                return existing;
+
+            existing.Score = parameter.score.GetValueOrDefault(existing.Score);
+            existing.Description = parameter.description ?? existing.Description;
+
+            await StorageContext.RatingTable.MergeAsync(existing, cancellationToken);
+            return existing;
+        }
+        #endregion
+
         #region Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken)
         public async Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken)
         {
@@ -173,6 +189,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             var rowKey = GenerateRatingEntityRowKey(judgeId, teamId, kindId);
             return await StorageContext.RatingTable.RetrieveAsync(hackathonName, rowKey, cancellationToken);
+        }
+        #endregion
+
+        #region Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
+        public async Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(ratingId))
+                return null;
+
+            return await StorageContext.RatingTable.RetrieveAsync(hackathonName, ratingId, cancellationToken);
         }
         #endregion
 

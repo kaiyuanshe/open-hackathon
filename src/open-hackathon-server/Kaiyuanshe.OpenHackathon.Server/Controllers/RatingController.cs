@@ -269,7 +269,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success. The response describes a rating.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Rating), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 404, 412)]
+        [SwaggerErrorResponse(400, 403, 404)]
         [Route("hackathon/{hackathonName}/rating")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonJudge)]
         public async Task<object> CreateRating(
