@@ -381,10 +381,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [JsonProperty("roles")]
         public PaginatedRoles Roles { get; set; }
 
-        /// <summary>
-        /// Groups
-        /// </summary>
-        [JsonProperty("groups")]
-        public PaginatedGroups Groups { get; set; }
+        ///// <summary>
+        ///// Groups
+        ///// </summary>
+        //[JsonProperty("groups")]
+        //public PaginatedGroups Groups { get; set; }
     }
 }
