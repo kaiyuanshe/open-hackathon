@@ -321,5 +321,73 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ratingResponse);
         }
         #endregion
+
+        #region UpdateRating
+        /// <summary>
+        /// Update a rating. Only score and description are allowed to edit. Other properties in request body are ignored if present.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="ratingId" example="dd09af6d-75f6-463c-8e5d-786818e409db">Auto-generated Guid of a rating.</param>
+        /// <returns>The rating</returns>
+        /// <response code="200">Success. The response describes a rating.</response>
+        [HttpPatch]
+        [ProducesResponseType(typeof(Rating), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/rating/{ratingId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonJudge)]
+        public async Task<object> UpdateRating(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string ratingId,
+            [FromBody] Rating parameter,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackJudgeRequird = true,
+                OnlineRequired = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Get Rating
+            var ratingEntity = await RatingManagement.GetRatingAsync(hackathonName.ToLower(), ratingId, cancellationToken);
+            if (ratingEntity == null)
+            {
+                return NotFound(Resources.Rating_NotFound);
+            }
+            if (ratingEntity.JudgeId != CurrentUserId)
+            {
+                bool isAdmin = await HackathonAdminManagement.IsHackathonAdmin(hackathonName.ToLower(), User, cancellationToken);
+                if (!isAdmin)
+                {
+                    return Forbidden(Resources.Rating_OnlyCreator);
+                }
+            }
+
+            // validate kind
+            var kind = await RatingManagement.GetRatingKindAsync(hackathonName.ToLower(), ratingEntity.RatingKindId, cancellationToken);
+            var validateKindOptions = new ValidateRatingKindOptions
+            {
+                ScoreInRangeRequired = true,
+                ScoreInRequest = parameter.score.GetValueOrDefault(ratingEntity.Score)
+            };
+            if (ValidateRatingKind(kind, validateKindOptions) == false)
+            {
+                return validateKindOptions.ValidateResult;
+            }
+
+            // update
+            ratingEntity = await RatingManagement.UpdateRatingAsync(ratingEntity, parameter, cancellationToken);
+            var ratingResponse = await BuildRatingResp(ratingEntity, null, null, kind, cancellationToken);
+            return Ok(ratingResponse);
+        }
+        #endregion
     }
 }

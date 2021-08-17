@@ -543,5 +543,185 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(4, resp.ratingKind.maximumScore);
         }
         #endregion
+
+        #region UpdateRating
+        [Test]
+        public async Task UpdateRating_RatingNotFound()
+        {
+            // data
+            Rating parameter = new Rating { description = "d2" };
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = null;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.UpdateRating("Hack", "rid", parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.Rating_NotFound);
+        }
+
+        [Test]
+        public async Task UpdateRating_CreatedByOthers()
+        {
+            // data
+            Rating parameter = new Rating { description = "d2" };
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = new RatingEntity { JudgeId = "anotherUser" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.IsHackathonAdmin("hack", It.IsAny<ClaimsPrincipal>(), default)).ReturnsAsync(false);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+            };
+            var result = await controller.UpdateRating("Hack", "rid", parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement, adminManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 403, Resources.Rating_OnlyCreator);
+        }
+
+        [Test]
+        public async Task UpdateRating_ScoreOutOfRange()
+        {
+            // data
+            Rating parameter = new Rating { description = "d2", score = 6 };
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = new RatingEntity { JudgeId = "anotherUser", Score = 4, RatingKindId = "kid" };
+            RatingKindEntity ratingKindEntity = new RatingKindEntity { MaximumScore = 5 };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            ratingManagement.Setup(r => r.GetRatingKindAsync("hack", "kid", default)).ReturnsAsync(ratingKindEntity);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.IsHackathonAdmin("hack", It.IsAny<ClaimsPrincipal>(), default)).ReturnsAsync(true);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+            };
+            var result = await controller.UpdateRating("Hack", "rid", parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement, adminManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 400, string.Format(Resources.Rating_ScoreNotInRange, ratingKindEntity.MaximumScore));
+        }
+
+        [Test]
+        public async Task UpdateRating_Succeeded()
+        {
+            // data
+            Rating parameter = new Rating { description = "d2" };
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = new RatingEntity { JudgeId = "anotherUser", Score = 4, RatingKindId = "kid", TeamId = "tid", PartitionKey = "hack" };
+            RatingKindEntity ratingKindEntity = new RatingKindEntity { MaximumScore = 5 };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            UserInfo judge = new UserInfo { Nickname = "nickname" };
+            UserInfo teamCreator = new UserInfo { Photo = "photo" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            ratingManagement.Setup(r => r.GetRatingKindAsync("hack", "kid", default)).ReturnsAsync(ratingKindEntity);
+            ratingManagement.Setup(r => r.UpdateRatingAsync(ratingEntity, parameter, default)).ReturnsAsync(ratingEntity);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.IsHackathonAdmin("hack", It.IsAny<ClaimsPrincipal>(), default)).ReturnsAsync(true);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "tid", default)).ReturnsAsync(team);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("anotherUser", default)).ReturnsAsync(judge);
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(teamCreator);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.UpdateRating("Hack", "rid", parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement, adminManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Rating>(result);
+            Assert.AreEqual(4, resp.score);
+            Assert.AreEqual("photo", resp.team.creator.Photo);
+            Assert.AreEqual("nickname", resp.judge.Nickname);
+            Assert.AreEqual(5, resp.ratingKind.maximumScore);
+        }
+        #endregion
     }
 }
