@@ -361,7 +361,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 new AwardQueryOptions { Top = 2 },
                 new List<AwardEntity> { a1, a2, a3, a4 },
                 new List<AwardEntity> { a4, a2, },
-                new TableContinuationToken { NextPartitionKey = "2", NextRowKey = "nr" }
+                new TableContinuationToken { NextPartitionKey = "2", NextRowKey = "2" }
                 );
 
             // paging
@@ -372,12 +372,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     TableContinuationToken = new TableContinuationToken
                     {
                         NextPartitionKey = "1",
-                        NextRowKey = "nr"
+                        NextRowKey = "1"
                     }
                 },
                 new List<AwardEntity> { a1, a2, a3, a4 },
                 new List<AwardEntity> { a2, a3, },
-                new TableContinuationToken { NextPartitionKey = "3", NextRowKey = "nr" }
+                new TableContinuationToken { NextPartitionKey = "3", NextRowKey = "3" }
                 );
         }
 

@@ -140,7 +140,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
 
         #region Cache
+        private string TeamCacheKey(string teamId)
+        {
+            return CacheKeys.GetCacheKey(CacheEntryType.Team, teamId);
+        }
 
+        private void InvalidateCachedTeam(string teamId)
+        {
+            string cacheKey = TeamCacheKey(teamId);
+            Cache.Remove(cacheKey);
+        }
         #endregion
 
         #region CreateTeamAsync
@@ -197,6 +206,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             teamEntity.DisplayName = request.displayName ?? teamEntity.DisplayName;
 
             await StorageContext.TeamTable.MergeAsync(teamEntity, cancellationToken);
+            InvalidateCachedTeam(teamEntity.Id);
             return teamEntity;
         }
         #endregion
@@ -204,12 +214,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #region UpdateTeamMembersCountAsync
         public async Task UpdateTeamMembersCountAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
         {
-            var team = await GetTeamByIdAsync(hackathonName, teamId, cancellationToken);
+            var team = await StorageContext.TeamTable.RetrieveAsync(hackathonName, teamId, cancellationToken);
             if (team != null)
             {
                 var count = await StorageContext.TeamMemberTable.GetMemberCountAsync(teamId, cancellationToken);
                 team.MembersCount = count;
                 await StorageContext.TeamTable.MergeAsync(team, cancellationToken);
+                InvalidateCachedTeam(teamId);
             }
         }
         #endregion
@@ -220,7 +231,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(teamId))
                 return null;
 
-            return await StorageContext.TeamTable.RetrieveAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            return await Cache.GetOrAddAsync(
+                TeamCacheKey(teamId),
+                TimeSpan.FromHours(12),
+                (ct) => StorageContext.TeamTable.RetrieveAsync(hackathonName.ToLower(), teamId, ct),
+                false,
+                cancellationToken);
         }
         #endregion
 
@@ -273,6 +289,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return;
 
             await StorageContext.TeamTable.DeleteAsync(team.PartitionKey, team.RowKey, cancellationToken);
+            InvalidateCachedTeam(team.Id);
         }
         #endregion
 
@@ -356,7 +373,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (member == null)
                 return;
 
-            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId);
+            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId, cancellationToken);
             await UpdateTeamMembersCountAsync(member.HackathonName, member.TeamId, cancellationToken);
         }
         #endregion

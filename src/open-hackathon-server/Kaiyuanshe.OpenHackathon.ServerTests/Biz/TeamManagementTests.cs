@@ -114,25 +114,35 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         public async Task UpdateTeamAsync_Updated()
         {
             var request = new Team { description = "newdesc", autoApprove = true };
-            var entity = new TeamEntity { Description = "desc", DisplayName = "dp", AutoApprove = false };
+            var entity = new TeamEntity
+            {
+                RowKey = "tid",
+                Description = "desc",
+                DisplayName = "dp",
+                AutoApprove = false
+            };
 
-            var cancellationToken = CancellationToken.None;
             var logger = new Mock<ILogger<TeamManagement>>();
             var teamTable = new Mock<ITeamTable>();
-            teamTable.Setup(t => t.MergeAsync(entity, cancellationToken));
+            teamTable.Setup(t => t.MergeAsync(entity, default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Team-tid"));
 
             TeamManagement teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
-            var result = await teamManagement.UpdateTeamAsync(request, entity, cancellationToken);
+            var result = await teamManagement.UpdateTeamAsync(request, entity, default);
 
-            Mock.VerifyAll(logger, storageContext, teamTable);
+            Mock.VerifyAll(logger, storageContext, teamTable, cache);
             logger.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             teamTable.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
+
             Assert.AreEqual("newdesc", result.Description);
             Assert.AreEqual("dp", result.DisplayName);
             Assert.AreEqual(true, result.AutoApprove);
@@ -155,10 +165,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Team-tid"));
 
             var teamManagement = new TeamManagement(null)
             {
-                StorageContext = storageContext.Object
+                StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             await teamManagement.UpdateTeamMembersCountAsync(hackathonName, teamId, default);
 
@@ -206,6 +219,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             TeamManagement teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = new DefaultCacheProvider(null),
             };
             var result = await teamManagement.GetTeamByIdAsync(hackName, teamId, cancellationToken);
 
@@ -370,17 +384,20 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             teamTable.Setup(t => t.DeleteAsync("pk", "rk", cancellationToken));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
-
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Team-rk"));
 
             TeamManagement teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             await teamManagement.DeleteTeamAsync(team, cancellationToken);
 
-            Mock.VerifyAll(logger, teamTable, storageContext);
+            Mock.VerifyAll(logger, teamTable, storageContext, cache);
             teamTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -402,11 +419,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
-
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Team-tid"));
 
             TeamManagement teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
             var result = await teamManagement.CreateTeamMemberAsync(request, cancellationToken);
 
@@ -613,7 +632,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         public async Task DeleteTeamMemberAsync()
         {
             TeamMemberEntity teamMember = new TeamMemberEntity { PartitionKey = "pk", RowKey = "rk", HackathonName = "hack" };
-            CancellationToken cancellationToken = CancellationToken.None;
             TeamEntity team = new TeamEntity { };
             int count = 5;
 
@@ -621,23 +639,27 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var teamTable = new Mock<ITeamTable>();
             teamTable.Setup(p => p.RetrieveAsync("hack", "pk", default)).ReturnsAsync(team);
             var teamMemberTable = new Mock<ITeamMemberTable>();
+            teamMemberTable.Setup(t => t.DeleteAsync("pk", "rk", default));
             teamMemberTable.Setup(m => m.GetMemberCountAsync("pk", default)).ReturnsAsync(count);
-            teamMemberTable.Setup(t => t.DeleteAsync("pk", "rk", cancellationToken));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamMemberTable).Returns(teamMemberTable.Object);
             storageContext.SetupGet(p => p.TeamTable).Returns(teamTable.Object);
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.Remove("Team-pk"));
 
             TeamManagement teamManagement = new TeamManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                Cache = cache.Object,
             };
-            await teamManagement.DeleteTeamMemberAsync(teamMember, cancellationToken);
+            await teamManagement.DeleteTeamMemberAsync(teamMember, default);
 
-            Mock.VerifyAll(storageContext, teamTable, teamMemberTable);
+            Mock.VerifyAll(storageContext, teamTable, teamMemberTable, cache);
             teamTable.Verify(t => t.MergeAsync(It.Is<TeamEntity>(t => t.MembersCount == 5), default), Times.Once);
             teamTable.VerifyNoOtherCalls();
             teamMemberTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
+            cache.VerifyNoOtherCalls();
         }
         #endregion
 
