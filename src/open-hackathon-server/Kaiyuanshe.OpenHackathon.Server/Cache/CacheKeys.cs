@@ -23,6 +23,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Cache
         Enrollment,
         Award,
         AwardAssignment,
+        Team,
         TeamMember,
         TeamWork,
         Judge,

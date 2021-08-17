@@ -108,6 +108,43 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region GetCachedRatingKindAsync
+        private static IEnumerable GetCachedRatingKindAsyncTestData()
+        {
+            var k1 = new RatingKindEntity { RowKey = "kid" };
+            var k2 = new RatingKindEntity { RowKey = "r2" };
+
+            yield return new TestCaseData(new List<RatingKindEntity> { k1, k2 })
+            {
+                ExpectedResult = k1
+            };
+
+            yield return new TestCaseData(new List<RatingKindEntity> { k2 })
+            {
+                ExpectedResult = default(RatingKindEntity)
+            };
+        }
+        [Test, TestCaseSource(nameof(GetCachedRatingKindAsyncTestData))]
+        public async Task<RatingKindEntity> GetCachedRatingKindAsync(List<RatingKindEntity> ratingKinds)
+        {
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<RatingKindEntity>>>(c => c.CacheKey == "RatingKind-hack"), default))
+                .ReturnsAsync(ratingKinds);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await ratingManagement.GetCachedRatingKindAsync("hack", "kid", default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            return result;
+        }
+        #endregion
+
         #region GetRatingKindAsync
         [Test]
         public async Task GetRatingKindAsync()
@@ -392,6 +429,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyNoOtherCalls();
 
             Assert.AreEqual("desc", result.Description);
+        }
+        #endregion
+
+        #region ListPaginatedRatingsAsync
+        private static IEnumerable ListPaginatedRatingsAsyncTestData()
+        {
+            // arg0: options
+            // arg1: expected top
+            // arg2: expected query
+
+            // no options
+            yield return new TestCaseData(
+                new RatingQueryOptions { },
+                100,
+                "PartitionKey eq 'hack'"
+                );
+
+            // top
+            yield return new TestCaseData(
+                new RatingQueryOptions { Top = 5 },
+                5,
+                "PartitionKey eq 'hack'"
+                );
+            yield return new TestCaseData(
+                new RatingQueryOptions { Top = -1 },
+                100,
+                "PartitionKey eq 'hack'"
+                );
+
+            // filter by kind
+            yield return new TestCaseData(
+               new RatingQueryOptions { RatingKindId = "kid" },
+               100,
+               "(PartitionKey eq 'hack') and (RatingKindId eq 'kid')"
+               );
+
+            // filter by team
+            yield return new TestCaseData(
+               new RatingQueryOptions { TeamId = "tid" },
+               100,
+               "(PartitionKey eq 'hack') and (TeamId eq 'tid')"
+               );
+
+            // filter by judge
+            yield return new TestCaseData(
+               new RatingQueryOptions { JudgeId = "uid" },
+               100,
+               "(PartitionKey eq 'hack') and (JudgeId eq 'uid')"
+               );
+
+            // all filters
+            yield return new TestCaseData(
+               new RatingQueryOptions { JudgeId = "uid", TeamId = "tid", RatingKindId = "kid" },
+               100,
+               "(((PartitionKey eq 'hack') and (JudgeId eq 'uid')) and (RatingKindId eq 'kid')) and (TeamId eq 'tid')"
+               );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedRatingsAsyncTestData))]
+        public async Task ListPaginatedRatingsAsync(RatingQueryOptions options, int expectedTop, string expectedFilter)
+        {
+            string hackName = "hack";
+            var entities = MockHelper.CreateTableQuerySegment<RatingEntity>(
+                 new List<RatingEntity>
+                 {
+                     new RatingEntity{  RowKey="rk" }
+                 },
+                 new TableContinuationToken { NextPartitionKey = "np", NextRowKey = "nr" }
+                );
+
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var ratingTable = new Mock<IRatingTable>();
+            ratingTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.Is<TableQuery<RatingEntity>>(r =>
+               r.FilterString == expectedFilter && r.TakeCount == expectedTop
+                ), default(TableContinuationToken), default)).ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.RatingTable).Returns(ratingTable.Object);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var segment = await ratingManagement.ListPaginatedRatingsAsync(hackName, options, default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(1, segment.Count());
+            Assert.AreEqual("rk", segment.First().Id);
+            Assert.AreEqual("np", segment.ContinuationToken.NextPartitionKey);
+            Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
         }
         #endregion
     }

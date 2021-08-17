@@ -16,6 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     {
         Task<RatingKindEntity> CreateRatingKindAsync(RatingKind parameter, CancellationToken cancellationToken);
         Task<RatingKindEntity> UpdateRatingKindAsync(RatingKindEntity existing, RatingKind parameter, CancellationToken cancellationToken);
+        Task<RatingKindEntity> GetCachedRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
         Task<RatingKindEntity> GetRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
         Task<IEnumerable<RatingKindEntity>> ListPaginatedRatingKindsAsync(string hackathonName, RatingKindQueryOptions options, CancellationToken cancellationToken = default);
         Task DeleteRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
@@ -23,6 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<RatingEntity> UpdateRatingAsync(RatingEntity existing, Rating parameter, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
+        Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default);
     }
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
@@ -81,6 +83,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             InvalidateCachedRatingKinds(existing.HackathonName);
 
             return existing;
+        }
+        #endregion
+
+        #region Task<RatingKindEntity> GetCachedRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
+        public async Task<RatingKindEntity> GetCachedRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken)
+        {
+            var allKinds = await ListRatingKindsAsync(hackathonName, cancellationToken);
+            return allKinds.FirstOrDefault(k => k.Id == kindId);
         }
         #endregion
 
@@ -199,6 +209,41 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 return null;
 
             return await StorageContext.RatingTable.RetrieveAsync(hackathonName, ratingId, cancellationToken);
+        }
+        #endregion
+
+        #region Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default)
+        public async Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            var filter = TableQuery.GenerateFilterCondition(nameof(RatingEntity.PartitionKey), QueryComparisons.Equal, hackathonName);
+            if (!string.IsNullOrWhiteSpace(options.JudgeId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.JudgeId), QueryComparisons.Equal, options.JudgeId));
+            }
+            if (!string.IsNullOrWhiteSpace(options.RatingKindId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.RatingKindId), QueryComparisons.Equal, options.RatingKindId));
+            }
+            if (!string.IsNullOrWhiteSpace(options.TeamId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.TeamId), QueryComparisons.Equal, options.TeamId));
+            }
+
+            int top = 100;
+            if (options != null && options.Top.HasValue && options.Top.Value > 0)
+            {
+                top = options.Top.Value;
+            }
+            TableQuery<RatingEntity> query = new TableQuery<RatingEntity>()
+                .Where(filter)
+                .Take(top);
+
+            TableContinuationToken continuationToken = options?.TableContinuationToken;
+            return await StorageContext.RatingTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+
         }
         #endregion
 

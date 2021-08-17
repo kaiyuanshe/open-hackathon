@@ -213,7 +213,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 options.Next = new TableContinuationToken
                 {
                     NextPartitionKey = (np + top).ToString(),
-                    NextRowKey = "nr"
+                    NextRowKey = (np + top).ToString(),
                 };
             }
 
