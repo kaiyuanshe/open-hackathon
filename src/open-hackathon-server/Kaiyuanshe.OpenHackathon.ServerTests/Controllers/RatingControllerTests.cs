@@ -723,5 +723,220 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(5, resp.ratingKind.maximumScore);
         }
         #endregion
+
+        #region ListPaginatedRatings
+        private static IEnumerable ListPaginatedRatingsTestData()
+        {
+            // arg0: pagination
+            // arg1: mocked next TableCotinuationToken
+            // arg2: kindId
+            // arg3: teamId
+            // arg4: judgeId
+            // arg5: expected options
+            // arg6: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null,
+                    null,
+                    null,
+                    new RatingQueryOptions { },
+                    null
+                );
+
+            // with pagination
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null,
+                    null,
+                    null,
+                    new RatingQueryOptions
+                    {
+                        Top = 10,
+                        TableContinuationToken = new TableContinuationToken
+                        {
+                            NextPartitionKey = "np",
+                            NextRowKey = "nr"
+                        },
+                    },
+                    null
+                );
+
+            // next page
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    null,
+                    null,
+                    null,
+                    new RatingQueryOptions { },
+                    "&np=np&nr=nr"
+                );
+
+            // filter: kindId
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "kid",
+                    null,
+                    null,
+                    new RatingQueryOptions { RatingKindId = "kid" },
+                    "&ratingKindId=kid&np=np&nr=nr"
+                );
+
+            // filter: teamId
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    null,
+                    "tid",
+                    null,
+                    new RatingQueryOptions { TeamId = "tid" },
+                    "&teamId=tid&np=np&nr=nr"
+                );
+
+            // filter: judgeId
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    null,
+                    null,
+                    "jid",
+                    new RatingQueryOptions { JudgeId = "jid" },
+                    "&judgeId=jid&np=np&nr=nr"
+                );
+
+            // all
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "kid",
+                    "tid",
+                    "jid",
+                    new RatingQueryOptions
+                    {
+                        Top = 10,
+                        TableContinuationToken = new TableContinuationToken
+                        {
+                            NextPartitionKey = "np",
+                            NextRowKey = "nr"
+                        },
+                        JudgeId = "jid",
+                        TeamId = "tid",
+                        RatingKindId = "kid",
+                    },
+                    "&top=10&ratingKindId=kid&teamId=tid&judgeId=jid&np=np&nr=nr"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListPaginatedRatingsTestData))]
+        public async Task ListPaginatedRatings(
+            Pagination pagination,
+            TableContinuationToken continuationToken,
+            string kindId,
+            string teamId,
+            string judgeId,
+            RatingQueryOptions expectedOptions,
+            string expectedLink)
+        {
+            // input
+            var hackName = "Hack";
+            HackathonEntity hackathonEntity = new HackathonEntity();
+            var ratings = new List<RatingEntity>
+            {
+                new RatingEntity
+                {
+                    PartitionKey = "hack",
+                    RowKey = "rk",
+                    RatingKindId = "kid",
+                    JudgeId = "judgeid",
+                    TeamId = "tid",
+                    Score = 4,
+                }
+            };
+            RatingKindEntity ratingKindEntity = new RatingKindEntity { MaximumScore = 5 };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            UserInfo judge = new UserInfo { OpenId = "openid" };
+            UserInfo teamCreator = new UserInfo { Unionid = "unionid" };
+            var segment = MockHelper.CreateTableQuerySegment(ratings, continuationToken);
+
+            // moq
+            RatingQueryOptions optionsCaptured = null;
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathonEntity);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetCachedRatingKindAsync("hack", "kid", default)).ReturnsAsync(ratingKindEntity);
+            ratingManagement.Setup(r => r.ListPaginatedRatingsAsync("hack", It.Is<RatingQueryOptions>(r =>
+                    r.RatingKindId == expectedOptions.RatingKindId &&
+                    r.TeamId == expectedOptions.TeamId &&
+                    r.JudgeId == expectedOptions.JudgeId
+                ), default))
+                .Callback<string, RatingQueryOptions, CancellationToken>((h, r, c) =>
+                {
+                    optionsCaptured = r;
+                })
+                .ReturnsAsync(segment);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "tid", default)).ReturnsAsync(team);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("judgeid", default)).ReturnsAsync(judge);
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(teamCreator);
+
+            // run
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                RatingManagement = ratingManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.ListPaginatedRatings(hackName, kindId, teamId, judgeId, pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, ratingManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<RatingList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("hack", list.value[0].hackathonName);
+            Assert.AreEqual("rk", list.value[0].id);
+            Assert.AreEqual(4, list.value[0].score);
+            Assert.AreEqual("unionid", list.value[0].team.creator.Unionid);
+            Assert.AreEqual("openid", list.value[0].judge.OpenId);
+            Assert.AreEqual(5, list.value[0].ratingKind.maximumScore);
+            Assert.AreEqual(expectedOptions.Top, optionsCaptured.Top);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextPartitionKey, optionsCaptured.TableContinuationToken?.NextPartitionKey);
+            Assert.AreEqual(expectedOptions.TableContinuationToken?.NextRowKey, optionsCaptured.TableContinuationToken?.NextRowKey);
+        }
+
+        #endregion
     }
 }

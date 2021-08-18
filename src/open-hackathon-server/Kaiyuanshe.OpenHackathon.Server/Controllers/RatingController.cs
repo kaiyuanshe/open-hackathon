@@ -250,7 +250,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             if (ratingKindEntity == null)
             {
-                ratingKindEntity = await RatingManagement.GetRatingKindAsync(ratingEntity.HackathonName, ratingEntity.RatingKindId, cancellationToken);
+                ratingKindEntity = await RatingManagement.GetCachedRatingKindAsync(ratingEntity.HackathonName, ratingEntity.RatingKindId, cancellationToken);
             }
             var kind = ResponseBuilder.BuildRatingKind(ratingKindEntity);
 
@@ -387,6 +387,81 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             ratingEntity = await RatingManagement.UpdateRatingAsync(ratingEntity, parameter, cancellationToken);
             var ratingResponse = await BuildRatingResp(ratingEntity, null, null, kind, cancellationToken);
             return Ok(ratingResponse);
+        }
+        #endregion
+
+        #region ListPaginatedRatings
+        /// <summary>
+        /// List paginated ratings, per service paging.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="ratingKindId" example="e4576366-fa87-451d-8e4d-ef6d1b6cee05">optional id of a rating kind. if present, only ratings of this kind is returned.</param>
+        /// <param name="teamId" example="d1e40c38-cc2a-445f-9eab-60c253256c57">optional id of a team. if present, only ratings of the team returned.</param>
+        /// <param name="judgeId" example="1">optional userId of a judge. If present, only ratings provided by the judge returned.</param>
+        /// <returns>a list of ratings</returns>
+        /// <response code="200">Success. The response describes a list of ratings and a nullable link to query more results.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(RatingList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/ratings")]
+        public async Task<object> ListPaginatedRatings(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery, Guid] string ratingKindId,
+            [FromQuery, Guid] string teamId,
+            [FromQuery] string judgeId,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                WritableRequired = false,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // list
+            var ratingQueryOptions = new RatingQueryOptions
+            {
+                RatingKindId = ratingKindId,
+                JudgeId = judgeId,
+                TeamId = teamId,
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+            };
+            var ratings = await RatingManagement.ListPaginatedRatingsAsync(hackathonName.ToLower(), ratingQueryOptions, cancellationToken);
+
+            // resp
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(ratingKindId))
+            {
+                routeValues.Add(nameof(ratingKindId), ratingKindId);
+            }
+            if (!string.IsNullOrWhiteSpace(teamId))
+            {
+                routeValues.Add(nameof(teamId), teamId);
+            }
+            if (!string.IsNullOrWhiteSpace(judgeId))
+            {
+                routeValues.Add(nameof(judgeId), judgeId);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, ratings.ContinuationToken);
+
+            var list = await ResponseBuilder.BuildResourceListAsync<RatingEntity, Rating, RatingList>(
+                ratings,
+                (ratingEntity, ct) => BuildRatingResp(ratingEntity, cancellationToken: ct),
+                nextLink,
+                cancellationToken);
+            return Ok(list);
         }
         #endregion
     }

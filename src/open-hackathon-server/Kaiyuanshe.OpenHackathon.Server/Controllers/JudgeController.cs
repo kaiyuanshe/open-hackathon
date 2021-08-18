@@ -167,7 +167,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
         /// Must contain only letters and/or numbers, length between 1 and 100</param>
         /// <returns>the response contains a list of judges and a nextLink if there are more results.</returns>
-        /// <response code="200">Success. The response describes a list of judge.</response>
+        /// <response code="200">Success. The response describes a list of judge and a nullable link to query more results.</response>
         [HttpGet]
         [ProducesResponseType(typeof(JudgeList), StatusCodes.Status200OK)]
         [SwaggerErrorResponse(400, 404)]

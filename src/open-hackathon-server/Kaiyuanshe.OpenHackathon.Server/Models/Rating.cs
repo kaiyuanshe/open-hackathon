@@ -73,4 +73,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [MaxLength(256)]
         public string description { get; set; }
     }
+
+    public class RatingList : IResourceList<Rating>
+    {
+        /// <summary>
+        /// a list of ratings.
+        /// </summary>
+        public Rating[] value { get; set; }
+
+        /// <summary>
+        ///  The URL the client should use to fetch the next page (per server side paging).
+        ///  No more results if it's null or empty.
+        /// </summary>
+        public string nextLink { get; set; }
+    }
 }

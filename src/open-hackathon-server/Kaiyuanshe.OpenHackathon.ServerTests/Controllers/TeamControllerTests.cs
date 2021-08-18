@@ -605,7 +605,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             yield return new TestCaseData(
                     new Pagination { },
                     null,
-                    new EnrollmentQueryOptions { },
+                    new TeamQueryOptions { },
                     null
                 );
 
@@ -613,7 +613,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             yield return new TestCaseData(
                     new Pagination { top = 10, np = "np", nr = "nr" },
                     null,
-                    new EnrollmentQueryOptions
+                    new TeamQueryOptions
                     {
                         Top = 10,
                         TableContinuationToken = new TableContinuationToken
@@ -621,7 +621,6 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                             NextPartitionKey = "np",
                             NextRowKey = "nr"
                         },
-                        Status = EnrollmentStatus.rejected
                     },
                     null
                 );
@@ -634,7 +633,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                         NextPartitionKey = "np",
                         NextRowKey = "nr"
                     },
-                    new EnrollmentQueryOptions { },
+                    new TeamQueryOptions { },
                     "&np=np&nr=nr"
                 );
         }
@@ -643,7 +642,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         public async Task ListTeams(
             Pagination pagination,
             TableContinuationToken continuationToken,
-            EnrollmentQueryOptions expectedOptions,
+            TeamQueryOptions expectedOptions,
             string expectedLink)
         {
             // input
