@@ -30,7 +30,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// fresh: hackathons that are about to start.
         /// </param>
         /// <returns>A list of hackathon.</returns>
-        /// <response code="200">Success. The response describes a list of hackathon and a nullable line to query more results</response>
+        /// <response code="200">Success. The response describes a list of hackathon and a nullable link to query more results.</response>
         [HttpGet]
         [ProducesResponseType(typeof(HackathonList), 200)]
         [Route("hackathons")]
