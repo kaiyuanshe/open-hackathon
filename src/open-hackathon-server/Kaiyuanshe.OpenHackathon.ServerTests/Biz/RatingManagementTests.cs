@@ -523,5 +523,27 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("nr", segment.ContinuationToken.NextRowKey);
         }
         #endregion
+
+        #region DeleteRatingAsync
+        [Test]
+        public async Task DeleteRatingAsync()
+        {
+            var ratingTable = new Mock<IRatingTable> { };
+            ratingTable.Setup(t => t.DeleteAsync("hack", "rid", default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.Setup(s => s.RatingTable).Returns(ratingTable.Object);
+            var logger = new Mock<ILogger<RatingManagement>>();
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await ratingManagement.DeleteRatingAsync("hack", "rid", default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+        }
+        #endregion
     }
 }
