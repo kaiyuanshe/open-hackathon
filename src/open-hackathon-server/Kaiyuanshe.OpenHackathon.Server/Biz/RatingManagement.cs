@@ -25,6 +25,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
         Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default);
+        Task DeleteRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
     }
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
@@ -244,6 +245,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.RatingTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
 
+        }
+        #endregion
+
+        #region Task DeleteRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken)
+        public async Task DeleteRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(ratingId))
+                return;
+
+            await StorageContext.RatingTable.DeleteAsync(hackathonName, ratingId, cancellationToken);
         }
         #endregion
 

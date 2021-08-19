@@ -995,5 +995,118 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(5, resp.ratingKind.maximumScore);
         }
         #endregion
+
+        #region DeleteRating
+        [Test]
+        public async Task DeleteRating_AlreadyDeleted()
+        {
+            HackathonEntity hackathon = new HackathonEntity { };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = null;
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.DeleteRating("Hack", "rid", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+
+        [Test]
+        public async Task DeleteRating_NotCreator()
+        {
+            HackathonEntity hackathon = new HackathonEntity { };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = new RatingEntity { JudgeId = "user" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.IsHackathonAdmin("hack", It.IsAny<ClaimsPrincipal>(), default)).ReturnsAsync(false);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+            };
+            var result = await controller.DeleteRating("Hack", "rid", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement, adminManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 403, Resources.Rating_OnlyCreator);
+        }
+
+        [Test]
+        public async Task DeleteRating_Delete()
+        {
+            HackathonEntity hackathon = new HackathonEntity { };
+            var authResult = AuthorizationResult.Success();
+            RatingEntity ratingEntity = new RatingEntity { JudgeId = "user" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonJudge))
+               .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            ratingManagement.Setup(r => r.DeleteRatingAsync("hack", "rid", default));
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.IsHackathonAdmin("hack", It.IsAny<ClaimsPrincipal>(), default)).ReturnsAsync(true);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+            };
+            var result = await controller.DeleteRating("Hack", "rid", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, authorizationService, ratingManagement, adminManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }

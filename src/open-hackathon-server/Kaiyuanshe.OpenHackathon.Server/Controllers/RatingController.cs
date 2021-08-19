@@ -507,5 +507,55 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ratingResponse);
         }
         #endregion
+
+        #region DeleteRating
+        /// <summary>
+        /// Delete a rating. Only hackathon adminstrator or the submitter can delete it.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="ratingId" example="dd09af6d-75f6-463c-8e5d-786818e409db">Auto-generated Guid of a rating.</param>
+        /// <response code="204">Success. The response indicates the rating is deleted.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 403, 404)]
+        [Route("hackathon/{hackathonName}/rating/{ratingId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonJudge)]
+        public async Task<object> DeleteRating(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string ratingId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackJudgeRequird = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Get Rating
+            var ratingEntity = await RatingManagement.GetRatingAsync(hackathonName.ToLower(), ratingId, cancellationToken);
+            if (ratingEntity == null)
+            {
+                return NoContent();
+            }
+
+            // delete
+            if (ratingEntity.JudgeId != CurrentUserId)
+            {
+                bool isAdmin = await HackathonAdminManagement.IsHackathonAdmin(hackathonName.ToLower(), User, cancellationToken);
+                if (!isAdmin)
+                {
+                    return Forbidden(Resources.Rating_OnlyCreator);
+                }
+            }
+            await RatingManagement.DeleteRatingAsync(hackathonName.ToLower(), ratingId, cancellationToken);
+            return NoContent();
+        }
+        #endregion
     }
 }
