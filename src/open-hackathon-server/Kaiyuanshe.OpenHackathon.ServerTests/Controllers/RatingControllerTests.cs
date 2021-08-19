@@ -938,5 +938,62 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         #endregion
+
+        #region GetRating
+        [Test]
+        public async Task GetRating()
+        {
+            // data
+            HackathonEntity hackathon = new HackathonEntity { };
+            RatingEntity ratingEntity = new RatingEntity
+            {
+                JudgeId = "anotherUser",
+                Score = 4,
+                RatingKindId = "kid",
+                TeamId = "tid",
+                PartitionKey = "hack"
+            };
+            RatingKindEntity ratingKindEntity = new RatingKindEntity { MaximumScore = 5 };
+            TeamEntity team = new TeamEntity { CreatorId = "creator" };
+            UserInfo judge = new UserInfo { OAuth = "oauth" };
+            UserInfo teamCreator = new UserInfo { SignedUp = "signedup" };
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(r => r.GetRatingAsync("hack", "rid", default)).ReturnsAsync(ratingEntity);
+            ratingManagement.Setup(r => r.GetCachedRatingKindAsync("hack", "kid", default)).ReturnsAsync(ratingKindEntity);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "tid", default)).ReturnsAsync(team);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("anotherUser", default)).ReturnsAsync(judge);
+            userManagement.Setup(u => u.GetUserByIdAsync("creator", default)).ReturnsAsync(teamCreator);
+
+            // test
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                RatingManagement = ratingManagement.Object,
+                TeamManagement = teamManagement.Object,
+                UserManagement = userManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetRating("Hack", "rid", default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, ratingManagement, teamManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Rating>(result);
+            Assert.AreEqual(4, resp.score);
+            Assert.AreEqual("signedup", resp.team.creator.SignedUp);
+            Assert.AreEqual("oauth", resp.judge.OAuth);
+            Assert.AreEqual(5, resp.ratingKind.maximumScore);
+        }
+        #endregion
     }
 }
