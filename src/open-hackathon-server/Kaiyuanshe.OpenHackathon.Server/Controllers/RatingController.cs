@@ -464,5 +464,48 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(list);
         }
         #endregion
+
+        #region GetRating
+        /// <summary>
+        /// Get a rating. 
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="ratingId" example="dd09af6d-75f6-463c-8e5d-786818e409db">Auto-generated Guid of a rating.</param>
+        /// <returns>The rating</returns>
+        /// <response code="200">Success. The response describes a rating.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Rating), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/rating/{ratingId}")]
+        public async Task<object> GetRating(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required, Guid] string ratingId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                WritableRequired = false,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // Get Rating
+            var ratingEntity = await RatingManagement.GetRatingAsync(hackathonName.ToLower(), ratingId, cancellationToken);
+            if (ratingEntity == null)
+            {
+                return NotFound(Resources.Rating_NotFound);
+            }
+
+            // get
+            var ratingResponse = await BuildRatingResp(ratingEntity, null, null, null, cancellationToken);
+            return Ok(ratingResponse);
+        }
+        #endregion
     }
 }
