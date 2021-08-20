@@ -364,9 +364,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
             var judgeManagement = new Mock<IJudgeManagement>();
             judgeManagement.Setup(j => j.GetJudgeAsync("hack", "uid", default)).ReturnsAsync(entity);
+            var ratingManagement = new Mock<IRatingManagement>();
             if (firstTime)
             {
                 judgeManagement.Setup(j => j.DeleteJudgeAsync("hack", "uid", default));
+                ratingManagement.Setup(j => j.IsRatingCountGreaterThanZero(
+                        "hack",
+                        It.Is<RatingQueryOptions>(o => o.RatingKindId == null && o.JudgeId == "uid" && o.TeamId == null),
+                        default)).ReturnsAsync(false);
             }
 
             var controller = new JudgeController
@@ -375,16 +380,60 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 AuthorizationService = authorizationService.Object,
                 UserManagement = userManagement.Object,
                 JudgeManagement = judgeManagement.Object,
+                RatingManagement = ratingManagement.Object,
             };
             var result = await controller.DeleteJudge("Hack", "uid", default);
 
-            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, judgeManagement);
+            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, judgeManagement, ratingManagement);
             hackathonManagement.VerifyNoOtherCalls();
             authorizationService.VerifyNoOtherCalls();
             userManagement.VerifyNoOtherCalls();
             judgeManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
 
             AssertHelper.AssertNoContentResult(result);
+        }
+
+        [Test]
+        public async Task DeleteJudge_HasRating()
+        {
+            var hackathon = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            UserInfo user = new UserInfo { };
+            JudgeEntity entity = new JudgeEntity();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.GetJudgeAsync("hack", "uid", default)).ReturnsAsync(entity);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.IsRatingCountGreaterThanZero(
+                "hack",
+                It.Is<RatingQueryOptions>(o => o.RatingKindId == null && o.JudgeId == "uid" && o.TeamId == null),
+                default)).ReturnsAsync(true);
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                UserManagement = userManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.DeleteJudge("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, judgeManagement, ratingManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, string.Format(Resources.Rating_HasRating, nameof(Judge)));
         }
         #endregion
     }

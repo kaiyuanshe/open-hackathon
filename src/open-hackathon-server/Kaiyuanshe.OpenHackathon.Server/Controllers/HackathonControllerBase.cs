@@ -203,6 +203,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         {
             public bool TeamAdminRequired { get; set; }
             public bool NoAwardAssignmentRequired { get; set; }
+            public bool NoRatingRequired { get; set; }
         }
 
         public class ValidateTeamMemberOptions : ControllerValiationOptions
@@ -375,6 +376,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 if (assignments.Count() > 0)
                 {
                     options.ValidateResult = PreconditionFailed(Resources.Team_HasAward);
+                    return false;
+                }
+            }
+
+            if (options.NoRatingRequired)
+            {
+                // valiate no ratings
+                var ratingOptions = new RatingQueryOptions { TeamId = team.Id };
+                var hasRating = await RatingManagement.IsRatingCountGreaterThanZero(team.HackathonName, ratingOptions, cancellationToken);
+                if (hasRating)
+                {
+                    options.ValidateResult = PreconditionFailed(string.Format(Resources.Rating_HasRating, nameof(Team)), team.Id);
                     return false;
                 }
             }

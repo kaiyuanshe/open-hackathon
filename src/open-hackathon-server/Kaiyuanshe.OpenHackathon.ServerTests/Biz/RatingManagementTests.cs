@@ -432,6 +432,62 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region IsRatingCountGreaterThanZero
+        private static IEnumerable IsRatingCountGreaterThanZeroTestData()
+        {
+            // arg0: options
+            // arg1: expected query
+
+            // filter by kind
+            yield return new TestCaseData(
+               new RatingQueryOptions { RatingKindId = "kid" },
+               "(PartitionKey eq 'hack') and (RatingKindId eq 'kid')"
+               );
+
+            // filter by team
+            yield return new TestCaseData(
+               new RatingQueryOptions { TeamId = "tid" },
+               "(PartitionKey eq 'hack') and (TeamId eq 'tid')"
+               );
+
+            // filter by judge
+            yield return new TestCaseData(
+               new RatingQueryOptions { JudgeId = "uid" },
+               "(PartitionKey eq 'hack') and (JudgeId eq 'uid')"
+               );
+        }
+
+        [Test, TestCaseSource(nameof(IsRatingCountGreaterThanZeroTestData))]
+        public async Task IsRatingCountGreaterThanZero(RatingQueryOptions options, string expectedFilter)
+        {
+            string hackName = "hack";
+            var entities = MockHelper.CreateTableQuerySegment<RatingEntity>(
+                 new List<RatingEntity>
+                 {
+                     new RatingEntity{  RowKey="rk" }
+                 }, null);
+
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var ratingTable = new Mock<IRatingTable>();
+            ratingTable.Setup(p => p.ExecuteQuerySegmentedAsync(It.Is<TableQuery<RatingEntity>>(r =>
+               r.FilterString == expectedFilter && r.TakeCount == 1
+                ), default(TableContinuationToken), default)).ReturnsAsync(entities);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.RatingTable).Returns(ratingTable.Object);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object
+            };
+            var result = await ratingManagement.IsRatingCountGreaterThanZero(hackName, options, default);
+
+            Mock.VerifyAll(ratingTable, storageContext);
+            ratingTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+            Assert.IsTrue(result);
+        }
+        #endregion
+
         #region ListPaginatedRatingsAsync
         private static IEnumerable ListPaginatedRatingsAsyncTestData()
         {

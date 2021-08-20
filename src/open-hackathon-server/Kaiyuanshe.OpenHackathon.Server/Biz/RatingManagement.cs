@@ -24,6 +24,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<RatingEntity> UpdateRatingAsync(RatingEntity existing, Rating parameter, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string judgeId, string teamId, string kindId, CancellationToken cancellationToken);
         Task<RatingEntity> GetRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
+        Task<bool> IsRatingCountGreaterThanZero(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken);
         Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default);
         Task DeleteRatingAsync(string hackathonName, string ratingId, CancellationToken cancellationToken);
     }
@@ -213,6 +214,37 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
+        #region Task<bool> IsRatingCountGreaterThanZero(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken);
+        public async Task<bool> IsRatingCountGreaterThanZero(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken)
+        {
+            var filter = TableQuery.GenerateFilterCondition(nameof(RatingEntity.PartitionKey), QueryComparisons.Equal, hackathonName);
+            if (!string.IsNullOrWhiteSpace(options.JudgeId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.JudgeId), QueryComparisons.Equal, options.JudgeId));
+            }
+            if (!string.IsNullOrWhiteSpace(options.RatingKindId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.RatingKindId), QueryComparisons.Equal, options.RatingKindId));
+            }
+            if (!string.IsNullOrWhiteSpace(options.TeamId))
+            {
+                filter = TableQueryHelper.And(filter,
+                    TableQuery.GenerateFilterCondition(nameof(RatingEntity.TeamId), QueryComparisons.Equal, options.TeamId));
+            }
+
+            TableQuery<RatingEntity> query = new TableQuery<RatingEntity>()
+                .Where(filter)
+                .Select(new[] { nameof(RatingEntity.RowKey) })
+                .Take(1);
+
+            TableContinuationToken continuationToken = null;
+            var segment = await StorageContext.RatingTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
+            return segment.Count() > 0;
+        }
+        #endregion
+
         #region Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default)
         public async Task<TableQuerySegment<RatingEntity>> ListPaginatedRatingsAsync(string hackathonName, RatingQueryOptions options, CancellationToken cancellationToken = default)
         {
@@ -244,7 +276,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             TableContinuationToken continuationToken = options?.TableContinuationToken;
             return await StorageContext.RatingTable.ExecuteQuerySegmentedAsync(query, continuationToken, cancellationToken);
-
         }
         #endregion
 

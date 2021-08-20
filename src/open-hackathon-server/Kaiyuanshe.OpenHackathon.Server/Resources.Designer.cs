@@ -313,6 +313,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot delete the {0}. Must delete related Rating first..
+        /// </summary>
+        internal static string Rating_HasRating {
+            get {
+                return ResourceManager.GetString("Rating_HasRating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The rating kind of specified Id doesn&apos;t exist..
         /// </summary>
         internal static string Rating_KindNotFound {
