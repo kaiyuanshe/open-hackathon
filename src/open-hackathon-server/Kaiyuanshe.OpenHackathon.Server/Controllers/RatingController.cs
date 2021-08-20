@@ -225,6 +225,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 return NoContent();
             }
+
+            // valiate no ratings
+            var ratingOptions = new RatingQueryOptions { RatingKindId = entity.Id};
+            var hasRating = await RatingManagement.IsRatingCountGreaterThanZero(hackathonName.ToLower(), ratingOptions, cancellationToken);
+            if (hasRating)
+            {
+                return PreconditionFailed(string.Format(Resources.Rating_HasRating, nameof(RatingKind)), kindId);
+            }
+
             await RatingManagement.DeleteRatingKindAsync(hackathonName.ToLower(), kindId, cancellationToken);
             return NoContent();
         }

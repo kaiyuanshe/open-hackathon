@@ -288,6 +288,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             {
                 TeamAdminRequired = true,
                 NoAwardAssignmentRequired = true,
+                NoRatingRequired = true,
             };
             if (await ValidateTeam(team, teamValidateOptions) == false)
             {

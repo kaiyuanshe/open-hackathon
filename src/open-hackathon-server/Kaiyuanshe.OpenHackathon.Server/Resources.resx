@@ -201,6 +201,9 @@
   <data name="Parameter_Required" xml:space="preserve">
     <value>Required parameter {0} is null or empty.</value>
   </data>
+  <data name="Rating_HasRating" xml:space="preserve">
+    <value>Cannot delete the {0}. Must delete related Rating first.</value>
+  </data>
   <data name="Rating_KindNotFound" xml:space="preserve">
     <value>The rating kind of specified Id doesn't exist.</value>
   </data>

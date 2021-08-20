@@ -1637,6 +1637,57 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task DeleteTeam_HasRating()
+        {
+            // input
+            string hackName = "Foo";
+            string teamId = "tid";
+            HackathonEntity hackathon = new HackathonEntity { Status = HackathonStatus.online };
+            TeamEntity teamEntity = new TeamEntity { PartitionKey = "foo", RowKey = "rk" };
+            var assignments = new List<AwardAssignmentEntity>();
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
+                .ReturnsAsync(hackathon);
+            var teamManagement = new Mock<ITeamManagement>();
+            teamManagement.Setup(t => t.GetTeamByIdAsync("foo", "tid", default))
+                .ReturnsAsync(teamEntity);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(a => a.ListAssignmentsByTeamAsync("foo", "rk", default))
+                .ReturnsAsync(assignments);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamAdministrator))
+                .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.IsRatingCountGreaterThanZero(
+                "foo",
+                It.Is<RatingQueryOptions>(o => o.RatingKindId == null && o.JudgeId == null && o.TeamId == "rk"),
+                default)).ReturnsAsync(true);
+
+            // run
+            var controller = new TeamController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                TeamManagement = teamManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                RatingManagement = ratingManagement.Object,
+            };
+            var result = await controller.DeleteTeam(hackName, teamId, default);
+            // verify
+            Mock.VerifyAll(hackathonManagement, teamManagement, ratingManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            teamManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, string.Format(Resources.Rating_HasRating, nameof(Team)));
+        }
+
+        [Test]
         public async Task DeleteTeam_Succeeded()
         {
             // input
@@ -1661,6 +1712,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var awardManagement = new Mock<IAwardManagement>();
             awardManagement.Setup(a => a.ListAssignmentsByTeamAsync("foo", "rk", default))
                 .ReturnsAsync(assignments);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(j => j.IsRatingCountGreaterThanZero(
+                "foo",
+                It.Is<RatingQueryOptions>(o => o.RatingKindId == null && o.JudgeId == null && o.TeamId == "rk"),
+                default)).ReturnsAsync(false);
 
             // run
             var controller = new TeamController
@@ -1669,15 +1725,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 TeamManagement = teamManagement.Object,
                 AuthorizationService = authorizationService.Object,
                 AwardManagement = awardManagement.Object,
-                ProblemDetailsFactory = new CustomProblemDetailsFactory(),
+                RatingManagement = ratingManagement.Object,
             };
             var result = await controller.DeleteTeam(hackName, teamId, default);
             // verify
-            Mock.VerifyAll(hackathonManagement, teamManagement, authorizationService, awardManagement);
+            Mock.VerifyAll(hackathonManagement, teamManagement, ratingManagement, authorizationService, awardManagement);
             hackathonManagement.VerifyNoOtherCalls();
             teamManagement.VerifyNoOtherCalls();
             authorizationService.VerifyNoOtherCalls();
             awardManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
 
             AssertHelper.AssertNoContentResult(result);
         }
