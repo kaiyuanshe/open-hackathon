@@ -205,6 +205,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The user created too many hackathons, please try again at a later time or contact the administrator..
+        /// </summary>
+        internal static string Hackathon_CreateTooMany {
+            get {
+                return ResourceManager.GetString("Hackathon_CreateTooMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hackathon {0} is Offline. Cannot be updated..
         /// </summary>
         internal static string Hackathon_Deleted {

@@ -165,6 +165,9 @@
   <data name="Hackathon_AlreadyOnline" xml:space="preserve">
     <value>Hackathon {0} is already Online.</value>
   </data>
+  <data name="Hackathon_CreateTooMany" xml:space="preserve">
+    <value>The user created too many hackathons, please try again at a later time or contact the administrator.</value>
+  </data>
   <data name="Hackathon_Deleted" xml:space="preserve">
     <value>Hackathon {0} is Offline. Cannot be updated.</value>
   </data>

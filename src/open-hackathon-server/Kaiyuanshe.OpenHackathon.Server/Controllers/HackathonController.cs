@@ -127,7 +127,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
         /// <response code="200">Success. The response describes a hackathon.</response>
         [HttpPut]
         [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
-        [SwaggerErrorResponse(400, 403)]
+        [SwaggerErrorResponse(400, 403, 412)]
         [Route("hackathon/{hackathonName}")]
         [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
         public async Task<object> CreateOrUpdate(
@@ -144,6 +144,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
             else
             {
+                var canCreate = await HackathonManagement.CanCreateHackathonAsync(User, cancellationToken);
+                if (!canCreate)
+                {
+                    return PreconditionFailed(Resources.Hackathon_CreateTooMany);
+                }
+
                 parameter.creatorId = CurrentUserId;
                 var created = await HackathonManagement.CreateHackathonAsync(parameter, cancellationToken);
                 var roles = await HackathonManagement.GetHackathonRolesAsync(created, User, cancellationToken);
