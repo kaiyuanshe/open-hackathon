@@ -124,6 +124,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A maximum of 100 awards are allowed..
+        /// </summary>
+        internal static string Award_TooMany {
+            get {
+                return ResourceManager.GetString("Award_TooMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot assign the award to more than {0} assignees..
         /// </summary>
         internal static string Award_TooManyAssignments {

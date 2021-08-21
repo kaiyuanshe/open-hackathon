@@ -16,28 +16,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Get a Award by Id
         /// </summary>
-        /// <param name="hackathonName">name of hackathon</param>
-        /// <param name="awardId">unique id of the award</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<AwardEntity> GetAwardByIdAsync(string hackathonName, string awardId, CancellationToken cancellationToken = default);
+
+        Task<bool> CanCreateNewAward(string hackathonName, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Create a new Award. No existeance check.
         /// </summary>
-        /// <param name="hackathonName">name of hackathon</param>
-        /// <param name="award">award from request</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<AwardEntity> CreateAwardAsync(string hackathonName, Award award, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update a new Award. No existeance check.
         /// </summary>
-        /// <param name="entity">award to update.</param>
-        /// <param name="award">award from request</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<AwardEntity> UpdateAwardAsync(AwardEntity entity, Award award, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -48,18 +38,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// List paged awards of hackathon
         /// </summary>
-        /// <param name="hackathonName">name of hackathon</param>
-        /// <param name="options">options for query</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<IEnumerable<AwardEntity>> ListPaginatedAwardsAsync(string hackathonName, AwardQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a new Award. 
         /// </summary>
-        /// <param name="entity">award to update.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task DeleteAwardAsync(AwardEntity entity, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -100,6 +83,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
     public class AwardManagement : ManagementClientBase, IAwardManagement
     {
+        static readonly int MaxAwardCount = 100;
+
         private readonly ILogger Logger;
 
         public AwardManagement(ILogger<AwardManagement> logger)
@@ -134,6 +119,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             {
                 return StorageContext.AwardAssignmentTable.ListByHackathonAsync(hackathonName, ct);
             }, false, cancellationToken);
+        }
+        #endregion
+
+        #region Task<bool> CanCreateNewAward(string hackathonName, CancellationToken cancellationToken = default)
+        public async Task<bool> CanCreateNewAward(string hackathonName, CancellationToken cancellationToken = default)
+        {
+            var awards = await ListAwardsAsync(hackathonName, cancellationToken);
+            return awards.Count() < MaxAwardCount;
         }
         #endregion
 

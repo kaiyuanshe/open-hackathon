@@ -50,6 +50,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
+            // check award count
+            bool canCreate = await AwardManagement.CanCreateNewAward(hackathonName.ToLower(), cancellationToken);
+            if (!canCreate)
+            {
+                return PreconditionFailed(Resources.Award_TooMany);
+            }
+
             // create award
             parameter.hackathonName = hackathonName.ToLower();
             var awardEntity = await AwardManagement.CreateAwardAsync(hackathonName.ToLower(), parameter, cancellationToken);

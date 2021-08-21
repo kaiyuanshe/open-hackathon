@@ -66,6 +66,51 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region CanCreateNewAward
+        private static IEnumerable CanCreateNewAwardTestData()
+        {
+            // arg0: awards
+            // arg1: expectedResult
+
+            List<AwardEntity> notexceed = new List<AwardEntity>();
+            for (int i = 0; i < 99; i++)
+            {
+                notexceed.Add(new AwardEntity());
+            }
+
+            // not exceed
+            yield return new TestCaseData(notexceed, true);
+
+            // exceed
+            List<AwardEntity> exceed = new List<AwardEntity>();
+            for (int i = 0; i < 100; i++)
+            {
+                exceed.Add(new AwardEntity());
+            }
+            yield return new TestCaseData(exceed, false);
+        }
+
+        [Test, TestCaseSource(nameof(CanCreateNewAwardTestData))]
+        public async Task CanCreateNewAward(List<AwardEntity> awards, bool expectedResult)
+        {
+            var logger = new Mock<ILogger<AwardManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<AwardEntity>>>(c => c.CacheKey == "Award-hack"), default))
+                .ReturnsAsync(awards);
+
+            var awardManagement = new AwardManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await awardManagement.CanCreateNewAward("hack", default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region CreateAwardAsync
 
         private static IEnumerable CreateAwardAsyncTestData()
