@@ -18,70 +18,57 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
     public interface IHackathonManagement
     {
         /// <summary>
+        /// Is user eligible to create new hackathon. Might be throttled. 
+        /// </summary>
+        Task<bool> CanCreateHackathonAsync(ClaimsPrincipal user, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Create a new hackathon
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<HackathonEntity> CreateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update hackathon from request.
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<HackathonEntity> UpdateHackathonAsync(Hackathon request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Change the status of a hackathon.
         /// </summary>
-        /// <param name="hackathonEntity"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<HackathonEntity> UpdateHackathonStatusAsync(HackathonEntity hackathonEntity, HackathonStatus status, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get Hackathon By name. Return null if not found.
         /// </summary>
-        /// <returns></returns>
         Task<HackathonEntity> GetHackathonEntityByNameAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search paginated hackathon
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<IEnumerable<HackathonEntity>> ListPaginatedHackathonsAsync(ClaimsPrincipal user, HackathonQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List all hackathons
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<Dictionary<string, HackathonEntity>> ListAllHackathonsAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get roles of a user on a specified hackathon
         /// </summary>
-        /// <param name="hackathon"></param>
-        /// <param name="user"></param>
-        /// <returns></returns>
         Task<HackathonRoles> GetHackathonRolesAsync(HackathonEntity hackathon, ClaimsPrincipal user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get roles of a user on a list of hackathon
         /// </summary>
-        /// <param name="hackathons"></param>
-        /// <param name="user"></param>
-        /// <returns></returns>
         Task<IEnumerable<Tuple<HackathonEntity, HackathonRoles>>> ListHackathonRolesAsync(IEnumerable<HackathonEntity> hackathons, ClaimsPrincipal user, CancellationToken cancellationToken = default);
     }
 
     /// <inheritdoc cref="IHackathonManagement"/>
     public class HackathonManagement : ManagementClientBase, IHackathonManagement
     {
+        static readonly int MaxHackathonsEachDay = 3;
+        static readonly int MaxHackathonsEachMonth = 10;
+
         private readonly ILogger logger;
         internal static string cacheKeyForAllHackathon = CacheKeys.GetCacheKey(CacheEntryType.Hackathon, "all");
 
@@ -103,6 +90,35 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             //  1. Partially update cache;
             //  2. cache required data only like those for filter/ordering
             Cache.Remove(cacheKeyForAllHackathon);
+        }
+        #endregion
+
+        #region Task<bool> CanCreateHackathonAsync(ClaimsPrincipal user, CancellationToken cancellationToken)
+        public async Task<bool> CanCreateHackathonAsync(ClaimsPrincipal user, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsHelper.GetUserId(user);
+            if (string.IsNullOrWhiteSpace(userId))
+                return false;
+
+            // cannot create >3 in each day or >10 in each month
+            var allHackathons = await ListAllHackathonsAsync(cancellationToken);
+            var myCreated = allHackathons.Values.Where(h => h.CreatorId == userId);
+
+            var thisDay = myCreated.Count(h => h.CreatedAt > DateTime.UtcNow.AddDays(-1));
+            if (thisDay >= MaxHackathonsEachDay)
+            {
+                logger.LogInformation($"{userId} created {thisDay} hackathons in the past 24 hours, cannot create more.");
+                return false;
+            }
+
+            var thisMonth = myCreated.Count(h => h.CreatedAt > DateTime.UtcNow.AddMonths(-1));
+            if (thisMonth >= MaxHackathonsEachMonth)
+            {
+                logger.LogInformation($"{userId} created {thisMonth} hackathons in the past month, cannot create more.");
+                return false;
+            }
+
+            return true;
         }
         #endregion
 

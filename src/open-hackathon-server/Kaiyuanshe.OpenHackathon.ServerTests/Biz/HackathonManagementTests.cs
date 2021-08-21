@@ -22,6 +22,72 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
     [TestFixture]
     public class HackathonManagementTests
     {
+        #region CanCreateHackathonAsync
+        private static IEnumerable CanCreateHackathonAsyncTestData()
+        {
+            // arg0: entities
+            // arg1: expectedResult
+
+            // >3 in 1 day
+            yield return new TestCaseData(
+                new Dictionary<string, HackathonEntity>
+                {
+                    { "a", new HackathonEntity{ CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddHours(-1) } },
+                    { "b", new HackathonEntity{ CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddHours(-12) } },
+                    { "c", new HackathonEntity{ CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddHours(-23) } },
+                },
+                false);
+
+            // >10 in 1 month
+            Dictionary<string, HackathonEntity> month = new Dictionary<string, HackathonEntity>();
+            for (int i = 0; i < 10; i++)
+            {
+                month.Add(i.ToString(), new HackathonEntity { CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddDays(-5) });
+            }
+            yield return new TestCaseData(
+                month,
+                false);
+
+            // pass
+            Dictionary<string, HackathonEntity> pass = new Dictionary<string, HackathonEntity>();
+            pass.Add("a", new HackathonEntity { CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddHours(-23) });
+            pass.Add("b", new HackathonEntity { CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddHours(-1) });
+            pass.Add("c", new HackathonEntity { CreatorId = "uid2", CreatedAt = DateTime.UtcNow.AddHours(-1) });
+            for (int i = 0; i < 7; i++)
+            {
+                pass.Add(i.ToString(), new HackathonEntity { CreatorId = "uid", CreatedAt = DateTime.UtcNow.AddDays(-5) });
+            }
+            yield return new TestCaseData(
+                pass,
+                true);
+        }
+
+        [Test, TestCaseSource(nameof(CanCreateHackathonAsyncTestData))]
+        public async Task CanCreateHackathonAsync(Dictionary<string, HackathonEntity> entities, bool expectedResult)
+        {
+            var user = new ClaimsPrincipal(
+                    new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(AuthConstant.ClaimType.UserId, "uid")
+                    })
+                );
+
+            var logger = new Mock<ILogger<HackathonManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.IsAny<CacheEntry<Dictionary<string, HackathonEntity>>>(), default)).ReturnsAsync(entities);
+
+            var hackathonManagement = new HackathonManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await hackathonManagement.CanCreateHackathonAsync(user, default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region CreateHackathonAsyncTest
         [Test]
         public async Task CreateHackathonAsyncTest()
@@ -975,7 +1041,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Mock.VerifyAll(hackathonAdminManagement, enrollmentManagement);
             hackathonAdminManagement.VerifyNoOtherCalls();
             enrollmentManagement.VerifyNoOtherCalls();
-            
+
             Assert.IsFalse(result.ElementAt(0).Item2.isAdmin);
             Assert.IsFalse(result.ElementAt(0).Item2.isEnrolled);
             Assert.IsFalse(result.ElementAt(0).Item2.isJudge);
