@@ -23,7 +23,44 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     {
         #region CreateAward
         [Test]
-        public async Task CreateAward()
+        public async Task CreateAward_TooMany()
+        {
+            // input
+            string hackName = "Foo";
+            HackathonEntity hackathon = new HackathonEntity { };
+            Award parameter = new Award { };
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
+                .ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var awardManagement = new Mock<IAwardManagement>();
+            awardManagement.Setup(t => t.CanCreateNewAward("foo", default)).ReturnsAsync(false);
+
+
+            // run
+            var controller = new AwardController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AwardManagement = awardManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.CreateAward(hackName, parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            awardManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Award_TooMany);
+        }
+
+        [Test]
+        public async Task CreateAward_Succeeded()
         {
             // input
             string hackName = "Foo";
@@ -42,16 +79,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                     new PictureInfo{ name="p1", description="d1", uri="u1" },
                 }
             };
-            CancellationToken cancellationToken = CancellationToken.None;
             var authResult = AuthorizationResult.Success();
 
             // moq
             var hackathonManagement = new Mock<IHackathonManagement>();
-            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", cancellationToken))
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("foo", default))
                 .ReturnsAsync(hackathon);
             var awardManagement = new Mock<IAwardManagement>();
-            awardManagement.Setup(t => t.CreateAwardAsync("foo", parameter, cancellationToken))
+            awardManagement.Setup(t => t.CreateAwardAsync("foo", parameter, default))
                 .ReturnsAsync(awardEntity);
+            awardManagement.Setup(t => t.CanCreateNewAward("foo", default)).ReturnsAsync(true);
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
                 .ReturnsAsync(authResult);
@@ -65,7 +102,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 ResponseBuilder = new DefaultResponseBuilder(),
                 AuthorizationService = authorizationService.Object,
             };
-            var result = await controller.CreateAward(hackName, parameter, cancellationToken);
+            var result = await controller.CreateAward(hackName, parameter, default);
 
             // verify
             Mock.VerifyAll(hackathonManagement, awardManagement, authorizationService);

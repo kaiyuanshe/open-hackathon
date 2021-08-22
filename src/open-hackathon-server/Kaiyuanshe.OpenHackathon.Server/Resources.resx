@@ -141,6 +141,9 @@
   <data name="Award_NotFound" xml:space="preserve">
     <value>Award with specified id is not found.</value>
   </data>
+  <data name="Award_TooMany" xml:space="preserve">
+    <value>A maximum of 100 awards are allowed.</value>
+  </data>
   <data name="Award_TooManyAssignments" xml:space="preserve">
     <value>Cannot assign the award to more than {0} assignees.</value>
   </data>
