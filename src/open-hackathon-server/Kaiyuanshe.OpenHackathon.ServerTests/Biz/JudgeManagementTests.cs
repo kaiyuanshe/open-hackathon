@@ -18,6 +18,51 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     public class JudgeManagementTests
     {
+        #region CanCreateJudgeAsync
+        private static IEnumerable CanCreateJudgeAsyncTestData()
+        {
+            // arg0: judges
+            // arg1: expectedResult
+
+            List<JudgeEntity> notexceed = new List<JudgeEntity>();
+            for (int i = 0; i < 99; i++)
+            {
+                notexceed.Add(new JudgeEntity());
+            }
+
+            // not exceed
+            yield return new TestCaseData(notexceed, true);
+
+            // exceed
+            List<JudgeEntity> exceed = new List<JudgeEntity>();
+            for (int i = 0; i < 100; i++)
+            {
+                exceed.Add(new JudgeEntity());
+            }
+            yield return new TestCaseData(exceed, false);
+        }
+
+        [Test, TestCaseSource(nameof(CanCreateJudgeAsyncTestData))]
+        public async Task CanCreateJudgeAsync(List<JudgeEntity> judges, bool expectedResult)
+        {
+            var logger = new Mock<ILogger<JudgeManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<JudgeEntity>>>(c => c.CacheKey == "Judge-hack"), default))
+                .ReturnsAsync(judges);
+
+            var judgeManagement = new JudgeManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await judgeManagement.CanCreateJudgeAsync("hack", default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region CreateJudgeAsync
         [Test]
         public async Task CreateJudgeAsync()

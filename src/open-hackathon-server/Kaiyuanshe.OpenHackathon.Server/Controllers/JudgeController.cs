@@ -55,6 +55,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return NotFound(Resources.User_NotFound);
             }
 
+            // check judge count
+            bool canCreate = await JudgeManagement.CanCreateJudgeAsync(hackathonName.ToLower(), cancellationToken);
+            if (!canCreate)
+            {
+                return PreconditionFailed(Resources.Judge_TooMany);
+            }
+
             // create judge
             parameter.hackathonName = hackathonName.ToLower();
             parameter.userId = userId;

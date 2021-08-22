@@ -52,6 +52,41 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
         }
 
         [Test]
+        public async Task CreateJudge_TooMany()
+        {
+            var hackathon = new HackathonEntity();
+            var authResult = AuthorizationResult.Success();
+            var parameter = new Judge { description = "desc" };
+            UserInfo user = new UserInfo { };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var judgeManagement = new Mock<IJudgeManagement>();
+            judgeManagement.Setup(j => j.CanCreateJudgeAsync("hack", default)).ReturnsAsync(false);
+
+            var controller = new JudgeController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                AuthorizationService = authorizationService.Object,
+                UserManagement = userManagement.Object,
+                JudgeManagement = judgeManagement.Object,
+            };
+            var result = await controller.CreateJudge("Hack", "uid", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, authorizationService, userManagement, judgeManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            judgeManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Judge_TooMany);
+        }
+
+        [Test]
         public async Task CreateJudge_Created()
         {
             var hackathon = new HackathonEntity();
@@ -71,6 +106,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 j.description == "desc" &&
                 j.hackathonName == "hack" &&
                 j.userId == "uid"), default)).ReturnsAsync(entity);
+            judgeManagement.Setup(j => j.CanCreateJudgeAsync("hack", default)).ReturnsAsync(true);
 
             var controller = new JudgeController
             {

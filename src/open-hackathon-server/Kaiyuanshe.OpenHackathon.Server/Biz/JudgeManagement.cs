@@ -13,6 +13,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IJudgeManagement
     {
+        Task<bool> CanCreateJudgeAsync(string hackathonName, CancellationToken cancellationToken);
         Task<JudgeEntity> CreateJudgeAsync(Judge parameter, CancellationToken cancellationToken);
         Task<JudgeEntity> UpdateJudgeAsync(JudgeEntity exising, Judge parameter, CancellationToken cancellationToken);
         Task<JudgeEntity> GetJudgeAsync(string hackathonName, string userId, CancellationToken cancellationToken);
@@ -23,6 +24,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
     public class JudgeManagement : ManagementClientBase, IJudgeManagement
     {
+        static readonly int MaxJudgeCount = 100;
+
         private readonly ILogger Logger;
 
         public JudgeManagement(ILogger<JudgeManagement> logger)
@@ -48,6 +51,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             {
                 return StorageContext.JudgeTable.ListByHackathonAsync(hackathonName, ct);
             }, true, cancellationToken);
+        }
+        #endregion
+
+        #region Task<bool> CanCreateJudgeAsync(string hackathonName, CancellationToken cancellationToken)
+        public async Task<bool> CanCreateJudgeAsync(string hackathonName, CancellationToken cancellationToken)
+        {
+            var judges = await GetCachedJudges(hackathonName, cancellationToken);
+            return judges.Count() < MaxJudgeCount;
         }
         #endregion
 
