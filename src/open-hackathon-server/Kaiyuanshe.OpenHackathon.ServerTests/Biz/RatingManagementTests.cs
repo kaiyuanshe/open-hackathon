@@ -18,6 +18,51 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     public class RatingManagementTests
     {
+        #region CanCreateRatingKindAsync
+        private static IEnumerable CanCreateRatingKindAsyncTestData()
+        {
+            // arg0: judges
+            // arg1: expectedResult
+
+            List<RatingKindEntity> notexceed = new List<RatingKindEntity>();
+            for (int i = 0; i < 99; i++)
+            {
+                notexceed.Add(new RatingKindEntity());
+            }
+
+            // not exceed
+            yield return new TestCaseData(notexceed, true);
+
+            // exceed
+            List<RatingKindEntity> exceed = new List<RatingKindEntity>();
+            for (int i = 0; i < 100; i++)
+            {
+                exceed.Add(new RatingKindEntity());
+            }
+            yield return new TestCaseData(exceed, false);
+        }
+
+        [Test, TestCaseSource(nameof(CanCreateRatingKindAsyncTestData))]
+        public async Task CanCreateRatingKindAsync(List<RatingKindEntity> judges, bool expectedResult)
+        {
+            var logger = new Mock<ILogger<RatingManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<RatingKindEntity>>>(c => c.CacheKey == "RatingKind-hack"), default))
+                .ReturnsAsync(judges);
+
+            var ratingManagement = new RatingManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await ratingManagement.CanCreateRatingKindAsync("hack", default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region CreateRatingKindAsync
         [TestCase(null, 10)]
         [TestCase(5, 5)]

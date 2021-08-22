@@ -21,6 +21,42 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
     {
         #region CreateRatingKind
         [Test]
+        public async Task CreateRatingKind_TooMany()
+        {
+            // input
+            string hackName = "Hack";
+            HackathonEntity hackathon = new HackathonEntity { };
+            RatingKind parameter = new RatingKind { };
+            var authResult = AuthorizationResult.Success();
+
+            // moq
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator))
+                .ReturnsAsync(authResult);
+            var ratingManagement = new Mock<IRatingManagement>();
+            ratingManagement.Setup(t => t.CanCreateRatingKindAsync("hack", default)).ReturnsAsync(false);
+
+            // run
+            var controller = new RatingController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                RatingManagement = ratingManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.CreateRatingKind(hackName, parameter, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, ratingManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            ratingManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Rating_TooManyKinds);
+        }
+
+        [Test]
         public async Task CreateRatingKind()
         {
             // input
@@ -45,6 +81,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
             var ratingManagement = new Mock<IRatingManagement>();
             ratingManagement.Setup(t => t.CreateRatingKindAsync(parameter, default)).ReturnsAsync(ratingKindEntity);
+            ratingManagement.Setup(t => t.CanCreateRatingKindAsync("hack", default)).ReturnsAsync(true);
 
             // run
             var controller = new RatingController

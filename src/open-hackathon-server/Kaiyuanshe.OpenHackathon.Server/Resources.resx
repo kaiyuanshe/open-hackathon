@@ -225,6 +225,9 @@
   <data name="Rating_ScoreNotInRange" xml:space="preserve">
     <value>The score must be not greater than {0}.</value>
   </data>
+  <data name="Rating_TooManyKinds" xml:space="preserve">
+    <value>A maximum of 100 rating kinds are allowed.</value>
+  </data>
   <data name="TeamMember_AccessDenied" xml:space="preserve">
     <value>Member {0} is not allowed to perform this operation.</value>
   </data>
