@@ -322,6 +322,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A maximum of 100 judges are allowed..
+        /// </summary>
+        internal static string Judge_TooMany {
+            get {
+                return ResourceManager.GetString("Judge_TooMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required parameter {0} is null or empty..
         /// </summary>
         internal static string Parameter_Required {
