@@ -18,6 +18,51 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     public class WorkManagementTests
     {
+        #region CanCreateTeamWorkAsync
+        private static IEnumerable CanCreateTeamWorkAsyncTestData()
+        {
+            // arg0: judges
+            // arg1: expectedResult
+
+            List<TeamWorkEntity> notexceed = new List<TeamWorkEntity>();
+            for (int i = 0; i < 99; i++)
+            {
+                notexceed.Add(new TeamWorkEntity());
+            }
+
+            // not exceed
+            yield return new TestCaseData(notexceed, true);
+
+            // exceed
+            List<TeamWorkEntity> exceed = new List<TeamWorkEntity>();
+            for (int i = 0; i < 100; i++)
+            {
+                exceed.Add(new TeamWorkEntity());
+            }
+            yield return new TestCaseData(exceed, false);
+        }
+
+        [Test, TestCaseSource(nameof(CanCreateTeamWorkAsyncTestData))]
+        public async Task CanCreateTeamWorkAsync(List<TeamWorkEntity> judges, bool expectedResult)
+        {
+            var logger = new Mock<ILogger<WorkManagement>>();
+            var cache = new Mock<ICacheProvider>();
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<TeamWorkEntity>>>(c => c.CacheKey == "TeamWork-hack"), default))
+                .ReturnsAsync(judges);
+
+            var workManagement = new WorkManagement(logger.Object)
+            {
+                Cache = cache.Object,
+            };
+            var result = await workManagement.CanCreateTeamWorkAsync("hack", default);
+
+            Mock.VerifyAll(cache);
+            cache.VerifyNoOtherCalls();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+        #endregion
+
         #region CreateTeamWorkAsync
         [TestCase(null)]
         [TestCase(TeamWorkType.video)]

@@ -475,6 +475,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A maximum of 100 works are allowed..
+        /// </summary>
+        internal static string TeamWork_TooMany {
+            get {
+                return ResourceManager.GetString("TeamWork_TooMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified user is not found..
         /// </summary>
         internal static string User_NotFound {
