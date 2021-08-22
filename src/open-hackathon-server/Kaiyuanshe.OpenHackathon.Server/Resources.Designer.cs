@@ -385,6 +385,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A maximum of 100 rating kinds are allowed..
+        /// </summary>
+        internal static string Rating_TooManyKinds {
+            get {
+                return ResourceManager.GetString("Rating_TooManyKinds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot delete the team for awards are assigned to this team. Please delete the award assignments first..
         /// </summary>
         internal static string Team_HasAward {

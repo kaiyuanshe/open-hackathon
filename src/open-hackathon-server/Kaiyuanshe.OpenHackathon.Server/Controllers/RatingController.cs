@@ -47,6 +47,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return options.ValidateResult;
             }
 
+            // check kind count
+            bool canCreate = await RatingManagement.CanCreateRatingKindAsync(hackathonName.ToLower(), cancellationToken);
+            if (!canCreate)
+            {
+                return PreconditionFailed(Resources.Rating_TooManyKinds);
+            }
+
             // create rating kind
             parameter.hackathonName = hackathonName.ToLower();
             var ratingKindEntity = await RatingManagement.CreateRatingKindAsync(parameter, cancellationToken);
@@ -227,7 +234,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // valiate no ratings
-            var ratingOptions = new RatingQueryOptions { RatingKindId = entity.Id};
+            var ratingOptions = new RatingQueryOptions { RatingKindId = entity.Id };
             var hasRating = await RatingManagement.IsRatingCountGreaterThanZero(hackathonName.ToLower(), ratingOptions, cancellationToken);
             if (hasRating)
             {

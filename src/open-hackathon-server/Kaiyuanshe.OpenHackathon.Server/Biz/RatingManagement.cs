@@ -14,6 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IRatingManagement
     {
+        Task<bool> CanCreateRatingKindAsync(string hackathonName, CancellationToken cancellationToken);
         Task<RatingKindEntity> CreateRatingKindAsync(RatingKind parameter, CancellationToken cancellationToken);
         Task<RatingKindEntity> UpdateRatingKindAsync(RatingKindEntity existing, RatingKind parameter, CancellationToken cancellationToken);
         Task<RatingKindEntity> GetCachedRatingKindAsync(string hackathonName, string kindId, CancellationToken cancellationToken);
@@ -31,6 +32,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
     public class RatingManagement : ManagementClientBase, IRatingManagement
     {
+        static readonly int MaxRatingKindCount = 100;
+
         private readonly ILogger Logger;
 
         public RatingManagement(ILogger<RatingManagement> logger)
@@ -49,6 +52,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Cache.Remove(CacheKeyRatingKinds(hackathonName));
         }
 
+        #endregion
+
+        #region Task<bool> CanCreateRatingKindAsync(string hackathonName, CancellationToken cancellationToken)
+        public async Task<bool> CanCreateRatingKindAsync(string hackathonName, CancellationToken cancellationToken)
+        {
+            var kinds = await ListRatingKindsAsync(hackathonName, cancellationToken);
+            return kinds.Count() < MaxRatingKindCount;
+        }
         #endregion
 
         #region Task<RatingKindEntity> CreateRatingKindAsync(RatingKind parameter, CancellationToken cancellationToken);
