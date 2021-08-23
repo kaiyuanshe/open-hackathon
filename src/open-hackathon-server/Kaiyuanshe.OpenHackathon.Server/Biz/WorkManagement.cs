@@ -13,37 +13,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IWorkManagement
     {
-        /// <summary>
-        /// Create a new team work. No existance check
-        /// </summary>
-        /// <returns></returns>
+        Task<bool> CanCreateTeamWorkAsync(string teamId, CancellationToken cancellationToken);
         Task<TeamWorkEntity> CreateTeamWorkAsync(TeamWork request, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Update a team work.
-        /// </summary>
         Task<TeamWorkEntity> UpdateTeamWorkAsync(TeamWorkEntity existing, TeamWork request, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Get a team work.
-        /// </summary>
-        /// <returns></returns>
         Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// List paginated works by team
-        /// </summary>
         Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
-
-
-        /// <summary>
-        /// Delete team work by Id
-        /// </summary>
         Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
     }
 
     public class WorkManagement : ManagementClientBase, IWorkManagement
     {
+        static readonly int MaxTeamWorkCount = 100;
+
         private readonly ILogger Logger;
 
         public WorkManagement(ILogger<WorkManagement> logger)
@@ -70,6 +51,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 (ct) => StorageContext.TeamWorkTable.ListByTeamAsync(teamId, ct),
                 true,
                 cancellationToken);
+        }
+        #endregion
+
+        #region Task<bool> CanCreateTeamWorkAsync(string hackathonName, CancellationToken cancellationToken)
+        public async Task<bool> CanCreateTeamWorkAsync(string teamId, CancellationToken cancellationToken)
+        {
+            var works = await ListByTeamAsync(teamId, cancellationToken);
+            return works.Count() < MaxTeamWorkCount;
         }
         #endregion
 

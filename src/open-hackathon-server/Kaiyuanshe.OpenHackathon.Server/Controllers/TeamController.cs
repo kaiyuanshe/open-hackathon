@@ -979,6 +979,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return teamMemberValidateOption.ValidateResult;
             }
 
+            // check work count
+            bool canCreate = await WorkManagement.CanCreateTeamWorkAsync(teamId, cancellationToken);
+            if (!canCreate)
+            {
+                return PreconditionFailed(Resources.TeamWork_TooMany);
+            }
+
             // create team work
             parameter.hackathonName = hackathonName.ToLower();
             parameter.teamId = teamId;
