@@ -12,6 +12,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
     {
         Hackathon BuildHackathon(HackathonEntity hackathonEntity, HackathonRoles roles);
 
+        HackathonAdmin BuildHackathonAdmin(HackathonAdminEntity hackathonAdminEntity, UserInfo userInfo);
+
         Enrollment BuildEnrollment(EnrollmentEntity enrollmentEntity, UserInfo userInfo);
 
         Team BuildTeam(TeamEntity teamEntity, UserInfo creator);
@@ -71,6 +73,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             {
                 h.updatedAt = hackathonEntity.Timestamp.UtcDateTime;
                 h.roles = roles;
+            });
+        }
+
+        public HackathonAdmin BuildHackathonAdmin(HackathonAdminEntity hackathonAdminEntity, UserInfo userInfo)
+        {
+            return hackathonAdminEntity.As<HackathonAdmin>(h =>
+            {
+                h.updatedAt = hackathonAdminEntity.Timestamp.UtcDateTime;
+                h.user = userInfo;
             });
         }
 
