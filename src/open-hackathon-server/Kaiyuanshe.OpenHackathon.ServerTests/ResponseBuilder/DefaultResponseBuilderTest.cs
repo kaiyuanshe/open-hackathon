@@ -10,6 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
     [TestFixture]
     public class DefaultResponseBuilderTest
     {
+        #region BuildHackathon
         [Test]
         public void BuildHackathonTest()
         {
@@ -48,7 +49,36 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.IsTrue(hack.roles.isJudge);
             Assert.IsTrue(hack.readOnly);
         }
+        #endregion
 
+        #region BuildHackathonAdmin
+        [Test]
+        public void BuildHackathonAdmin()
+        {
+            HackathonAdminEntity entity = new HackathonAdminEntity
+            {
+                PartitionKey = "hack",
+                RowKey = "uid",
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow,
+            };
+            UserInfo userInfo = new UserInfo
+            {
+                PreferredUsername = "pun"
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var admin = respBuilder.BuildHackathonAdmin(entity, userInfo);
+
+            Assert.AreEqual("hack", admin.hackathonName);
+            Assert.AreEqual("uid", admin.userId);
+            Assert.AreEqual(entity.CreatedAt, admin.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, admin.updatedAt);
+            Assert.AreEqual("pun", admin.user.PreferredUsername);
+        }
+        #endregion
+
+        #region BuildEnrollmentTest
         [Test]
         public void BuildEnrollmentTest()
         {
@@ -75,6 +105,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual(entity.Timestamp.DateTime, enrollment.updatedAt);
             Assert.AreEqual("name", enrollment.user.Name);
         }
+        #endregion
 
         #region BuildTeamTest
         [Test]

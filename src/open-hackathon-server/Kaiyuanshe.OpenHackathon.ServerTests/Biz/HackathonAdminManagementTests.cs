@@ -28,18 +28,16 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 hackathonName = "hack",
                 userId = "uid"
             };
-            var cancellationToken = CancellationToken.None;
 
             var logger = new Mock<ILogger<HackathonAdminManagement>>();
             var hackathonAdminTable = new Mock<IHackathonAdminTable>();
-            HackathonAdminEntity captured = null;
-            hackathonAdminTable.Setup(a => a.InsertAsync(It.IsAny<HackathonAdminEntity>(), cancellationToken))
-                .Callback<HackathonAdminEntity, CancellationToken>((en, ct) =>
-                {
-                    captured = en;
-                });
+            hackathonAdminTable.Setup(a => a.InsertOrMergeAsync(It.Is<HackathonAdminEntity>(a =>
+                    a.HackathonName == "hack" && a.UserId == "uid"),
+                    default));
+
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackathonAdminTable.Object);
+
             var cache = new Mock<ICacheProvider>();
             cache.Setup(c => c.Remove("HackathonAdmin-hack"));
 
@@ -48,14 +46,13 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 StorageContext = storageContext.Object,
                 Cache = cache.Object,
             };
-            var result = await management.CreateAdminAsync(admin, cancellationToken);
+            var result = await management.CreateAdminAsync(admin, default);
 
             Mock.VerifyAll(hackathonAdminTable, storageContext, cache);
             hackathonAdminTable.VerifyNoOtherCalls();
             storageContext.VerifyNoOtherCalls();
             cache.VerifyNoOtherCalls();
-            Assert.AreEqual("hack", captured.HackathonName);
-            Assert.AreEqual("uid", captured.UserId);
+
             Assert.AreEqual("hack", result.HackathonName);
             Assert.AreEqual("uid", result.UserId);
         }
@@ -157,7 +154,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 
             var hackathonAdminManagement = new Mock<HackathonAdminManagement>(null) { CallBase = true };
             hackathonAdminManagement.Object.Cache = cache.Object;
-           
+
             var result = await hackathonAdminManagement.Object.IsHackathonAdmin("hack", user, default);
 
             Mock.VerifyAll(hackathonAdminManagement, cache);

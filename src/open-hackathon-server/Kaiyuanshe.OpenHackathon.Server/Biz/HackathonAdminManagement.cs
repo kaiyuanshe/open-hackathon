@@ -60,7 +60,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 RowKey = admin.userId,
                 CreatedAt = DateTime.UtcNow,
             };
-            await StorageContext.HackathonAdminTable.InsertAsync(entity, cancellationToken);
+            await StorageContext.HackathonAdminTable.InsertOrMergeAsync(entity, cancellationToken);
 
             InvalidateAdminCache(admin.hackathonName);
             return entity;
