@@ -32,6 +32,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         public HackathonListType? ListType { get; set; }
     }
 
+    public class AdminQueryOptions : TableQueryOptions
+    {
+
+    }
+
     public class EnrollmentQueryOptions : TableQueryOptions
     {
         public EnrollmentStatus? Status { get; set; }
