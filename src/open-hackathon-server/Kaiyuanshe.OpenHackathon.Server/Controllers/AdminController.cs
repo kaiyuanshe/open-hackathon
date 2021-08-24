@@ -1,9 +1,12 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Models;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Kaiyuanshe.OpenHackathon.Server.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,6 +61,63 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             };
             var adminEntity = await HackathonAdminManagement.CreateAdminAsync(admin, cancellationToken);
             var resp = ResponseBuilder.BuildHackathonAdmin(adminEntity, user);
+            return Ok(resp);
+        }
+        #endregion
+
+        #region ListAdmins
+        /// <summary>
+        /// List paginated admins of a hackathon.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <returns>the response contains a list of admins and a nextLink if there are more results.</returns>
+        /// <response code="200">Success. The response describes a list of admin user and a nullable link to query more results.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(HackathonAdminList), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/admins")]
+        public async Task<object> ListAdmins(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery] Pagination pagination,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower());
+            var options = new ValidateHackathonOptions
+            {
+                HackathonName = hackathonName,
+                WritableRequired = false,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // query
+            var queryOptioins = new AdminQueryOptions
+            {
+                TableContinuationToken = pagination.ToContinuationToken(),
+                Top = pagination.top,
+            };
+            var admins = await HackathonAdminManagement.ListPaginatedHackathonAdminAsync(hackathonName.ToLower(), queryOptioins, cancellationToken);
+            var routeValues = new RouteValueDictionary();
+            if (pagination.top.HasValue)
+            {
+                routeValues.Add(nameof(pagination.top), pagination.top.Value);
+            }
+            var nextLink = BuildNextLinkUrl(routeValues, queryOptioins.Next);
+
+            // build resp
+            var resp = await ResponseBuilder.BuildResourceListAsync<HackathonAdminEntity, HackathonAdmin, HackathonAdminList>(
+                admins,
+                async (admin, ct) =>
+                {
+                    var userInfo = await UserManagement.GetUserByIdAsync(admin.UserId, ct);
+                    return ResponseBuilder.BuildHackathonAdmin(admin, userInfo);
+                },
+                nextLink);
+
             return Ok(resp);
         }
         #endregion

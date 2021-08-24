@@ -22,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         /// <summary>
         /// List all individual participants of a hackathon including admins, judges and contestents.
         /// </summary>
-        /// <param name="hackathonName">name of hackathon</param>
+        /// <param name="hackathonName">name of hackathon. string.Empty for platform admin</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonAdminEntity>> ListByHackathonAsync(string hackathonName, CancellationToken cancellationToken);

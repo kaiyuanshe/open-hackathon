@@ -6,9 +6,13 @@ using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
@@ -85,6 +89,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("pk", admin.hackathonName);
             Assert.AreEqual("rk", admin.userId);
             Assert.AreEqual("zone", admin.user.Zoneinfo);
+        }
+        #endregion
+
+        #region ListAdmins
+        private static IEnumerable ListAdminsTestData()
+        {
+            // arg0: pagination
+            // arg1: next TableCotinuationToken
+            // arg2: expected nextlink
+
+            // no pagination, no filter, no top
+            yield return new TestCaseData(
+                    new Pagination { },
+                    null,
+                    null
+                );
+
+            // with pagination and filters
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    null,
+                    null
+                );
+
+            // next link
+            yield return new TestCaseData(
+                    new Pagination { },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np",
+                        NextRowKey = "nr"
+                    },
+                    "&np=np&nr=nr"
+                );
+
+            // next link with top
+            yield return new TestCaseData(
+                    new Pagination { top = 10, np = "np", nr = "nr" },
+                    new TableContinuationToken
+                    {
+                        NextPartitionKey = "np2",
+                        NextRowKey = "nr2"
+                    },
+                    "&top=10&np=np2&nr=nr2"
+                );
+        }
+
+        [Test, TestCaseSource(nameof(ListAdminsTestData))]
+        public async Task ListAdmins(
+            Pagination pagination,
+            TableContinuationToken next,
+            string expectedLink)
+        {
+            // input
+            HackathonEntity hackathon = new HackathonEntity();
+            List<HackathonAdminEntity> admins = new List<HackathonAdminEntity> {
+                new HackathonAdminEntity { PartitionKey = "pk", RowKey = "uid" }
+            };
+            var user = new UserInfo { IsDeleted = true };
+
+            // mock and capture
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(j => j.ListPaginatedHackathonAdminAsync("hack", It.Is<AdminQueryOptions>(o => o.Top == pagination.top), default))
+                .Callback<string, AdminQueryOptions, CancellationToken>((h, opt, c) => { opt.Next = next; })
+                .ReturnsAsync(admins);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+
+            // run
+            var controller = new AdminController
+            {
+                ResponseBuilder = new DefaultResponseBuilder(),
+                HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+            };
+            var result = await controller.ListAdmins("Hack", pagination, default);
+
+            // verify
+            Mock.VerifyAll(hackathonManagement, adminManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            var list = AssertHelper.AssertOKResult<HackathonAdminList>(result);
+            Assert.AreEqual(expectedLink, list.nextLink);
+            Assert.AreEqual(1, list.value.Length);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
+            Assert.AreEqual("uid", list.value[0].userId);
+            Assert.AreEqual(true, list.value[0].user.IsDeleted);
         }
         #endregion
     }

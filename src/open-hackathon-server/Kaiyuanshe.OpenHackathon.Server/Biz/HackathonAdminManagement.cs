@@ -3,6 +3,7 @@ using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string hackathonName, CancellationToken cancellationToken = default);
+        Task<IEnumerable<HackathonAdminEntity>> ListPaginatedHackathonAdminAsync(string hackathonName, AdminQueryOptions options, CancellationToken cancellationToken = default);
+
         Task<bool> IsHackathonAdmin(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
     }
 
@@ -77,6 +80,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 {
                     return StorageContext.HackathonAdminTable.ListByHackathonAsync(hackathonName, token);
                 }, true, cancellationToken);
+        }
+        #endregion
+
+        #region Task<IEnumerable<HackathonAdminEntity>> ListPaginatedHackathonAdminAsync(string hackathonName, AdminQueryOptions options, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<HackathonAdminEntity>> ListPaginatedHackathonAdminAsync(string hackathonName, AdminQueryOptions options, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<HackathonAdminEntity> allAdmins = await ListHackathonAdminAsync(hackathonName, cancellationToken);
+
+            // paging
+            int.TryParse(options.TableContinuationToken?.NextPartitionKey, out int np);
+            int top = options.Top.GetValueOrDefault(100);
+            var admins = allAdmins.OrderByDescending(a => a.CreatedAt).Skip(np).Take(top);
+
+            // next paging
+            options.Next = null;
+            if (np + top < allAdmins.Count())
+            {
+                options.Next = new TableContinuationToken
+                {
+                    NextPartitionKey = (np + top).ToString(),
+                    NextRowKey = (np + top).ToString(),
+                };
+            }
+
+            return admins;
         }
         #endregion
 
