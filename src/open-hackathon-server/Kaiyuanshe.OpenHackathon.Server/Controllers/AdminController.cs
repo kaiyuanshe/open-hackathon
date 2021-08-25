@@ -121,5 +121,53 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(resp);
         }
         #endregion
+
+        #region GetAdmin
+        /// <summary>
+        /// query an admin.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <returns>The admin</returns>
+        /// <response code="200">Success. The response describes an admin.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(HackathonAdmin), StatusCodes.Status200OK)]
+        [SwaggerErrorResponse(400, 404)]
+        [Route("hackathon/{hackathonName}/admin/{userId}")]
+        public async Task<object> GetAdmin(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                WritableRequired = false,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // validate user
+            var user = await UserManagement.GetUserByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                return NotFound(Resources.User_NotFound);
+            }
+
+            // create admin
+            var adminEntity = await HackathonAdminManagement.GetAdminAsync(hackathonName.ToLower(), userId, cancellationToken);
+            if (adminEntity == null)
+            {
+                return NotFound(Resources.Admin_NotFound);
+            }
+            var resp = ResponseBuilder.BuildHackathonAdmin(adminEntity, user);
+            return Ok(resp);
+        }
+        #endregion
     }
 }

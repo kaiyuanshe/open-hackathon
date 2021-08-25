@@ -212,6 +212,33 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region GetAdminAsync
+        [Test]
+        public async Task GetAdminAsync()
+        {
+            var adminEntity = new HackathonAdminEntity { PartitionKey = "pk" };
+
+            var logger = new Mock<ILogger<HackathonAdminManagement>>();
+            var hackathonAdminTable = new Mock<IHackathonAdminTable>();
+            hackathonAdminTable.Setup(a => a.RetrieveAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackathonAdminTable.Object);
+
+            var management = new HackathonAdminManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await management.GetAdminAsync("hack", "uid", default);
+
+            Mock.VerifyAll(storageContext, hackathonAdminTable);
+            storageContext.VerifyNoOtherCalls();
+            hackathonAdminTable.VerifyNoOtherCalls();
+
+            Assert.AreEqual("pk", result.HackathonName);
+        }
+        #endregion
+
         #region IsHackathonAdmin
         private static IEnumerable IsHackathonAdminTestData()
         {
