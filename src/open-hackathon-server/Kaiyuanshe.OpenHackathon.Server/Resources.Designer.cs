@@ -61,6 +61,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified user is not an admin of the hackathon.
+        /// </summary>
+        internal static string Admin_NotFound {
+            get {
+                return ResourceManager.GetString("Admin_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Forbidden. The user associated with the token doesn&apos;t have proper permission. Please contact the administrator for access..
         /// </summary>
         internal static string Auth_Forbidden {

@@ -183,5 +183,96 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(true, list.value[0].user.IsDeleted);
         }
         #endregion
+
+        #region GetAdmin
+        [Test]
+        public async Task GetAdmin_UserNotFound()
+        {
+            var hackathon = new HackathonEntity();
+            UserInfo user = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.GetAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.User_NotFound);
+        }
+
+        [Test]
+        public async Task GetAdmin_NotAdmin()
+        {
+            var hackathon = new HackathonEntity();
+            UserInfo user = new UserInfo();
+            HackathonAdminEntity adminEntity = null;
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.GetAdminAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                UserManagement = userManagement.Object,
+            };
+            var result = await controller.GetAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, adminManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, Resources.Admin_NotFound);
+        }
+
+        [Test]
+        public async Task GetAdmin_Succeeded()
+        {
+            var hackathon = new HackathonEntity();
+            UserInfo user = new UserInfo { StreetAddress = "streetAddress" };
+            HackathonAdminEntity adminEntity = new HackathonAdminEntity { PartitionKey = "pk", RowKey = "rk" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var userManagement = new Mock<IUserManagement>();
+            userManagement.Setup(u => u.GetUserByIdAsync("uid", default)).ReturnsAsync(user);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.GetAdminAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                UserManagement = userManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.GetAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, adminManagement, userManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            userManagement.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            var admin = AssertHelper.AssertOKResult<HackathonAdmin>(result);
+            Assert.AreEqual("pk", admin.hackathonName);
+            Assert.AreEqual("rk", admin.userId);
+            Assert.AreEqual("streetAddress", admin.user.StreetAddress);
+        }
+        #endregion
     }
 }
