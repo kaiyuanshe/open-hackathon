@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -167,6 +168,52 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
             var resp = ResponseBuilder.BuildHackathonAdmin(adminEntity, user);
             return Ok(resp);
+        }
+        #endregion
+
+        #region DeleteAdmin
+        /// <summary>
+        /// Delete as hackathon admin.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="userId" example="1">Id of user</param>
+        /// <response code="204">Success.</response>
+        [HttpDelete]
+        [SwaggerErrorResponse(400, 404, 412)]
+        [Route("hackathon/{hackathonName}/admin/{userId}")]
+        [Authorize(Policy = AuthConstant.PolicyForSwagger.HackathonAdministrator)]
+        public async Task<object> DeleteAdmin(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromRoute, Required] string userId,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            var hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                HackAdminRequird = true,
+                HackathonName = hackathonName,
+            };
+            if (await ValidateHackathon(hackathon, options, cancellationToken) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // get admin
+            var adminEntity = await HackathonAdminManagement.GetAdminAsync(hackathonName.ToLower(), userId, cancellationToken);
+            if (adminEntity == null)
+            {
+                return NoContent();
+            }
+
+            if (hackathon.CreatorId == userId)
+            {
+                return PreconditionFailed(Resources.Admin_CannotDeleteCreator);
+            }
+
+            await HackathonAdminManagement.DeleteAdminAsync(hackathonName.ToLower(), userId, cancellationToken);
+            return NoContent();
         }
         #endregion
     }

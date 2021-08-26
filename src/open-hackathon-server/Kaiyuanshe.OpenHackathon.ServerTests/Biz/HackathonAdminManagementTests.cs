@@ -239,6 +239,30 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region DeleteAdminAsync
+        [Test]
+        public async Task DeleteAdminAsync()
+        {
+            var logger = new Mock<ILogger<HackathonAdminManagement>>();
+            var hackathonAdminTable = new Mock<IHackathonAdminTable>();
+            hackathonAdminTable.Setup(a => a.DeleteAsync("hack", "uid", default));
+
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.HackathonAdminTable).Returns(hackathonAdminTable.Object);
+
+            var management = new HackathonAdminManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+            await management.DeleteAdminAsync("hack", "uid", default);
+
+            Mock.VerifyAll(storageContext, hackathonAdminTable);
+            storageContext.VerifyNoOtherCalls();
+            hackathonAdminTable.VerifyNoOtherCalls();
+
+        }
+        #endregion
+
         #region IsHackathonAdmin
         private static IEnumerable IsHackathonAdminTestData()
         {

@@ -32,6 +32,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         Task<IEnumerable<HackathonAdminEntity>> ListHackathonAdminAsync(string hackathonName, CancellationToken cancellationToken = default);
         Task<IEnumerable<HackathonAdminEntity>> ListPaginatedHackathonAdminAsync(string hackathonName, AdminQueryOptions options, CancellationToken cancellationToken = default);
         Task<HackathonAdminEntity> GetAdminAsync(string hackathonName, string userId, CancellationToken cancellationToken);
+        Task DeleteAdminAsync(string hackathonName, string userId, CancellationToken cancellationToken);
         Task<bool> IsHackathonAdmin(string hackathonName, ClaimsPrincipal user, CancellationToken cancellationToken = default);
     }
 
@@ -117,6 +118,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             }
 
             return await StorageContext.HackathonAdminTable.RetrieveAsync(hackathonName, userId, cancellationToken);
+        }
+        #endregion
+
+        #region Task DeleteAdminAsync(string hackathonName, string userId, CancellationToken cancellationToken)
+        public async Task DeleteAdminAsync(string hackathonName, string userId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(userId))
+                return;
+
+            await StorageContext.HackathonAdminTable.DeleteAsync(hackathonName, userId, cancellationToken);
         }
         #endregion
 

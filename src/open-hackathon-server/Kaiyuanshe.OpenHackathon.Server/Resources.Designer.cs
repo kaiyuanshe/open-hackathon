@@ -61,6 +61,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The creator of a hackathon cannot be deleted..
+        /// </summary>
+        internal static string Admin_CannotDeleteCreator {
+            get {
+                return ResourceManager.GetString("Admin_CannotDeleteCreator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified user is not an admin of the hackathon.
         /// </summary>
         internal static string Admin_NotFound {

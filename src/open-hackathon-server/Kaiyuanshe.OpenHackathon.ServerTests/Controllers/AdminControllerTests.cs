@@ -274,5 +274,98 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual("streetAddress", admin.user.StreetAddress);
         }
         #endregion
+
+        #region DeleteAdmin
+        [Test]
+        public async Task DeleteAdmin_ReDelete()
+        {
+            var hackathon = new HackathonEntity();
+            HackathonAdminEntity adminEntity = null;
+            var authResult = AuthorizationResult.Success();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.GetAdminAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.DeleteAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, adminManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+
+        [Test]
+        public async Task DeleteAdmin_DeleteCreator()
+        {
+            var hackathon = new HackathonEntity { CreatorId = "uid" };
+            HackathonAdminEntity adminEntity = new HackathonAdminEntity();
+            var authResult = AuthorizationResult.Success();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.GetAdminAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.DeleteAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, adminManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Admin_CannotDeleteCreator);
+        }
+
+        [Test]
+        public async Task DeleteAdmin_Deleted()
+        {
+            var hackathon = new HackathonEntity();
+            HackathonAdminEntity adminEntity = new HackathonAdminEntity();
+            var authResult = AuthorizationResult.Success();
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var authorizationService = new Mock<IAuthorizationService>();
+            authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), hackathon, AuthConstant.Policy.HackathonAdministrator)).ReturnsAsync(authResult);
+            var adminManagement = new Mock<IHackathonAdminManagement>();
+            adminManagement.Setup(a => a.GetAdminAsync("hack", "uid", default)).ReturnsAsync(adminEntity);
+            adminManagement.Setup(a => a.DeleteAdminAsync("hack", "uid", default));
+
+            var controller = new AdminController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                HackathonAdminManagement = adminManagement.Object,
+                AuthorizationService = authorizationService.Object,
+            };
+            var result = await controller.DeleteAdmin("Hack", "uid", default);
+
+            Mock.VerifyAll(hackathonManagement, adminManagement, authorizationService);
+            hackathonManagement.VerifyNoOtherCalls();
+            authorizationService.VerifyNoOtherCalls();
+            adminManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertNoContentResult(result);
+        }
+        #endregion
     }
 }
