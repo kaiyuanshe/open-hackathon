@@ -185,7 +185,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             {
                 PartitionKey = "pk",
                 RowKey = "rk",
-                HackathonName = "hack",
+                TeamId = "tid",
                 Description = "desc",
                 Title = "title",
                 Type = TeamWorkType.word,
@@ -197,9 +197,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             var respBuilder = new DefaultResponseBuilder();
             var teamWork = respBuilder.BuildTeamWork(entity);
 
-            Assert.AreEqual("pk", teamWork.teamId);
+            Assert.AreEqual("tid", teamWork.teamId);
             Assert.AreEqual("rk", teamWork.id);
-            Assert.AreEqual("hack", teamWork.hackathonName);
+            Assert.AreEqual("pk", teamWork.hackathonName);
             Assert.AreEqual("desc", teamWork.description);
             Assert.AreEqual("title", teamWork.title);
             Assert.AreEqual(TeamWorkType.word, teamWork.type);

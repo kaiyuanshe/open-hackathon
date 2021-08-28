@@ -980,7 +980,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // check work count
-            bool canCreate = await WorkManagement.CanCreateTeamWorkAsync(teamId, cancellationToken);
+            bool canCreate = await WorkManagement.CanCreateTeamWorkAsync(hackathonName.ToLower(), teamId, cancellationToken);
             if (!canCreate)
             {
                 return PreconditionFailed(Resources.TeamWork_TooMany);
@@ -1045,7 +1045,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // create team work
-            var teamWorkEntity = await WorkManagement.GetTeamWorkAsync(teamId, workId, cancellationToken);
+            var teamWorkEntity = await WorkManagement.GetTeamWorkAsync(hackathonName.ToLower(), workId, cancellationToken);
             if (teamWorkEntity == null)
             {
                 return NotFound(Resources.TeamWork_NotFound);
@@ -1099,7 +1099,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // get team work
-            var teamWorkEntity = await WorkManagement.GetTeamWorkAsync(teamId, workId, cancellationToken);
+            var teamWorkEntity = await WorkManagement.GetTeamWorkAsync(hackathonName.ToLower(), workId, cancellationToken);
             if (teamWorkEntity == null)
             {
                 return NotFound(Resources.TeamWork_NotFound);
@@ -1156,7 +1156,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 TableContinuationToken = pagination.ToContinuationToken(),
                 Top = pagination.top,
             };
-            var assignments = await WorkManagement.ListPaginatedWorksAsync(teamId.ToLower(), teamWorkQueryOptions, cancellationToken);
+            var assignments = await WorkManagement.ListPaginatedWorksAsync(hackathonName.ToLower(), teamId.ToLower(), teamWorkQueryOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
@@ -1221,12 +1221,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Delete work
-            var work = await WorkManagement.GetTeamWorkAsync(teamId, workId, cancellationToken);
+            var work = await WorkManagement.GetTeamWorkAsync(hackathonName.ToLower(), workId, cancellationToken);
             if (work == null)
             {
                 return NoContent();
             }
-            await WorkManagement.DeleteTeamWorkAsync(teamId, workId, cancellationToken);
+            await WorkManagement.DeleteTeamWorkAsync(hackathonName.ToLower(), workId, cancellationToken);
             return NoContent();
         }
         #endregion

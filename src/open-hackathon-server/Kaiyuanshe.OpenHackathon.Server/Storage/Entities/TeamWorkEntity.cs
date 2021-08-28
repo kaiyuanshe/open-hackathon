@@ -10,7 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// <summary>
     /// Entity of TeamWork.
     /// 
-    /// PK: TeamId.
+    /// PK: HackathonName.
     /// RK: auto-generated GUID
     /// </summary>
     public class TeamWorkEntity : AdvancedTableEntity
@@ -19,7 +19,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// PartitionKey
         /// </summary>
         [IgnoreProperty]
-        public string TeamId
+        public string HackathonName
         {
             get
             {
@@ -39,7 +39,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
-        public string HackathonName { get; set; }
+        public string TeamId { get; set; }
 
         public string Title { get; set; }
 

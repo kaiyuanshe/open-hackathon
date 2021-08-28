@@ -2051,7 +2051,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             teamManagement.Setup(t => t.GetTeamMemberAsync("teamId", It.IsAny<string>(), default)).ReturnsAsync(memberEntity);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.CanCreateTeamWorkAsync("teamId", default)).ReturnsAsync(false);
+            workManagement.Setup(w => w.CanCreateTeamWorkAsync("hack", "teamId", default)).ReturnsAsync(false);
 
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamMember))
@@ -2098,7 +2098,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var workManagement = new Mock<IWorkManagement>();
             workManagement.Setup(w => w.CreateTeamWorkAsync(It.Is<TeamWork>(work => work.hackathonName == "hack" && work.teamId == "teamId"), default)).ReturnsAsync(teamWorkEntity);
-            workManagement.Setup(w => w.CanCreateTeamWorkAsync("teamId", default)).ReturnsAsync(true);
+            workManagement.Setup(w => w.CanCreateTeamWorkAsync("hack", "teamId", default)).ReturnsAsync(true);
 
             var authorizationService = new Mock<IAuthorizationService>();
             authorizationService.Setup(m => m.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), teamEntity, AuthConstant.Policy.TeamMember))
@@ -2153,7 +2153,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.GetTeamWorkAsync("hack", "workId", default)).ReturnsAsync(teamWorkEntity);
 
             // run
             var controller = new TeamController
@@ -2201,7 +2201,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.GetTeamWorkAsync("hack", "workId", default)).ReturnsAsync(teamWorkEntity);
             workManagement.Setup(w => w.UpdateTeamWorkAsync(It.IsAny<TeamWorkEntity>(), request, default)).ReturnsAsync(teamWorkEntity);
 
             // run
@@ -2245,7 +2245,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(teamEntity);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.GetTeamWorkAsync("hack", "workId", default)).ReturnsAsync(teamWorkEntity);
 
             // run
             var controller = new TeamController
@@ -2282,7 +2282,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             teamManagement.Setup(t => t.GetTeamByIdAsync("hack", "teamId", default)).ReturnsAsync(teamEntity);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.GetTeamWorkAsync("hack", "workId", default)).ReturnsAsync(teamWorkEntity);
 
             // run
             var controller = new TeamController
@@ -2375,8 +2375,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             teamManagement.Setup(t => t.GetTeamByIdAsync(It.IsAny<string>(), It.IsAny<string>(), default)).ReturnsAsync(team);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(p => p.ListPaginatedWorksAsync("tid", It.IsAny<TeamWorkQueryOptions>(), default))
-                .Callback<string, TeamWorkQueryOptions, CancellationToken>((n, o, t) =>
+            workManagement.Setup(p => p.ListPaginatedWorksAsync("hack", "tid", It.IsAny<TeamWorkQueryOptions>(), default))
+                .Callback<string, string, TeamWorkQueryOptions, CancellationToken>((h, t, o, c) =>
                 {
                     o.Next = next;
                 })
@@ -2401,7 +2401,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var list = AssertHelper.AssertOKResult<TeamWorkList>(result);
             Assert.AreEqual(expectedLink, list.nextLink);
             Assert.AreEqual(1, list.value.Length);
-            Assert.AreEqual("pk", list.value[0].teamId);
+            Assert.AreEqual("pk", list.value[0].hackathonName);
             Assert.AreEqual("rk", list.value[0].id);
         }
         #endregion
@@ -2431,10 +2431,10 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
                 .ReturnsAsync(authResult);
 
             var workManagement = new Mock<IWorkManagement>();
-            workManagement.Setup(w => w.GetTeamWorkAsync("teamId", "workId", default)).ReturnsAsync(teamWorkEntity);
+            workManagement.Setup(w => w.GetTeamWorkAsync("hack", "workId", default)).ReturnsAsync(teamWorkEntity);
             if (firstTime)
             {
-                workManagement.Setup(w => w.DeleteTeamWorkAsync("teamId", "workId", default));
+                workManagement.Setup(w => w.DeleteTeamWorkAsync("hack", "workId", default));
             }
 
             // run
