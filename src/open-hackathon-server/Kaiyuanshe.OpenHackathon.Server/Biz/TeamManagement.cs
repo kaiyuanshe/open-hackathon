@@ -64,68 +64,41 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// List all team members
         /// </summary>
-        /// <param name="teamId">guid of the team</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List paginated team members with optional filters
         /// </summary>
-        /// <param name="teamId">guid of the team</param>
-        /// <param name="options">options for query</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default);
+        Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string hackathonName, string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get a team member by userId
         /// </summary>
-        /// <param name="teamId"></param>
-        /// <param name="userId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns>the team member</returns>
-        Task<TeamMemberEntity> GetTeamMemberAsync(string teamId, string userId, CancellationToken cancellationToken = default);
+        Task<TeamMemberEntity> GetTeamMemberAsync(string hackathonName, string userId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Create a new team member. Not existance check. Please check existance before call this method
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<TeamMemberEntity> CreateTeamMemberAsync(TeamMember request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Upldate a team member(not including status/role). Not existance check. Please check existance before call this method
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberAsync(TeamMemberEntity member, TeamMember request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update the status of a member
         /// </summary>
-        /// <param name="member"></param>
-        /// <param name="teamMemberStatus"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberStatusAsync(TeamMemberEntity member, TeamMemberStatus teamMemberStatus, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update the status of a member
         /// </summary>
-        /// <param name="member"></param>
-        /// <param name="teamMemberRole"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         Task<TeamMemberEntity> UpdateTeamMemberRoleAsync(TeamMemberEntity member, TeamMemberRole teamMemberRole, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a team memter
         /// </summary>
-        /// <param name="member"></param>
-        /// <param name="cancellationToken"></param>
         Task DeleteTeamMemberAsync(TeamMemberEntity member, CancellationToken cancellationToken = default);
     }
 
@@ -181,9 +154,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             TeamMemberEntity teamMember = new TeamMemberEntity
             {
-                PartitionKey = teamEntity.Id,
+                TeamId = teamEntity.Id,
                 RowKey = request.creatorId,
-                HackathonName = request.hackathonName,
+                PartitionKey = request.hackathonName,
                 Description = "Creator",
                 Role = TeamMemberRole.Admin,
                 Status = TeamMemberStatus.approved,
@@ -217,7 +190,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             var team = await StorageContext.TeamTable.RetrieveAsync(hackathonName, teamId, cancellationToken);
             if (team != null)
             {
-                var count = await StorageContext.TeamMemberTable.GetMemberCountAsync(teamId, cancellationToken);
+                var count = await StorageContext.TeamMemberTable.GetMemberCountAsync(hackathonName, teamId, cancellationToken);
                 team.MembersCount = count;
                 await StorageContext.TeamTable.MergeAsync(team, cancellationToken);
                 InvalidateCachedTeam(teamId);
@@ -300,14 +273,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             {
                 CreatedAt = DateTime.UtcNow,
                 Description = request.description,
-                HackathonName = request.hackathonName,
-                PartitionKey = request.teamId,
+                PartitionKey = request.hackathonName,
+                TeamId = request.teamId,
                 RowKey = request.userId,
                 Role = request.role.GetValueOrDefault(TeamMemberRole.Member),
                 Status = request.status,
             };
 
-            await StorageContext.TeamMemberTable.InsertAsync(entity);
+            await StorageContext.TeamMemberTable.InsertOrMergeAsync(entity);
             await UpdateTeamMembersCountAsync(request.hackathonName, request.teamId, cancellationToken);
             return entity;
         }
@@ -326,12 +299,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region GetTeamMemberAsync
-        public async Task<TeamMemberEntity> GetTeamMemberAsync(string teamId, string userId, CancellationToken cancellationToken = default)
+        public async Task<TeamMemberEntity> GetTeamMemberAsync(string hackathonName, string userId, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(userId))
                 return null;
 
-            return await StorageContext.TeamMemberTable.RetrieveAsync(teamId, userId, cancellationToken);
+            return await StorageContext.TeamMemberTable.RetrieveAsync(hackathonName, userId, cancellationToken);
         }
         #endregion
 
@@ -373,20 +346,19 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             if (member == null)
                 return;
 
-            await StorageContext.TeamMemberTable.DeleteAsync(member.TeamId, member.UserId, cancellationToken);
+            await StorageContext.TeamMemberTable.DeleteAsync(member.PartitionKey, member.RowKey, cancellationToken);
             await UpdateTeamMembersCountAsync(member.HackathonName, member.TeamId, cancellationToken);
         }
         #endregion
 
         #region ListTeamMembersAsync
-        public async Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string teamId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TeamMemberEntity>> ListTeamMembersAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
         {
             Func<CancellationToken, Task<IEnumerable<TeamMemberEntity>>> supplyValue = async (ct) =>
             {
-                var filter = TableQuery.GenerateFilterCondition(
-                              nameof(EnrollmentEntity.PartitionKey),
-                              QueryComparisons.Equal,
-                              teamId);
+                var pkFilter = TableQueryHelper.PartitionKeyFilter(hackathonName);
+                var teamIdFilter = TableQuery.GenerateFilterCondition(nameof(TeamMemberEntity.TeamId), QueryComparisons.Equal, teamId);
+                var filter = TableQueryHelper.And(pkFilter, teamIdFilter);
 
                 TableQuery<TeamMemberEntity> query = new TableQuery<TeamMemberEntity>().Where(filter);
 
@@ -406,12 +378,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         #endregion
 
         #region ListPaginatedTeamMembersAsync
-        public async Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default)
+        public async Task<TableQuerySegment<TeamMemberEntity>> ListPaginatedTeamMembersAsync(string hackathonName, string teamId, TeamMemberQueryOptions options, CancellationToken cancellationToken = default)
         {
-            var filter = TableQuery.GenerateFilterCondition(
-                           nameof(TeamMemberEntity.PartitionKey),
-                           QueryComparisons.Equal,
-                           teamId);
+            var pkFilter = TableQueryHelper.PartitionKeyFilter(hackathonName);
+            var teamIdFilter = TableQuery.GenerateFilterCondition(nameof(TeamMemberEntity.TeamId), QueryComparisons.Equal, teamId);
+            var filter = TableQueryHelper.And(pkFilter, teamIdFilter);
 
             if (options != null)
             {

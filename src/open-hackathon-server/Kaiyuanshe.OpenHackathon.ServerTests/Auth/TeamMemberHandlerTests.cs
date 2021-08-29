@@ -136,7 +136,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
-            teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
+            teamManagement.Setup(t => t.ListTeamMembersAsync("hack", "tid", CancellationToken.None))
                 .ReturnsAsync(teamMembers);
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
@@ -197,7 +197,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
-            teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
+            teamManagement.Setup(t => t.ListTeamMembersAsync("hack", "tid", CancellationToken.None))
                 .ReturnsAsync(teamMembers);
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 
@@ -258,7 +258,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Auth
             hackathonAdminManagement.Setup(h => h.ListHackathonAdminAsync("hack", CancellationToken.None))
                 .ReturnsAsync(admins);
             var teamManagement = new Mock<ITeamManagement>();
-            teamManagement.Setup(t => t.ListTeamMembersAsync("tid", CancellationToken.None))
+            teamManagement.Setup(t => t.ListTeamMembersAsync("hack", "tid", default))
                 .ReturnsAsync(teamMembers);
             var context = new AuthorizationHandlerContext(requirements, claimsPrincipal, teamEntity);
 

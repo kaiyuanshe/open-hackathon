@@ -7,13 +7,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     /// <summary>
     /// Represents a team member.
     /// 
-    /// PK: TeamId. Rowkey of Team
+    /// PK: Hackathon name.
     /// RK: UserId.
     /// </summary>
     public class TeamMemberEntity : AdvancedTableEntity
     {
+        /// <summary>
+        /// PartitionKey.
+        /// </summary>
         [IgnoreProperty]
-        public string TeamId
+        public string HackathonName
         {
             get
             {
@@ -30,7 +33,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
-        public string HackathonName { get; set; }
+        public string TeamId { get; set; }
 
         public string Description { get; set; }
 

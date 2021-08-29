@@ -148,9 +148,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         {
             var entity = new TeamMemberEntity
             {
-                PartitionKey = "pk",
-                RowKey = "rk",
-                HackathonName = "hack",
+                PartitionKey = "hack",
+                RowKey = "uid",
+                TeamId = "tid",
                 Description = "desc",
                 Role = TeamMemberRole.Admin,
                 Status = TeamMemberStatus.pendingApproval,
@@ -166,8 +166,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             var teamMember = respBuilder.BuildTeamMember(entity, user);
 
             Assert.AreEqual("hack", teamMember.hackathonName);
-            Assert.AreEqual("pk", teamMember.teamId);
-            Assert.AreEqual("rk", teamMember.userId);
+            Assert.AreEqual("tid", teamMember.teamId);
+            Assert.AreEqual("uid", teamMember.userId);
             Assert.AreEqual("desc", teamMember.description);
             Assert.AreEqual(TeamMemberRole.Admin, teamMember.role);
             Assert.AreEqual(TeamMemberStatus.pendingApproval, teamMember.status);

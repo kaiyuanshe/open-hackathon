@@ -1,7 +1,6 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,7 +13,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         /// <summary>
         /// Get count of all team members including pendingApproval ones.
         /// </summary>
-        Task<int> GetMemberCountAsync(string teamId, CancellationToken cancellationToken = default);
+        Task<int> GetMemberCountAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
     }
 
     public class TeamMemberTable : AzureTable<TeamMemberEntity>, ITeamMemberTable
@@ -30,12 +29,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         }
 
         #region GetMemberCountAsync
-        public async Task<int> GetMemberCountAsync(string teamId, CancellationToken cancellationToken = default)
+        public async Task<int> GetMemberCountAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
         {
-            var filter = TableQuery.GenerateFilterCondition(
-                nameof(TeamMemberEntity.PartitionKey),
-                QueryComparisons.Equal,
-                teamId);
+            var pkFilter = TableQueryHelper.PartitionKeyFilter(hackathonName);
+            var teamIdFilter = TableQuery.GenerateFilterCondition(nameof(TeamMemberEntity.TeamId), QueryComparisons.Equal, teamId);
+            var filter = TableQueryHelper.And(pkFilter, teamIdFilter);
 
             TableQuery<TeamMemberEntity> query = new TableQuery<TeamMemberEntity>()
                 .Where(filter)

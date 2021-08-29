@@ -249,6 +249,9 @@
   <data name="TeamWork_TooMany" xml:space="preserve">
     <value>A maximum of 100 works are allowed.</value>
   </data>
+  <data name="Team_CreateSecond" xml:space="preserve">
+    <value>Cannot create a new team since the user is already in a team.</value>
+  </data>
   <data name="Team_HasAward" xml:space="preserve">
     <value>Cannot delete the team for awards are assigned to this team. Please delete the award assignments first.</value>
   </data>

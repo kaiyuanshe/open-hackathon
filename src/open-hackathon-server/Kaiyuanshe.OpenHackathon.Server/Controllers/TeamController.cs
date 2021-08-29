@@ -72,6 +72,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return PreconditionFailed(string.Format(Resources.Team_NameTaken, parameter.displayName));
             }
 
+            // check team membership
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), CurrentUserId, default);
+            if (teamMember != null)
+            {
+                return PreconditionFailed(Resources.Team_CreateSecond);
+            }
+
             // create team
             parameter.hackathonName = hackathonName.ToLower();
             parameter.creatorId = CurrentUserId;
@@ -123,14 +130,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // validate team
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
-            // check name uniqueness
-            if (parameter.displayName != null && team.DisplayName != parameter.displayName)
-            {
-                if (await IsTeamNameTaken(hackathonName.ToLower(), parameter.displayName, cancellationToken))
-                {
-                    return PreconditionFailed(string.Format(Resources.Team_NameTaken, parameter.displayName));
-                }
-            }
             var teamOptions = new ValidateTeamOptions
             {
                 TeamAdminRequired = true,
@@ -138,6 +137,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             if (!await ValidateTeam(team, teamOptions, cancellationToken))
             {
                 return teamOptions.ValidateResult;
+            }
+            // check name uniqueness
+            if (parameter.displayName != null && team.DisplayName != parameter.displayName)
+            {
+                if (await IsTeamNameTaken(hackathonName.ToLower(), parameter.displayName, cancellationToken))
+                {
+                    return PreconditionFailed(string.Format(Resources.Team_NameTaken, parameter.displayName));
+                }
             }
 
             team = await TeamManagement.UpdateTeamAsync(parameter, team, cancellationToken);
@@ -295,7 +302,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return teamValidateOptions.ValidateResult;
             }
 
-            // Delete team
+            // Delete team and member
+            var members = await TeamManagement.ListTeamMembersAsync(hackathonName.ToLower(), teamId, cancellationToken);
+            foreach (var member in members)
+            {
+                await TeamManagement.DeleteTeamMemberAsync(member, cancellationToken);
+            }
             await TeamManagement.DeleteTeamAsync(team, cancellationToken);
             return NoContent();
         }
@@ -393,7 +405,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // join team
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), userId, cancellationToken);
             if (teamMember == null)
             {
                 parameter.hackathonName = hackathonName.ToLower();
@@ -454,7 +466,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Validate team and member
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId.ToLower(), cancellationToken);
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), userId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -519,7 +531,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Validate team member
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), userId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -584,7 +596,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Validate team member
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), userId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -644,7 +656,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Delete team member
-            return await DeleteMemberInternalAsync(teamId.ToLower(), CurrentUserId, cancellationToken);
+            return await DeleteMemberInternalAsync(hackathonName.ToLower(), teamId.ToLower(), CurrentUserId, cancellationToken);
         }
         #endregion
 
@@ -693,12 +705,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Delete team member
-            return await DeleteMemberInternalAsync(teamId.ToLower(), userId, cancellationToken);
+            return await DeleteMemberInternalAsync(hackathonName.ToLower(), teamId.ToLower(), userId, cancellationToken);
         }
 
-        private async Task<object> DeleteMemberInternalAsync(string teamId, string userId, CancellationToken cancellationToken)
+        private async Task<object> DeleteMemberInternalAsync(string hackathonName, string teamId, string userId, CancellationToken cancellationToken)
         {
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName, userId, cancellationToken);
             if (teamMember == null)
             {
                 // deleted already
@@ -706,7 +718,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // one of the admins must be the last person who leaves the team, to ensure there is at least one admin at any time.
-            var members = await TeamManagement.ListTeamMembersAsync(teamId, cancellationToken);
+            var members = await TeamManagement.ListTeamMembersAsync(hackathonName, teamId, cancellationToken);
             var admins = members.Where(m => m.Role == TeamMemberRole.Admin && m.Status == TeamMemberStatus.approved);
             if (admins.Count() == 1 && members.Count() > 1 && admins.Single().UserId == userId)
             {
@@ -762,7 +774,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             }
 
             // Validate team member
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId.ToLower(), userId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), userId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -832,7 +844,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 Role = role,
                 Top = pagination.top
             };
-            var segment = await TeamManagement.ListPaginatedTeamMembersAsync(teamId, qureyOptions, cancellationToken);
+            var segment = await TeamManagement.ListPaginatedTeamMembersAsync(hackathonName.ToLower(), teamId, qureyOptions, cancellationToken);
             var routeValues = new RouteValueDictionary();
             if (pagination.top.HasValue)
             {
@@ -967,7 +979,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Validate team and member
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -1032,7 +1044,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Validate team and member
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
@@ -1208,7 +1220,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
 
             // Validate team and member
             var team = await TeamManagement.GetTeamByIdAsync(hackathonName.ToLower(), teamId, cancellationToken);
-            var teamMember = await TeamManagement.GetTeamMemberAsync(teamId, CurrentUserId, cancellationToken);
+            var teamMember = await TeamManagement.GetTeamMemberAsync(hackathonName.ToLower(), CurrentUserId, cancellationToken);
             var teamMemberValidateOption = new ValidateTeamMemberOptions
             {
                 TeamId = teamId,
