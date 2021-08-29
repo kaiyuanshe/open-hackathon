@@ -13,13 +13,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Storage
         [Test]
         public async Task ListByTeamAsync()
         {
-            string teamId = "tid";
-
             var teamWorkTable = new Mock<TeamWorkTable> { };
-            await teamWorkTable.Object.ListByTeamAsync(teamId, default);
+            await teamWorkTable.Object.ListByTeamAsync("hack", "tid", default);
 
             teamWorkTable.Verify(t => t.ExecuteQuerySegmentedAsync(
-                It.Is<TableQuery<TeamWorkEntity>>(q => q.FilterString == "PartitionKey eq 'tid'"),
+                It.Is<TableQuery<TeamWorkEntity>>(q => q.FilterString == "(PartitionKey eq 'hack') and (TeamId eq 'tid')"),
                 It.IsAny<Action<TableQuerySegment<TeamWorkEntity>>>(),
                 default), Times.Once);
             teamWorkTable.VerifyNoOtherCalls();

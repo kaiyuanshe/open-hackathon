@@ -47,14 +47,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         {
             var logger = new Mock<ILogger<WorkManagement>>();
             var cache = new Mock<ICacheProvider>();
-            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<TeamWorkEntity>>>(c => c.CacheKey == "TeamWork-hack"), default))
+            cache.Setup(c => c.GetOrAddAsync(It.Is<CacheEntry<IEnumerable<TeamWorkEntity>>>(c => c.CacheKey == "TeamWork-tid"), default))
                 .ReturnsAsync(judges);
 
             var workManagement = new WorkManagement(logger.Object)
             {
                 Cache = cache.Object,
             };
-            var result = await workManagement.CanCreateTeamWorkAsync("hack", default);
+            var result = await workManagement.CanCreateTeamWorkAsync("hack", "tid", default);
 
             Mock.VerifyAll(cache);
             cache.VerifyNoOtherCalls();
@@ -117,9 +117,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             // input
             TeamWorkEntity existing = new TeamWorkEntity
             {
-                PartitionKey = "pk",
+                PartitionKey = "hack1",
                 RowKey = "rk",
-                HackathonName = "hack1",
+                TeamId = "teamId1",
                 Description = "desc1",
                 Title = "title1",
                 Type = TeamWorkType.image,
@@ -140,14 +140,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var teamWorkTable = new Mock<ITeamWorkTable>();
             teamWorkTable.Setup(p => p.MergeAsync(It.Is<TeamWorkEntity>(e => e.Description == "desc2"
                 && e.HackathonName == "hack1"
-                && e.TeamId == "pk"
+                && e.TeamId == "teamId1"
                 && e.Title == "title2"
                 && e.Url == "url2"
                 && e.Type == TeamWorkType.powerpoint), default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
             var cache = new Mock<ICacheProvider>();
-            cache.Setup(c => c.Remove("TeamWork-pk"));
+            cache.Setup(c => c.Remove("TeamWork-teamId1"));
 
             // test
             var workManagement = new WorkManagement(logger.Object)
@@ -169,12 +169,12 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         [Test]
         public async Task GetTeamWorkAsync()
         {
-            var teamWork = new TeamWorkEntity { HackathonName = "hack" };
+            var teamWork = new TeamWorkEntity { PartitionKey = "hack" };
 
             // mock
             var logger = new Mock<ILogger<WorkManagement>>();
             var teamWorkTable = new Mock<ITeamWorkTable>();
-            teamWorkTable.Setup(p => p.RetrieveAsync("tid", "wid", default)).ReturnsAsync(teamWork);
+            teamWorkTable.Setup(p => p.RetrieveAsync("hack", "wid", default)).ReturnsAsync(teamWork);
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
 
@@ -183,7 +183,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object,
             };
-            var result = await workManagement.GetTeamWorkAsync("tid", "wid", default);
+            var result = await workManagement.GetTeamWorkAsync("hack", "wid", default);
 
             // verify
             Mock.VerifyAll(teamWorkTable, storageContext);
@@ -274,7 +274,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 Cache = cache.Object,
             };
-            var result = await awardManagement.ListPaginatedWorksAsync(teamId, options, default);
+            var result = await awardManagement.ListPaginatedWorksAsync("hack", teamId, options, default);
 
             Mock.VerifyAll(cache);
             cache.VerifyNoOtherCalls();
@@ -303,7 +303,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         {
             var logger = new Mock<ILogger<WorkManagement>>();
             var teamWorkTable = new Mock<ITeamWorkTable>();
-            teamWorkTable.Setup(t => t.DeleteAsync("teamId", "workId", default));
+            teamWorkTable.Setup(t => t.DeleteAsync("hack", "workId", default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TeamWorkTable).Returns(teamWorkTable.Object);
 
@@ -311,7 +311,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             {
                 StorageContext = storageContext.Object,
             };
-            await workManagement.DeleteTeamWorkAsync("teamId", "workId", default);
+            await workManagement.DeleteTeamWorkAsync("hack", "workId", default);
 
             Mock.VerifyAll(teamWorkTable, storageContext);
             teamWorkTable.VerifyNoOtherCalls();

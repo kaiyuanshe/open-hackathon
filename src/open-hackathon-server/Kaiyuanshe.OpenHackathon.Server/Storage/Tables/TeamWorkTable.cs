@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
     public interface ITeamWorkTable : IAzureTable<TeamWorkEntity>
     {
-        Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string teamId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default);
     }
 
     public class TeamWorkTable : AzureTable<TeamWorkEntity>, ITeamWorkTable
@@ -24,14 +24,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
         {
         }
 
-        public async Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string teamId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string hackathonName, string teamId, CancellationToken cancellationToken = default)
         {
             List<TeamWorkEntity> list = new List<TeamWorkEntity>();
 
-            var filter = TableQuery.GenerateFilterCondition(
-                           nameof(TeamWorkEntity.PartitionKey),
+            var pkFilter = TableQueryHelper.PartitionKeyFilter(hackathonName);
+            var teamIdFilter=TableQuery.GenerateFilterCondition(nameof(TeamWorkEntity.TeamId),
                            QueryComparisons.Equal,
                            teamId);
+            var filter = TableQueryHelper.And(pkFilter, teamIdFilter);
 
             TableQuery<TeamWorkEntity> query = new TableQuery<TeamWorkEntity>().Where(filter);
             await ExecuteQuerySegmentedAsync(query, (segment) =>

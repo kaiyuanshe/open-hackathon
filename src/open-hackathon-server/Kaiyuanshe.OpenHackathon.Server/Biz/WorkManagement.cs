@@ -13,12 +13,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IWorkManagement
     {
-        Task<bool> CanCreateTeamWorkAsync(string teamId, CancellationToken cancellationToken);
+        Task<bool> CanCreateTeamWorkAsync(string hackathonName, string teamId, CancellationToken cancellationToken);
         Task<TeamWorkEntity> CreateTeamWorkAsync(TeamWork request, CancellationToken cancellationToken = default);
         Task<TeamWorkEntity> UpdateTeamWorkAsync(TeamWorkEntity existing, TeamWork request, CancellationToken cancellationToken = default);
-        Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
-        Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
+        Task<TeamWorkEntity> GetTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string hackathonName, string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
+        Task DeleteTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default);
     }
 
     public class WorkManagement : ManagementClientBase, IWorkManagement
@@ -43,21 +43,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             Cache.Remove(CacheKeyWorks(teamId));
         }
 
-        private async Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string teamId, CancellationToken cancellationToken)
+        private async Task<IEnumerable<TeamWorkEntity>> ListByTeamAsync(string hackathonName, string teamId, CancellationToken cancellationToken)
         {
             return await Cache.GetOrAddAsync(
                 CacheKeyWorks(teamId),
                 TimeSpan.FromHours(4),
-                (ct) => StorageContext.TeamWorkTable.ListByTeamAsync(teamId, ct),
+                (ct) => StorageContext.TeamWorkTable.ListByTeamAsync(hackathonName, teamId, ct),
                 true,
                 cancellationToken);
         }
         #endregion
 
         #region Task<bool> CanCreateTeamWorkAsync(string hackathonName, CancellationToken cancellationToken)
-        public async Task<bool> CanCreateTeamWorkAsync(string teamId, CancellationToken cancellationToken)
+        public async Task<bool> CanCreateTeamWorkAsync(string hackathonName, string teamId, CancellationToken cancellationToken)
         {
-            var works = await ListByTeamAsync(teamId, cancellationToken);
+            var works = await ListByTeamAsync(hackathonName, teamId, cancellationToken);
             return works.Count() < MaxTeamWorkCount;
         }
         #endregion
@@ -70,12 +70,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 
             var entity = new TeamWorkEntity
             {
-                PartitionKey = request.teamId,
+                PartitionKey = request.hackathonName,
                 RowKey = Guid.NewGuid().ToString(),
 
                 CreatedAt = DateTime.UtcNow,
                 Description = request.description,
-                HackathonName = request.hackathonName,
+                TeamId = request.teamId,
                 Title = request.title,
                 Type = request.type.GetValueOrDefault(TeamWorkType.website),
                 Url = request.url,
@@ -104,20 +104,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
-        public async Task<TeamWorkEntity> GetTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default)
+        #region Task<TeamWorkEntity> GetTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default);
+        public async Task<TeamWorkEntity> GetTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(workId))
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(workId))
                 return null;
 
-            return await StorageContext.TeamWorkTable.RetrieveAsync(teamId, workId, cancellationToken);
+            return await StorageContext.TeamWorkTable.RetrieveAsync(hackathonName, workId, cancellationToken);
         }
         #endregion
 
-        #region Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
-        public async Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default)
+        #region Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string hackathonName, string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default);
+        public async Task<IEnumerable<TeamWorkEntity>> ListPaginatedWorksAsync(string hackathonName, string teamId, TeamWorkQueryOptions options, CancellationToken cancellationToken = default)
         {
-            var allWorks = await ListByTeamAsync(teamId, cancellationToken);
+            var allWorks = await ListByTeamAsync(hackathonName, teamId, cancellationToken);
 
             // paging
             int np = 0;
@@ -142,13 +142,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
         #endregion
 
-        #region Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default);
-        public async Task DeleteTeamWorkAsync(string teamId, string workId, CancellationToken cancellationToken = default)
+        #region Task DeleteTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default);
+        public async Task DeleteTeamWorkAsync(string hackathonName, string workId, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(teamId) || string.IsNullOrWhiteSpace(workId))
+            if (string.IsNullOrWhiteSpace(hackathonName) || string.IsNullOrWhiteSpace(workId))
                 return;
 
-            await StorageContext.TeamWorkTable.DeleteAsync(teamId, workId, cancellationToken);
+            await StorageContext.TeamWorkTable.DeleteAsync(hackathonName, workId, cancellationToken);
         }
         #endregion
     }
