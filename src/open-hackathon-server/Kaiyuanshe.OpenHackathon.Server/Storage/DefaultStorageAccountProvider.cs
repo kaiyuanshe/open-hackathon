@@ -1,5 +1,4 @@
-﻿using Kaiyuanshe.OpenHackathon.Server;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage

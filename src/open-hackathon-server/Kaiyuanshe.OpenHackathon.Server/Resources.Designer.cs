@@ -412,6 +412,15 @@ namespace Kaiyuanshe.OpenHackathon.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot create a new team since the user is already in a team..
+        /// </summary>
+        internal static string Team_CreateSecond {
+            get {
+                return ResourceManager.GetString("Team_CreateSecond", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot delete the team for awards are assigned to this team. Please delete the award assignments first..
         /// </summary>
         internal static string Team_HasAward {

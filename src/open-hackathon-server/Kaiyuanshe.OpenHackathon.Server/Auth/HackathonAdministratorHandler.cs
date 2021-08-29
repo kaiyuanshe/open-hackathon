@@ -34,6 +34,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
                 return;
             }
 
+            // creator
+            if(resource.CreatorId == userId)
+            {
+                context.Succeed(requirement);
+                return;
+            }
+
             var hackathonAdmins = await HackathonAdminManagement.ListHackathonAdminAsync(resource.Name);
             if (hackathonAdmins.Any(a => a.UserId == userId))
             {

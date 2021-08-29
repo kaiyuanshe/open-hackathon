@@ -49,8 +49,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Auth
                 context.Succeed(requirement);
                 return;
             }
+            
+            // creator
+            if( resource.CreatorId == userId)
+            {
+                context.Succeed(requirement);
+                return;
+            }
 
-            var teamMembers = await TeamManagement.ListTeamMembersAsync(resource.Id);
+            var teamMembers = await TeamManagement.ListTeamMembersAsync(resource.HackathonName, resource.Id);
             var teamMember = teamMembers.FirstOrDefault(m => m.UserId == userId && m.Status == Models.TeamMemberStatus.approved);
             if (teamMember != null)
             {

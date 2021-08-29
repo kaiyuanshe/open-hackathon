@@ -407,7 +407,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
                 return false;
             }
 
-            if (teamMember == null)
+            if (teamMember == null || teamMember.TeamId != team.Id)
             {
                 options.ValidateResult = NotFound(string.Format(Resources.TeamMember_NotFound, options.UserId ?? CurrentUserId, options.TeamId));
                 return false;
