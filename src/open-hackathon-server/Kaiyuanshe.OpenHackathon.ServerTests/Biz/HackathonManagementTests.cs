@@ -221,6 +221,32 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
         }
         #endregion
 
+        #region UpdateHackathonReadOnlyAsync
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task UpdateHackathonReadOnlyAsync(bool readOnly)
+        {
+            HackathonEntity entity = new HackathonEntity();
+
+            var hackathonTable = new Mock<IHackathonTable>();
+            hackathonTable.Setup(p => p.MergeAsync(It.Is<HackathonEntity>(h => h.ReadOnly == readOnly), default));
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.HackathonTable).Returns(hackathonTable.Object);
+
+            var hackathonManager = new HackathonManagement(null)
+            {
+                StorageContext = storageContext.Object,
+            };
+            var result = await hackathonManager.UpdateHackathonReadOnlyAsync(entity, readOnly, default);
+
+            Mock.VerifyAll(storageContext, hackathonTable);
+            hackathonTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual(readOnly, result.ReadOnly);
+        }
+        #endregion
+
         #region GetHackathonEntityByNameAsync
         [Test]
         public async Task GetHackathonEntityByNameAsyncTest()
