@@ -342,5 +342,46 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
         }
         #endregion
+
+        #region UpdateReadOnly
+        /// <summary>
+        /// Mark a hackathon as Readnly or not Readonly. 
+        /// A readonly hackathon cannot be updated. Team, Award, Rating etc are all readonly.
+        /// </summary>
+        /// <param name="hackathonName" example="foo">Name of hackathon. Case-insensitive.
+        /// Must contain only letters and/or numbers, length between 1 and 100</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>the hackathon</returns>
+        [HttpPost]
+        [Route("hackathon/{hackathonName}/updateReadonly")]
+        [SwaggerErrorResponse(400, 404)]
+        [ProducesResponseType(typeof(Hackathon), StatusCodes.Status200OK)]
+        [Authorize(Policy = AuthConstant.Policy.PlatformAdministrator)]
+        public async Task<object> UpdateReadonly(
+            [FromRoute, Required, RegularExpression(ModelConstants.HackathonNamePattern)] string hackathonName,
+            [FromQuery, Required] bool readOnly,
+            CancellationToken cancellationToken)
+        {
+            // validate hackathon
+            HackathonEntity hackathon = await HackathonManagement.GetHackathonEntityByNameAsync(hackathonName.ToLower(), cancellationToken);
+            var options = new ValidateHackathonOptions
+            {
+                WritableRequired = false,
+                HackathonName = hackathonName,
+                UserId = CurrentUserId,
+            };
+            if (await ValidateHackathon(hackathon, options) == false)
+            {
+                return options.ValidateResult;
+            }
+
+            // update status
+            hackathon = await HackathonManagement.UpdateHackathonReadOnlyAsync(hackathon, readOnly, cancellationToken);
+
+            // resp
+            var roles = await HackathonManagement.GetHackathonRolesAsync(hackathon, User, cancellationToken);
+            return Ok(ResponseBuilder.BuildHackathon(hackathon, roles));
+        }
+        #endregion
     }
 }

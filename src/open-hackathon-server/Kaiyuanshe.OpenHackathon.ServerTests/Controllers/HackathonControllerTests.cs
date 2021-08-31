@@ -804,5 +804,38 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             Assert.AreEqual(HackathonStatus.online, resp.status);
         }
         #endregion
+
+        #region UpdateReadonly
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task UpdateReadonly(bool readOnly)
+        {
+            HackathonEntity entity = new HackathonEntity { };
+            var role = new HackathonRoles { isAdmin = true };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(m => m.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(entity);
+            hackathonManagement.Setup(m => m.UpdateHackathonReadOnlyAsync(entity, readOnly, default))
+                .Callback<HackathonEntity, bool, CancellationToken>((h, r, c) =>
+                {
+                    h.ReadOnly = r;
+                })
+                .ReturnsAsync(entity);
+            hackathonManagement.Setup(h => h.GetHackathonRolesAsync(entity, null, default)).ReturnsAsync(role);
+
+            var controller = new HackathonController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.UpdateReadonly("Hack", readOnly, default);
+
+            Mock.VerifyAll(hackathonManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+
+            var resp = AssertHelper.AssertOKResult<Hackathon>(result);
+            Assert.AreEqual(readOnly, resp.readOnly);
+        }
+        #endregion
     }
 }
