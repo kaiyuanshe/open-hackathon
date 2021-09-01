@@ -28,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
                 TokenExpiredAt = date,
                 RegisterSource = registerSource,
                 Identities = identities,
-                Roles = roles,
+                //Roles = roles,
             };
 
             var user1 = userInfo.As<User>();
@@ -40,7 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
             Assert.AreEqual(10, user1.LoginsCount.Value);
             Assert.AreEqual(date.ToString("o"), user1.TokenExpiredAt);
             Assert.AreEqual(identities, user1.Identities);
-            Assert.AreEqual(roles, user1.Roles);
+            //Assert.AreEqual(roles, user1.Roles);
 
             var user2 = userInfo.As<User>((u) =>
             {
@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Helpers
             Assert.AreEqual(10, user2.LoginsCount.Value);
             Assert.AreEqual(date.ToString("o"), user2.TokenExpiredAt);
             Assert.AreEqual(identities, user2.Identities);
-            Assert.AreEqual(roles, user2.Roles);
+            //Assert.AreEqual(roles, user2.Roles);
         }
 
         [Test]

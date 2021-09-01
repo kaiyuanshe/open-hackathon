@@ -375,11 +375,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         [JsonProperty("blocked")]
         public bool? Blocked { get; set; }
 
-        /// <summary>
-        /// Roles
-        /// </summary>
-        [JsonProperty("roles")]
-        public PaginatedRoles Roles { get; set; }
+        ///// <summary>
+        ///// Roles
+        ///// </summary>
+        //[JsonProperty("roles")]
+        //public PaginatedRoles Roles { get; set; }
 
         ///// <summary>
         ///// Groups
