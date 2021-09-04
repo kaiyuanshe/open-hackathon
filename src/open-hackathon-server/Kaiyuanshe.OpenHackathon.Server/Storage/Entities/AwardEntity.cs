@@ -16,7 +16,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
     public class AwardEntity : AdvancedTableEntity
     {
         /// <summary>
-        /// name of Hackathon
+        /// name of Hackathon. PartitionKey
         /// </summary>
         [IgnoreProperty]
         public string HackathonName
@@ -28,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         }
 
         /// <summary>
-        /// id of award
+        /// id of award. RowKey
         /// </summary>
         [IgnoreProperty]
         public string Id

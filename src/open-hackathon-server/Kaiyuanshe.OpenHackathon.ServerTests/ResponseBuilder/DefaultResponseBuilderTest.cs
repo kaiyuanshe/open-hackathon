@@ -4,6 +4,7 @@ using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
 {
@@ -206,6 +207,47 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("url", teamWork.url);
             Assert.AreEqual(entity.CreatedAt, teamWork.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, teamWork.updatedAt);
+        }
+        #endregion
+
+        #region BuildTemplate
+        [Test]
+        public void BuildTemplate()
+        {
+            var entity = new TemplateEntity
+            {
+                PartitionKey = "pk",
+                RowKey = "rk",
+                Commands = new string[] { "a", "b", "c" },
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+                    { "e1", "v1" },
+                    { "e2", "v2" }
+                },
+                Image = "image",
+                IngressPort = 22,
+                IngressProtocol = "ssh",
+                UserName = "un",
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var template = respBuilder.BuildTemplate(entity);
+
+            Assert.AreEqual("pk", template.hackathonName);
+            Assert.AreEqual("rk", template.name);
+            Assert.AreEqual(3, template.commands.Length);
+            Assert.AreEqual("a", template.commands[0]);
+            Assert.AreEqual(2, template.environmentVariables.Count);
+            Assert.AreEqual("e1", template.environmentVariables.First().Key);
+            Assert.AreEqual("v1", template.environmentVariables.First().Value);
+            Assert.AreEqual("image", template.image);
+            Assert.AreEqual(22, template.ingressPort);
+            Assert.AreEqual("ssh", template.ingressProtocol);
+            Assert.AreEqual("un", template.userName);
+            Assert.AreEqual(entity.CreatedAt, template.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, template.updatedAt);
         }
         #endregion
 
