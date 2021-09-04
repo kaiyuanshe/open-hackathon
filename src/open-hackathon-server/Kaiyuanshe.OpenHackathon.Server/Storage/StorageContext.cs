@@ -17,6 +17,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IRatingKindTable RatingKindTable { get; }
         ITeamTable TeamTable { get; }
         ITeamMemberTable TeamMemberTable { get; }
+        ITemplateTable TemplateTable { get; }
         ITeamWorkTable TeamWorkTable { get; }
         IUserTable UserTable { get; }
         IUserTokenTable UserTokenTable { get; }
@@ -39,6 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public ITeamTable TeamTable { get; }
         public ITeamMemberTable TeamMemberTable { get; }
         public ITeamWorkTable TeamWorkTable { get; }
+        public ITemplateTable TemplateTable { get; }
         public IUserTable UserTable { get; }
         public IUserTokenTable UserTokenTable { get; }
         public IUserBlobContainer UserBlobContainer { get; }
@@ -60,6 +62,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             TeamTable = new TeamTable(storageAccount, TableNames.Team);
             TeamMemberTable = new TeamMemberTable(storageAccount, TableNames.TeamMember);
             TeamWorkTable = new TeamWorkTable(storageAccount, TableNames.TeamWork);
+            TemplateTable = new TemplateTable(storageAccount, TableNames.Template);
             UserTable = new UserTable(storageAccount, TableNames.User);
             UserTokenTable = new UserTokenTable(storageAccount, TableNames.UserToken);
 

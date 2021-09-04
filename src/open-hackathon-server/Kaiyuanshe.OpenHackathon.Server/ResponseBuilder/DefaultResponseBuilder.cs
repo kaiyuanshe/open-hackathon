@@ -21,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member);
 
         TeamWork BuildTeamWork(TeamWorkEntity teamWorkEntity);
+        Template BuildTemplate(TemplateEntity templateEntity);
 
         Award BuildAward(AwardEntity awardEntity);
 
@@ -117,6 +118,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             return teamWorkEntity.As<TeamWork>(p =>
             {
                 p.updatedAt = teamWorkEntity.Timestamp.UtcDateTime;
+            });
+        }
+
+        public Template BuildTemplate(TemplateEntity templateEntity)
+        {
+            return templateEntity.As<Template>(p=> {
+                p.updatedAt = templateEntity.Timestamp.UtcDateTime;
             });
         }
 

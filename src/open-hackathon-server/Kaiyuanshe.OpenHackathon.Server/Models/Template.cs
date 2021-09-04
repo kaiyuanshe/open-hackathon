@@ -2,15 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Models
 {
     /// <summary>
     /// Template to setup virtual experiment on Kubernetes. Not required.
     /// </summary>
-    public class Template
+    public class Template : ModelBase
     {
         /// <summary>
         /// name of hackathon
