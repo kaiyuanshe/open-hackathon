@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
+﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
@@ -53,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// protocol for remote connection
         /// </summary>
         /// <example>vnc</example>
-        public string IngressProtocol { get; set; }
+        public IngressProtocol IngressProtocol { get; set; }
 
         /// <summary>
         /// Port for remote connection
