@@ -50,7 +50,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// </summary>
         /// <example>vnc</example>
         [Required]
-        public string ingressProtocol { get; set; }
+        public IngressProtocol ingressProtocol { get; set; }
 
         /// <summary>
         /// Port for remote connection
@@ -66,5 +66,15 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>johndoe</example>
         [RegularExpression("^[a-z][a-z0-9]{1, 63}$")]
         public string userName { get; set; }
+    }
+
+    /// <summary>
+    /// protocol for remote connection.
+    /// </summary>
+    public enum IngressProtocol
+    {
+        ssh,
+        vnc,
+        rdp,
     }
 }

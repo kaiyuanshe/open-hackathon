@@ -226,7 +226,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 },
                 Image = "image",
                 IngressPort = 22,
-                IngressProtocol = "ssh",
+                IngressProtocol = IngressProtocol.ssh,
                 UserName = "un",
                 CreatedAt = DateTime.UtcNow,
                 Timestamp = DateTime.UtcNow
@@ -244,7 +244,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("v1", template.environmentVariables.First().Value);
             Assert.AreEqual("image", template.image);
             Assert.AreEqual(22, template.ingressPort);
-            Assert.AreEqual("ssh", template.ingressProtocol);
+            Assert.AreEqual(IngressProtocol.ssh, template.ingressProtocol);
             Assert.AreEqual("un", template.userName);
             Assert.AreEqual(entity.CreatedAt, template.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, template.updatedAt);
