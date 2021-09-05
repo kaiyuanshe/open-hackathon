@@ -43,11 +43,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// commands to start a container.
         /// </summary>
+        [ConvertableEntityProperty] 
         public string[] Commands { get; set; }
 
         /// <summary>
         /// environment variables passed to the container.
         /// </summary>
+        [ConvertableEntityProperty] 
         public Dictionary<string, string> EnvironmentVariables { get; set; }
 
         /// <summary>
@@ -63,8 +65,9 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         public int IngressPort { get; set; }
 
         /// <summary>
-        /// login user name for remote connection. lowercase chars and numbers only: ^[a-z][a-z0-9]{1, 63}$
+        /// vnc settings.
         /// </summary>
-        public string UserName { get; set; }
+        [ConvertableEntityProperty] 
+        public Vnc Vnc { get; set; }
     }
 }

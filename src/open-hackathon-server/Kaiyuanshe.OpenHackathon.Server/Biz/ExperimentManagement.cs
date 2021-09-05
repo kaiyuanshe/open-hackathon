@@ -40,7 +40,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 Image = template.image,
                 IngressPort = template.ingressPort,
                 IngressProtocol = template.ingressProtocol,
-                UserName = template.userName,
+                Vnc = template.vnc,
             };
             await StorageContext.TemplateTable.InsertOrMergeAsync(entity, cancellationToken);
 

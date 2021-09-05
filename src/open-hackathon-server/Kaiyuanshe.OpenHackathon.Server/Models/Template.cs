@@ -8,6 +8,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Template to setup virtual experiment on Kubernetes. Not required.
     /// </summary>
+    [RemoteConfigPolicy]
     public class Template : ModelBase
     {
         /// <summary>
@@ -44,7 +45,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <example>{ "FOO": "bar" }</example>
         [EnvironmentVariables]
         public Dictionary<string, string> environmentVariables { get; set; }
-
+        
         /// <summary>
         /// protocol for remote connection
         /// </summary>
@@ -53,7 +54,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public IngressProtocol ingressProtocol { get; set; }
 
         /// <summary>
-        /// Port for remote connection
+        /// Port exposed by the container image. Note this is not the actual port for remote connection.
+        /// The actual port is auto-generated during runtime and is invisible to external.
         /// </summary>
         /// <example>5901</example>
         [Required]
@@ -61,11 +63,31 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public int ingressPort { get; set; }
 
         /// <summary>
-        /// login user name for remote connection. lowercase chars and numbers only: ^[a-z][a-z0-9]{1, 63}$
+        /// vnc settings. Required ingressProtocol is vnc.
+        /// </summary>
+        /// <example>{"userName":"un", "password":"mypassword"}</example>
+        public Vnc vnc { get; set; }
+    }
+
+    /// <summary>
+    /// vnc configurations.
+    /// </summary>
+    public class Vnc
+    {
+        /// <summary>
+        /// login user name for remote connection. lowercase chars and numbers only: ^[a-z][a-z0-9]{1,63}$
         /// </summary>
         /// <example>johndoe</example>
-        [RegularExpression("^[a-z][a-z0-9]{1, 63}$")]
+        [RegularExpression("^[a-z][a-z0-9]{1,63}$")]
         public string userName { get; set; }
+
+        /// <summary>
+        /// login password for remote connection. 
+        /// </summary>
+        /// <example>mypassword</example>
+        [MinLength(6)]
+        [MaxLength(64)]
+        public string password { get; set; }
     }
 
     /// <summary>
