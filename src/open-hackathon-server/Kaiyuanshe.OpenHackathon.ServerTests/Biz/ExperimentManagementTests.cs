@@ -29,8 +29,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 },
                 image = "image",
                 ingressPort = 22,
-                ingressProtocol = IngressProtocol.ssh,
-                userName = "un",
+                ingressProtocol = IngressProtocol.vnc,
+                vnc = new Vnc { userName = "un", password = "pw" },
             };
 
             var logger = new Mock<ILogger<ExperimentManagement>>();
@@ -45,8 +45,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 t.EnvironmentVariables.Last().Value == "v2" &&
                 t.Image == "image" &&
                 t.IngressPort == 22 &&
-                t.IngressProtocol == IngressProtocol.ssh &&
-                t.UserName == "un"), default));
+                t.IngressProtocol == IngressProtocol.vnc &&
+                t.Vnc.userName == "un" &&
+                t.Vnc.password == "pw"), default));
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TemplateTable).Returns(templateTable.Object);
 
@@ -63,7 +64,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("hack", result.PartitionKey);
             Assert.AreEqual("default", result.RowKey);
             Assert.AreEqual(22, result.IngressPort);
-            Assert.AreEqual("un", result.UserName);
+            Assert.AreEqual("un", result.Vnc.userName);
         }
     }
 }
