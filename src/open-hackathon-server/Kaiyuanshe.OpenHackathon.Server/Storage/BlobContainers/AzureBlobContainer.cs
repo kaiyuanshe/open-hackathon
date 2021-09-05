@@ -1,6 +1,10 @@
-﻿using System;
-using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using System;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 {
@@ -8,6 +12,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
     {
         string CreateContainerSasToken(SharedAccessBlobPolicy policy);
         string CreateBlobSasToken(string blobName, SharedAccessBlobPolicy polich);
+        Task<string> DownloadBlockBlobAsync(string blobName, CancellationToken cancellationToken);
     }
 
     public class AzureBlobContainer : IAzureBlobContainer
@@ -64,6 +69,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
         {
             var blobProxy = blobContainerProxy.GetBlobReference(blobName);
             return blobProxy.GetSharedAccessSignature(policy);
+        }
+
+        public async Task<string> DownloadBlockBlobAsync(string blobName, CancellationToken cancellationToken)
+        {
+            var blob = blobContainerProxy.GetBlockBlobReference(blobName);
+            using (MemoryStream stream = new MemoryStream())
+            {
+                await blob.DownloadToStreamAsync(stream, null, null, null, cancellationToken);
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
         }
     }
 }
