@@ -22,6 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IUserTable UserTable { get; }
         IUserTokenTable UserTokenTable { get; }
         IUserBlobContainer UserBlobContainer { get; }
+        IKubernetesBlobContainer KubernetesBlobContainer { get; }
     }
 
 
