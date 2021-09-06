@@ -25,6 +25,7 @@
     <PackageReference Include="Authing.ApiClient" Version="4.1.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="bootstrap" Version="4.6.0" />
+    <PackageReference Include="KubernetesClient" Version="6.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Quartz" Version="3.3.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.2" />

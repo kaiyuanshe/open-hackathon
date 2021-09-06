@@ -2,7 +2,7 @@
 
 namespace Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers
 {
-    public interface IKubernetesBlobContainer
+    public interface IKubernetesBlobContainer : IAzureBlobContainer
     {
     }
 
