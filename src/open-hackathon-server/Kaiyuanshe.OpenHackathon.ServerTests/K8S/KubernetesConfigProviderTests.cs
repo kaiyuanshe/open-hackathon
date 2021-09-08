@@ -1,17 +1,14 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Kubernetes;
+﻿using Kaiyuanshe.OpenHackathon.Server.K8S;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.BlobContainers;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.ServerTests.Kubernetes
+namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
 {
-    class KubenetesConfigProviderTests
+    class KubernetesConfigProviderTests
     {
         #region GetDefaultConfigAsync
         [Test]
@@ -44,7 +41,7 @@ users:
             var storage = new Mock<IStorageContext>();
             storage.SetupGet(s => s.KubernetesBlobContainer).Returns(kubeContainer.Object);
 
-            var kubeConfigProvider = new KubenetesConfigProvider
+            var kubeConfigProvider = new KubernetesConfigProvider
             {
                 StorageContext = storage.Object,
             };
