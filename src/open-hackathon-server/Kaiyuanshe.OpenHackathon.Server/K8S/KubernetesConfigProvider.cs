@@ -4,14 +4,14 @@ using Kaiyuanshe.OpenHackathon.Server.Storage;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Kaiyuanshe.OpenHackathon.Server.Kubernetes
+namespace Kaiyuanshe.OpenHackathon.Server.K8S
 {
-    public interface IKubenetesConfigProvider
+    public interface IKubernetesConfigProvider
     {
         Task<K8SConfiguration> GetDefaultConfigAsync(CancellationToken cancellationToken);
     }
 
-    public class KubenetesConfigProvider : IKubenetesConfigProvider
+    public class KubernetesConfigProvider : IKubernetesConfigProvider
     {
         static readonly string DefaultConfigBlob = "default/kubeconfig.yaml";
         public IStorageContext StorageContext { get; set; }

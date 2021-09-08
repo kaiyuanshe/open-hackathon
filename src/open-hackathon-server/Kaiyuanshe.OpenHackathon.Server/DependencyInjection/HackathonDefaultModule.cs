@@ -2,6 +2,7 @@
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Cache;
 using Kaiyuanshe.OpenHackathon.Server.CronJobs;
+using Kaiyuanshe.OpenHackathon.Server.K8S;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Quartz;
@@ -29,6 +30,10 @@ namespace Kaiyuanshe.OpenHackathon.Server.DependencyInjection
             builder.RegisterType<JudgeManagement>().As<IJudgeManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<RatingManagement>().As<IRatingManagement>().PropertiesAutowired().SingleInstance();
             builder.RegisterType<ExperimentManagement>().As<IExperimentManagement>().PropertiesAutowired().SingleInstance();
+
+            // Kubernetes
+            builder.RegisterType<KubernetesConfigProvider>().As<IKubernetesConfigProvider>().PropertiesAutowired().SingleInstance();
+            builder.RegisterType<KubernetesClusterFactory>().As<IKubernetesClusterFactory>().PropertiesAutowired().SingleInstance();
 
             // Response
             builder.RegisterType<DefaultResponseBuilder>().As<IResponseBuilder>().PropertiesAutowired().SingleInstance();
