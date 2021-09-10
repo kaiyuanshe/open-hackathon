@@ -1,7 +1,6 @@
 ﻿using k8s;
-using k8s.KubeConfigModels;
 using Kaiyuanshe.OpenHackathon.Server.K8S;
-using Microsoft.Rest;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System.Threading.Tasks;
@@ -21,6 +20,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
             var factory = new KubernetesClusterFactory
             {
                 KubernetesConfigProvider = configProvider.Object,
+                LoggerFactory = new Mock<ILoggerFactory>().Object,
             };
             var cluster = await factory.GetDefaultKubernetes(default);
             Assert.AreEqual(typeof(KubernetesCluster), cluster.GetType());

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kaiyuanshe.OpenHackathon.Server.K8S
@@ -14,6 +15,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
         static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public IKubernetesConfigProvider KubernetesConfigProvider { get; set; }
+
+        public ILoggerFactory LoggerFactory { get; set; }
 
         public async Task<IKubernetesCluster> GetDefaultKubernetes(CancellationToken cancellationToken)
         {
@@ -31,7 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
                 }
 
                 var config = await KubernetesConfigProvider.GetDefaultConfigAsync(cancellationToken);
-                _default = new KubernetesCluster(config);
+                _default = new KubernetesCluster(config, LoggerFactory);
                 return _default;
             }
             finally
