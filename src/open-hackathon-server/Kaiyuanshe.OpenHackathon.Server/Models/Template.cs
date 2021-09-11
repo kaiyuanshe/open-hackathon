@@ -9,7 +9,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// Template to setup virtual experiment on Kubernetes. Not required.
     /// </summary>
     [RemoteConfigPolicy]
-    public class Template : ModelBase
+    public class Template : KubernetesModelBase
     {
         /// <summary>
         /// name of hackathon
@@ -42,7 +42,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// environment variables passed to the container.
         /// </summary>
-        /// <example>{ "FOO": "bar" }</example>
+        /// <example>{ "FOO": "bar", "KEY": "value" }</example>
         [EnvironmentVariables]
         public Dictionary<string, string> environmentVariables { get; set; }
         
@@ -65,7 +65,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// vnc settings. Required ingressProtocol is vnc.
         /// </summary>
-        /// <example>{"userName":"un", "password":"mypassword"}</example>
         public Vnc vnc { get; set; }
     }
 

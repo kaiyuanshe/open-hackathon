@@ -14,6 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// name of the extension.
         /// </summary>
+        /// <example>mykey</example>
         [Required]
         [MaxLength(128)]
         public string name { get; set; }
@@ -21,6 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// value of the extension
         /// </summary>
+        /// <example>myvalue</example>
         [Required]
         [MaxLength(1024)]
         public string value { get; set; }

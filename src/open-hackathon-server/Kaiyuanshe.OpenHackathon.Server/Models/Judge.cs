@@ -32,17 +32,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public string description { get; set; }
     }
 
-    public class JudgeList : IResourceList<Judge>
+    public class JudgeList : ResourceList<Judge>
     {
         /// <summary>
         /// a list of judges
         /// </summary>
-        public Judge[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override Judge[] value { get; set; }
     }
 }

@@ -6,6 +6,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
     public class TemplateContext
     {
         public TemplateEntity TemplateEntity { get; set; }
+        public k8s.Models.V1Status Status { get; set; }
 
         public TemplateResource BuildCustomResource()
         {

@@ -53,23 +53,18 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// count of members, including members pending approval.
         /// </summary>
-        public int  membersCount { get; set; }
+        /// <example>10</example>
+        public int membersCount { get; internal set; }
     }
 
     /// <summary>
     /// a list of teams and a optional nextLink for more results.
     /// </summary>
-    public class TeamList : IResourceList<Team>
+    public class TeamList : ResourceList<Team>
     {
         /// <summary>
         /// a list of teams
         /// </summary>
-        public Team[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override Team[] value { get; set; }
     }
 }

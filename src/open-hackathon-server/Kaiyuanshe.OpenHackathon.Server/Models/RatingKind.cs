@@ -49,17 +49,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// a list of enrollment
     /// </summary>
-    public class RatingKindList : IResourceList<RatingKind>
+    public class RatingKindList : ResourceList<RatingKind>
     {
         /// <summary>
         /// a list of RatingKinds
         /// </summary>
-        public RatingKind[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override RatingKind[] value { get; set; }
     }
 }

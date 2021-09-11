@@ -1,6 +1,8 @@
 ﻿using k8s;
 using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Rest;
+using Newtonsoft.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,13 +30,28 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
         {
             var kubernetes = GetKubernetes();
             var customResource = context.BuildCustomResource();
-            var resp = await kubernetes.CreateNamespacedCustomObjectWithHttpMessagesAsync(
-                customResource,
-                TemplateResource.Group,
-                TemplateResource.Version,
-                customResource.Metadata.NamespaceProperty ?? "default",
-                TemplateResource.Plural);
-            logger.TraceInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.ReasonPhrase}");
+            try
+            {
+                var resp = await kubernetes.CreateNamespacedCustomObjectWithHttpMessagesAsync(
+                    customResource,
+                    TemplateResource.Group,
+                    TemplateResource.Version,
+                    customResource.Metadata.NamespaceProperty ?? "default",
+                    TemplateResource.Plural);
+                logger.TraceInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.Content.AsString()}");
+                context.Status = new k8s.Models.V1Status
+                {
+                    Code = (int)resp.Response.StatusCode,
+                    Reason = resp.Response.ReasonPhrase,
+                };
+            }
+            catch (HttpOperationException exception)
+            {
+                if (exception.Response?.Content == null)
+                    throw;
+
+                context.Status = JsonConvert.DeserializeObject<k8s.Models.V1Status>(exception.Response.Content);
+            }
         }
 
         internal virtual IKubernetes GetKubernetes()

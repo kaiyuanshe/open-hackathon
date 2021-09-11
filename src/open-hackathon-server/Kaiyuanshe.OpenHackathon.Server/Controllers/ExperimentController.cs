@@ -49,8 +49,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Controllers
             // create template
             parameter.hackathonName = hackathonName.ToLower();
             parameter.name = "default";
-            var entity = await ExperimentManagement.CreateTemplateAsync(parameter, cancellationToken);
-            return Ok(ResponseBuilder.BuildTemplate(entity));
+            var context = await ExperimentManagement.CreateTemplateAsync(parameter, cancellationToken);
+            return Ok(ResponseBuilder.BuildTemplate(context));
         }
         #endregion
     }

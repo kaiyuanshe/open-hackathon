@@ -14,7 +14,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         /// <summary>
         /// Create a template.
         /// </summary>
-        Task<TemplateEntity> CreateTemplateAsync(Template template, CancellationToken cancellationToken);
+        Task<TemplateContext> CreateTemplateAsync(Template template, CancellationToken cancellationToken);
     }
 
     public class ExperimentManagement : ManagementClientBase, IExperimentManagement
@@ -29,7 +29,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
         }
 
         #region CreateTemplateAsync
-        public async Task<TemplateEntity> CreateTemplateAsync(Template template, CancellationToken cancellationToken)
+        public async Task<TemplateContext> CreateTemplateAsync(Template template, CancellationToken cancellationToken)
         {
             if (template == null)
                 return null;
@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             var kubernetesCluster = await KubernetesClusterFactory.GetDefaultKubernetes(cancellationToken);
             await kubernetesCluster.CreateOrUpdateTemplateAsync(context, cancellationToken);
 
-            return entity;
+            return context;
         }
         #endregion
     }

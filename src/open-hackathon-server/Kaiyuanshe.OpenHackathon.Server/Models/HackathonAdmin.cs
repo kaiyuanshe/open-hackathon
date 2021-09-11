@@ -28,17 +28,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         public UserInfo user { get; internal set; }
     }
 
-    public class HackathonAdminList : IResourceList<HackathonAdmin>
+    public class HackathonAdminList : ResourceList<HackathonAdmin>
     {
         /// <summary>
         /// a list of admins
         /// </summary>
-        public HackathonAdmin[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override HackathonAdmin[] value { get; set; }
     }
 }

@@ -53,18 +53,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// a list of team members and a optional nextLink for more results.
     /// </summary>
-    public class TeamMemberList : IResourceList<TeamMember>
+    public class TeamMemberList : ResourceList<TeamMember>
     {
         /// <summary>
         /// a list of members
         /// </summary>
-        public TeamMember[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override TeamMember[] value { get; set; }
     }
 
     public enum TeamMemberRole

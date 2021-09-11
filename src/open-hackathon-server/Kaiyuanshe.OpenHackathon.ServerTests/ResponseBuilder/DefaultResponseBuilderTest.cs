@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using NUnit.Framework;
@@ -231,9 +232,19 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                 CreatedAt = DateTime.UtcNow,
                 Timestamp = DateTime.UtcNow
             };
+            var status = new k8s.Models.V1Status
+            {
+                Code = 200,
+                Kind = "kind",
+            };
+            var context = new TemplateContext
+            {
+                TemplateEntity = entity,
+                Status = status
+            };
 
             var respBuilder = new DefaultResponseBuilder();
-            var template = respBuilder.BuildTemplate(entity);
+            var template = respBuilder.BuildTemplate(context);
 
             Assert.AreEqual("pk", template.hackathonName);
             Assert.AreEqual("rk", template.name);
@@ -249,6 +260,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("pw", template.vnc.password);
             Assert.AreEqual(entity.CreatedAt, template.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, template.updatedAt);
+            Assert.AreEqual(200, template.status.Code);
+            Assert.AreEqual("kind", template.status.Kind);
         }
         #endregion
 

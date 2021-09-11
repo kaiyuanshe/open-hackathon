@@ -14,6 +14,19 @@
         /// The URL the client should use to fetch the next page (per server side paging).
         /// No more results if it's null or empty.
         /// </summary>
+        /// <example>https://hackathon-api.kaiyuanshe.cn/...pathToMoreResults...</example>
         string nextLink { get; set; }
+    }
+
+    public abstract class ResourceList<T> : IResourceList<T>
+    {
+        public abstract T[] value { get; set; }
+
+        /// <summary>
+        /// The URL the client should use to fetch the next page (per server side paging).
+        /// No more results if it's null or empty.
+        /// </summary>
+        /// <example>https://hackathon-api.kaiyuanshe.cn/...pathToMoreResults...</example>
+        public string nextLink { get; set; }
     }
 }
