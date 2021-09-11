@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 
@@ -43,13 +44,13 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// commands to start a container.
         /// </summary>
-        [ConvertableEntityProperty] 
+        [ConvertableEntityProperty]
         public string[] Commands { get; set; }
 
         /// <summary>
         /// environment variables passed to the container.
         /// </summary>
-        [ConvertableEntityProperty] 
+        [ConvertableEntityProperty]
         public Dictionary<string, string> EnvironmentVariables { get; set; }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
         /// <summary>
         /// vnc settings.
         /// </summary>
-        [ConvertableEntityProperty] 
+        [ConvertableEntityProperty]
         public Vnc Vnc { get; set; }
     }
 }

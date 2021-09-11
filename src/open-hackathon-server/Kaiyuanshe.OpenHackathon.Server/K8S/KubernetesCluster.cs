@@ -8,7 +8,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
 {
     public interface IKubernetesCluster
     {
-        Task CreateTemplateAsync(TemplateResource templateResource, CancellationToken cancellationToken);
+        Task CreateOrUpdateTemplateAsync(TemplateContext context, CancellationToken cancellationToken);
     }
 
     public class KubernetesCluster : IKubernetesCluster
@@ -18,25 +18,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
 
         public KubernetesCluster(
             KubernetesClientConfiguration kubernetesClientConfiguration,
-            ILoggerFactory loggerFactory)
+            ILogger logger)
         {
             kubeconfig = kubernetesClientConfiguration;
-            logger = loggerFactory.CreateLogger<KubernetesCluster>();
+            this.logger = logger;
         }
 
-        public async Task CreateTemplateAsync(TemplateResource templateResource, CancellationToken cancellationToken)
+        public async Task CreateOrUpdateTemplateAsync(TemplateContext context, CancellationToken cancellationToken)
         {
             var kubernetes = GetKubernetes();
+            var customResource = context.BuildCustomResource();
             var resp = await kubernetes.CreateNamespacedCustomObjectWithHttpMessagesAsync(
-                templateResource,
+                customResource,
                 TemplateResource.Group,
                 TemplateResource.Version,
-                templateResource.Metadata.NamespaceProperty ?? "default",
+                customResource.Metadata.NamespaceProperty ?? "default",
                 TemplateResource.Plural);
-            logger.LogInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.ReasonPhrase}");
+            logger.TraceInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.ReasonPhrase}");
         }
 
-        internal virtual Kubernetes GetKubernetes()
+        internal virtual IKubernetes GetKubernetes()
         {
             return new Kubernetes(kubeconfig);
         }

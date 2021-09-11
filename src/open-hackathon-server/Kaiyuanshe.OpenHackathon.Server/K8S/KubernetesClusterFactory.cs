@@ -34,7 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
                 }
 
                 var config = await KubernetesConfigProvider.GetDefaultConfigAsync(cancellationToken);
-                _default = new KubernetesCluster(config, LoggerFactory);
+                _default = new KubernetesCluster(config, LoggerFactory.CreateLogger<KubernetesCluster>());
                 return _default;
             }
             finally
