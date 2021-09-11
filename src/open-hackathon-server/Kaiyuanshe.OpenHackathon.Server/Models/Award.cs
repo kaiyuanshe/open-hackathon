@@ -70,17 +70,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// a list of enrollment
     /// </summary>
-    public class AwardList : IResourceList<Award>
+    public class AwardList : ResourceList<Award>
     {
         /// <summary>
         /// a list of Award
         /// </summary>
-        public Award[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override Award[] value { get; set; }
     }
 }

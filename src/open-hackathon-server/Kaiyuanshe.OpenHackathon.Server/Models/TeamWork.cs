@@ -21,6 +21,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// auto-generated id of the work.
         /// </summary>
+        /// <example>c85e65ef-fd5e-4539-a1f8-bafb7e4f9d74</example>
         public string id { get; internal set; }
 
         /// <summary>
@@ -89,17 +90,11 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// a list of team works
     /// </summary>
-    public class TeamWorkList : IResourceList<TeamWork>
+    public class TeamWorkList : ResourceList<TeamWork>
     {
         /// <summary>
         /// a list of team works
         /// </summary>
-        public TeamWork[] value { get; set; }
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override TeamWork[] value { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
+using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.ResponseBuilder;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -22,6 +23,11 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var authResult = AuthorizationResult.Success();
             var parameter = new Template { };
             var entity = new TemplateEntity { PartitionKey = "pk" };
+            var context = new TemplateContext
+            {
+                TemplateEntity = entity,
+                Status = new k8s.Models.V1Status { Reason = "reason" }
+            };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
             hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
@@ -30,7 +36,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var experimentManagement = new Mock<IExperimentManagement>();
             experimentManagement.Setup(j => j.CreateTemplateAsync(It.Is<Template>(j =>
                 j.name == "default" &&
-                j.hackathonName == "hack"), default)).ReturnsAsync(entity);
+                j.hackathonName == "hack"), default)).ReturnsAsync(context);
 
             var controller = new ExperimentController
             {
@@ -48,6 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var resp = AssertHelper.AssertOKResult<Template>(result);
             Assert.AreEqual("pk", resp.hackathonName);
+            Assert.AreEqual("reason", resp.status.Reason);
         }
         #endregion
     }

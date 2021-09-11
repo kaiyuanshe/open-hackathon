@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Models;
+﻿using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
+using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member);
 
         TeamWork BuildTeamWork(TeamWorkEntity teamWorkEntity);
-        Template BuildTemplate(TemplateEntity templateEntity);
+        Template BuildTemplate(TemplateContext context);
 
         Award BuildAward(AwardEntity awardEntity);
 
@@ -121,10 +122,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             });
         }
 
-        public Template BuildTemplate(TemplateEntity templateEntity)
+        public Template BuildTemplate(TemplateContext context)
         {
-            return templateEntity.As<Template>(p=> {
-                p.updatedAt = templateEntity.Timestamp.UtcDateTime;
+            return context.TemplateEntity.As<Template>(p =>
+            {
+                p.updatedAt = context.TemplateEntity.Timestamp.UtcDateTime;
+                p.status = context.Status;
             });
         }
 

@@ -65,6 +65,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// whether a hackathon is readOnly or not. 
         /// If a hackathon is readOnly, no WRITE operation is allowed including hackathon, enrollment, team etc.
         /// </summary>
+        /// <example>false</example>
         public bool readOnly { get; internal set; }
 
         /// <summary>
@@ -173,19 +174,12 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
     /// <summary>
     /// Represents a list of hackathon
     /// </summary>
-    public class HackathonList : IResourceList<Hackathon>
+    public class HackathonList : ResourceList<Hackathon>
     {
         /// <summary>
         /// List of hackathon
         /// </summary>
-        public Hackathon[] value { get; set; }
-
-
-        /// <summary>
-        ///  The URL the client should use to fetch the next page (per server side paging).
-        ///  No more results if it's null or empty.
-        /// </summary>
-        public string nextLink { get; set; }
+        public override Hackathon[] value { get; set; }
     }
 
     /// <summary>

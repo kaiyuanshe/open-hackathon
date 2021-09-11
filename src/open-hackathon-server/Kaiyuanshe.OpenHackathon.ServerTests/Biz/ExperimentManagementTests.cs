@@ -71,7 +71,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyAll();
             templateTable.VerifyAll();
 
-            Assert.AreEqual("pk", result.PartitionKey);
+            Assert.AreEqual("pk", result.TemplateEntity.PartitionKey);
         }
     }
 }

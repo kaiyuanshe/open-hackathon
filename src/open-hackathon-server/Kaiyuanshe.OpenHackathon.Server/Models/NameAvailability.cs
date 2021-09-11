@@ -22,17 +22,20 @@ namespace Kaiyuanshe.OpenHackathon.Server.Models
         /// <summary>
         /// Indicates whether the name is available or not.
         /// </summary>
+        /// <example>true</example>
         public bool nameAvailable { get; internal set; }
 
         /// <summary>
         /// The reason of the availability. Required if name is not available.
         /// </summary>
+        /// <example>AlreadyExists</example>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string reason { get; internal set; }
 
         /// <summary>
         /// The message of the operation.
         /// </summary>
+        /// <example>AlreadyExists</example>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string message { get; internal set; }
 
