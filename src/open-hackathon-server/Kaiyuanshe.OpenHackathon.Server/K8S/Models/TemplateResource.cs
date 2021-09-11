@@ -10,6 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
         public static readonly string Group = "hackathon.kaiyuanshe.cn";
         public static readonly string Version = "v1";
         public static readonly string Plural = "templates";
+        public static readonly string API_VERSION = "hackathon.kaiyuanshe.cn/v1";
 
         [JsonProperty(PropertyName = "data")]
         public TemplateData Data { get; set; }
@@ -27,7 +28,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
         public string IngressProtocol { get; set; }
 
         [JsonProperty(PropertyName = "ingressPort")]
-        public string IngressPort { get; set; }
+        public int IngressPort { get; set; }
 
         [JsonProperty(PropertyName = "vnc")]
         public VncConnection VncConnection { get; set; }

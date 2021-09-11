@@ -70,7 +70,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
 
             // blob containers
             UserBlobContainer = new UserBlobContainer(storageAccount, BlobContainerNames.StaticWebsite);
-            KubernetesBlobContainer = new KubernetesBlobContainer(storageAccount, BlobContainerNames.StaticWebsite);
+            KubernetesBlobContainer = new KubernetesBlobContainer(storageAccount, BlobContainerNames.Kubernetes);
         }
     }
 }

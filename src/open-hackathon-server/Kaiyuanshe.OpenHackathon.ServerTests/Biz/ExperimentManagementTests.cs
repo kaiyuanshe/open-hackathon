@@ -1,4 +1,6 @@
 ﻿using Kaiyuanshe.OpenHackathon.Server.Biz;
+using Kaiyuanshe.OpenHackathon.Server.K8S;
+using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
 using Kaiyuanshe.OpenHackathon.Server.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -32,6 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 ingressProtocol = IngressProtocol.vnc,
                 vnc = new Vnc { userName = "un", password = "pw" },
             };
+            TemplateEntity entity = new TemplateEntity { PartitionKey = "pk" };
 
             var logger = new Mock<ILogger<ExperimentManagement>>();
 
@@ -48,12 +51,19 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 t.IngressProtocol == IngressProtocol.vnc &&
                 t.Vnc.userName == "un" &&
                 t.Vnc.password == "pw"), default));
+            templateTable.Setup(t => t.RetrieveAsync("hack", "default", default)).ReturnsAsync(entity);
             var storageContext = new Mock<IStorageContext>();
             storageContext.SetupGet(p => p.TemplateTable).Returns(templateTable.Object);
+
+            var k8s = new Mock<IKubernetesCluster>();
+            k8s.Setup(k => k.CreateOrUpdateTemplateAsync(It.IsAny<TemplateContext>(), default));
+            var k8sfactory = new Mock<IKubernetesClusterFactory>();
+            k8sfactory.Setup(f => f.GetDefaultKubernetes(default)).ReturnsAsync(k8s.Object);
 
             var management = new ExperimentManagement(logger.Object)
             {
                 StorageContext = storageContext.Object,
+                KubernetesClusterFactory = k8sfactory.Object,
             };
             var result = await management.CreateTemplateAsync(template, default);
 
@@ -61,10 +71,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             storageContext.VerifyAll();
             templateTable.VerifyAll();
 
-            Assert.AreEqual("hack", result.PartitionKey);
-            Assert.AreEqual("default", result.RowKey);
-            Assert.AreEqual(22, result.IngressPort);
-            Assert.AreEqual("un", result.Vnc.userName);
+            Assert.AreEqual("pk", result.PartitionKey);
         }
     }
 }
