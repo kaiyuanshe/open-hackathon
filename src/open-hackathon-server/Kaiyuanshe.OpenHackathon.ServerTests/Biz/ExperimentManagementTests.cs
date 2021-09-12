@@ -16,8 +16,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
 {
     class ExperimentManagementTests
     {
+        #region CreateTemplateAsync
         [Test]
-        public async Task CreateTemplateAsync()
+        public async Task CreateTemplateAsync_Exception()
         {
             Template template = new Template
             {
@@ -39,7 +40,71 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             var logger = new Mock<ILogger<ExperimentManagement>>();
 
             var templateTable = new Mock<ITemplateTable>();
-            templateTable.Setup(p => p.InsertOrMergeAsync(It.Is<TemplateEntity>(t =>
+            templateTable.Setup(p => p.InsertOrReplaceAsync(It.Is<TemplateEntity>(t =>
+                t.PartitionKey == "hack" &&
+                t.RowKey == "default" &&
+                t.Commands.Length == 3 &&
+                t.Commands[1] == "b" &&
+                t.EnvironmentVariables.Count == 2 &&
+                t.EnvironmentVariables.Last().Value == "v2" &&
+                t.Image == "image" &&
+                t.IngressPort == 22 &&
+                t.IngressProtocol == IngressProtocol.vnc &&
+                t.Vnc.userName == "un" &&
+                t.Vnc.password == "pw"), default));
+            templateTable.Setup(t => t.RetrieveAsync("hack", "default", default)).ReturnsAsync(entity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(p => p.TemplateTable).Returns(templateTable.Object);
+
+            var k8s = new Mock<IKubernetesCluster>();
+            k8s.Setup(k => k.CreateOrUpdateTemplateAsync(It.IsAny<TemplateContext>(), default))
+                .Throws(new Microsoft.Rest.HttpOperationException("message"));
+            var k8sfactory = new Mock<IKubernetesClusterFactory>();
+            k8sfactory.Setup(f => f.GetDefaultKubernetes(default)).ReturnsAsync(k8s.Object);
+
+            var management = new ExperimentManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+                KubernetesClusterFactory = k8sfactory.Object,
+            };
+            var result = await management.CreateTemplateAsync(template, default);
+
+            Mock.VerifyAll(storageContext, templateTable, k8s, k8sfactory);
+            storageContext.VerifyAll();
+            templateTable.VerifyAll();
+            k8s.VerifyNoOtherCalls();
+            k8sfactory.VerifyNoOtherCalls();
+
+            Assert.AreEqual("pk", result.TemplateEntity.PartitionKey);
+            Assert.AreEqual(500, result.Status.Code);
+            Assert.AreEqual("Internal Server Error", result.Status.Reason);
+            Assert.AreEqual("message", result.Status.Message);
+        }
+
+        [Test]
+        public async Task CreateTemplateAsync_Success()
+        {
+            Template template = new Template
+            {
+                hackathonName = "hack",
+                name = "default",
+                commands = new string[] { "a", "b", "c" },
+                environmentVariables = new Dictionary<string, string>
+                {
+                    { "e1", "v1" },
+                    { "e2", "v2" }
+                },
+                image = "image",
+                ingressPort = 22,
+                ingressProtocol = IngressProtocol.vnc,
+                vnc = new Vnc { userName = "un", password = "pw" },
+            };
+            TemplateEntity entity = new TemplateEntity { PartitionKey = "pk" };
+
+            var logger = new Mock<ILogger<ExperimentManagement>>();
+
+            var templateTable = new Mock<ITemplateTable>();
+            templateTable.Setup(p => p.InsertOrReplaceAsync(It.Is<TemplateEntity>(t =>
                 t.PartitionKey == "hack" &&
                 t.RowKey == "default" &&
                 t.Commands.Length == 3 &&
@@ -67,11 +132,14 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             };
             var result = await management.CreateTemplateAsync(template, default);
 
-            Mock.VerifyAll(storageContext, templateTable);
+            Mock.VerifyAll(storageContext, templateTable, k8s, k8sfactory);
             storageContext.VerifyAll();
             templateTable.VerifyAll();
+            k8s.VerifyNoOtherCalls();
+            k8sfactory.VerifyNoOtherCalls();
 
             Assert.AreEqual("pk", result.TemplateEntity.PartitionKey);
         }
+        #endregion
     }
 }

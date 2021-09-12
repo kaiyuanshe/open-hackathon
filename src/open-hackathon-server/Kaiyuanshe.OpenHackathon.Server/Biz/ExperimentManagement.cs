@@ -46,14 +46,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 IngressProtocol = template.ingressProtocol,
                 Vnc = template.vnc,
             };
-            await StorageContext.TemplateTable.InsertOrMergeAsync(entity, cancellationToken);
+            await StorageContext.TemplateTable.InsertOrReplaceAsync(entity, cancellationToken);
 
             // call K8S API.
             entity = await StorageContext.TemplateTable.RetrieveAsync(template.hackathonName, template.name, cancellationToken);
             var context = new TemplateContext { TemplateEntity = entity };
             var kubernetesCluster = await KubernetesClusterFactory.GetDefaultKubernetes(cancellationToken);
-            await kubernetesCluster.CreateOrUpdateTemplateAsync(context, cancellationToken);
-
+            try
+            {
+                await kubernetesCluster.CreateOrUpdateTemplateAsync(context, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.TraceError($"Internal error: {e.Message}", e);
+                context.Status = new k8s.Models.V1Status
+                {
+                    Code = 500,
+                    Reason = "Internal Server Error",
+                    Message = e.Message,
+                };
+            }
             return context;
         }
         #endregion
