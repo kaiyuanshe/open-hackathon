@@ -1,4 +1,5 @@
 ﻿using k8s;
+using k8s.Models;
 using Kaiyuanshe.OpenHackathon.Server.K8S;
 using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
 using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
@@ -95,6 +96,19 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
                 {
                     Body = "{\"kind\":\"template\"}"
                 });
+            kubernetes.Setup(k => k.PatchNamespacedCustomObjectWithHttpMessagesAsync(
+                It.IsAny<V1Patch>(),
+                "hackathon.kaiyuanshe.cn", "v1", "default", "templates",
+                "pk-rk",
+                null, null, null, null, default))
+                .ReturnsAsync(new HttpOperationResponse<object>
+                {
+                    Response = new System.Net.Http.HttpResponseMessage
+                    {
+                        StatusCode = System.Net.HttpStatusCode.OK,
+                        ReasonPhrase = "success",
+                    },
+                });
             var context = new TemplateContext
             {
                 TemplateEntity = new TemplateEntity { PartitionKey = "pk", RowKey = "rk" }
@@ -105,6 +119,9 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
 
             Mock.VerifyAll(kubernetes);
             kubernetes.VerifyNoOtherCalls();
+
+            Assert.AreEqual(200, context.Status.Code);
+            Assert.AreEqual("success", context.Status.Reason);
         }
         #endregion
 
@@ -136,6 +153,41 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
             Assert.AreEqual("template", result.Kind);
             Assert.AreEqual(200, context.Status.Code);
             Assert.AreEqual("success", context.Status.Status);
+        }
+        #endregion
+
+        #region UpdateTemplateAsync
+        [Test]
+        public async Task UpdateTemplateAsync()
+        {
+            var logger = new Mock<ILogger<KubernetesCluster>>();
+            var kubernetes = new Mock<IKubernetes>();
+            kubernetes.Setup(k => k.PatchNamespacedCustomObjectWithHttpMessagesAsync(
+                It.IsAny<V1Patch>(),
+                "hackathon.kaiyuanshe.cn", "v1", "default", "templates",
+                "pk-rk",
+                null, null, null, null, default))
+                .ReturnsAsync(new HttpOperationResponse<object>
+                {
+                    Response = new System.Net.Http.HttpResponseMessage
+                    {
+                        StatusCode = System.Net.HttpStatusCode.OK,
+                        ReasonPhrase = "success",
+                    },
+                });
+            var context = new TemplateContext
+            {
+                TemplateEntity = new TemplateEntity { PartitionKey = "pk", RowKey = "rk" }
+            };
+
+            var kubernetesCluster = new KubernetesCluster(kubernetes.Object, logger.Object);
+            await kubernetesCluster.UpdateTemplateAsync(context, default);
+
+            Mock.VerifyAll(kubernetes);
+            kubernetes.VerifyNoOtherCalls();
+
+            Assert.AreEqual(200, context.Status.Code);
+            Assert.AreEqual("success", context.Status.Reason);
         }
         #endregion
     }
