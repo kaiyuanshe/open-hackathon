@@ -2,6 +2,7 @@
 using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Rest;
+using Microsoft.Rest.Serialization;
 using Newtonsoft.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,57 +12,91 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
     public interface IKubernetesCluster
     {
         Task CreateOrUpdateTemplateAsync(TemplateContext context, CancellationToken cancellationToken);
+        Task<TemplateResource> GetTemplateAsync(TemplateContext context, CancellationToken cancellationToken);
     }
 
     public class KubernetesCluster : IKubernetesCluster
     {
-        KubernetesClientConfiguration kubeconfig;
+        IKubernetes kubeClient;
         private readonly ILogger logger;
 
         public KubernetesCluster(
-            KubernetesClientConfiguration kubernetesClientConfiguration,
+            IKubernetes kubernetes,
             ILogger logger)
         {
-            kubeconfig = kubernetesClientConfiguration;
+            kubeClient = kubernetes;
             this.logger = logger;
         }
 
         public async Task CreateOrUpdateTemplateAsync(TemplateContext context, CancellationToken cancellationToken)
         {
-            var kubernetes = GetKubernetes();
-            var customResource = context.BuildCustomResource();
+            var cr = await GetTemplateAsync(context, cancellationToken);
+            if (cr == null)
+            {
+                if (context.Status.Code != 404)
+                {
+                    return;
+                }
+
+                // create if not found
+                var customResource = context.BuildCustomResource();
+                try
+                {
+                    var resp = await kubeClient.CreateNamespacedCustomObjectWithHttpMessagesAsync(
+                        customResource,
+                        TemplateResource.Group,
+                        TemplateResource.Version,
+                        customResource.Metadata.NamespaceProperty ?? "default",
+                        TemplateResource.Plural);
+                    logger.TraceInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.Content.AsString()}");
+                    context.Status = new k8s.Models.V1Status
+                    {
+                        Code = (int)resp.Response.StatusCode,
+                        Reason = resp.Response.ReasonPhrase,
+                    };
+                }
+                catch (HttpOperationException exception)
+                {
+                    if (exception.Response?.Content == null)
+                        throw;
+
+                    context.Status = JsonConvert.DeserializeObject<k8s.Models.V1Status>(exception.Response.Content);
+                }
+            }
+            else
+            {
+                // Patch
+            }
+        }
+
+        public async Task<TemplateResource> GetTemplateAsync(TemplateContext context, CancellationToken cancellationToken)
+        {
             try
             {
-                var resp = await kubernetes.CreateNamespacedCustomObjectWithHttpMessagesAsync(
-                    customResource,
+                var cr = await kubeClient.GetNamespacedCustomObjectWithHttpMessagesAsync(
                     TemplateResource.Group,
                     TemplateResource.Version,
-                    customResource.Metadata.NamespaceProperty ?? "default",
-                    TemplateResource.Plural);
-                logger.TraceInformation($"CreateTemplateAsync. Status: {resp.Response.StatusCode}, reason: {resp.Response.Content.AsString()}");
+                    context.GetNamespace(),
+                    TemplateResource.Plural,
+                    context.GetTemplateResourceName(),
+                    null,
+                    cancellationToken);
                 context.Status = new k8s.Models.V1Status
                 {
-                    Code = (int)resp.Response.StatusCode,
-                    Reason = resp.Response.ReasonPhrase,
+                    Code = 200,
+                    Status = "success",
                 };
+                return SafeJsonConvert.DeserializeObject<TemplateResource>(cr.Body.ToString());
             }
             catch (HttpOperationException exception)
             {
                 if (exception.Response?.Content == null)
                     throw;
 
+                logger.TraceInformation(exception.Response.Content);
                 context.Status = JsonConvert.DeserializeObject<k8s.Models.V1Status>(exception.Response.Content);
+                return null;
             }
-        }
-
-        internal virtual IKubernetes GetKubernetes()
-        {
-            return new Kubernetes(kubeconfig);
-        }
-
-        internal virtual GenericClient GetGenericClient(string group, string version, string plural)
-        {
-            return new GenericClient(kubeconfig, group, version, plural);
         }
     }
 }

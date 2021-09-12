@@ -36,7 +36,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
             var cr = context.BuildCustomResource();
             Assert.AreEqual("hackathon.kaiyuanshe.cn/v1", cr.ApiVersion);
             Assert.AreEqual("Template", cr.Kind);
-            Assert.AreEqual("template-pk-rk", cr.Metadata.Name);
+            Assert.AreEqual("pk-rk", cr.Metadata.Name);
             Assert.AreEqual("default", cr.Metadata.NamespaceProperty);
             Assert.AreEqual(2, cr.Metadata.Labels.Count);
             Assert.AreEqual("pk", cr.Metadata.Labels["hackathonName"]);

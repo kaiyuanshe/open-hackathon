@@ -1,4 +1,5 @@
 ﻿using k8s;
+using k8s.KubeConfigModels;
 using Kaiyuanshe.OpenHackathon.Server.K8S;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -12,7 +13,29 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.K8S
         [Test]
         public async Task GetDefaultKubernetes()
         {
-            KubernetesClientConfiguration kubeconfig = new KubernetesClientConfiguration();
+            string testConfig = @"
+apiVersion: v1
+clusters:
+- cluster:
+    server: https://10.0.0.1:8443
+    insecure-skip-tls-verify: true
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+    password: password
+    username: username
+";
+            var configObj = Yaml.LoadFromString<K8SConfiguration>(testConfig);
+            KubernetesClientConfiguration kubeconfig = KubernetesClientConfiguration.BuildConfigFromConfigObject(configObj);
 
             var configProvider = new Mock<IKubernetesConfigProvider>();
             configProvider.Setup(p => p.GetDefaultConfigAsync(default)).ReturnsAsync(kubeconfig);

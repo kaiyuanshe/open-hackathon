@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using k8s;
+using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S
                 }
 
                 var config = await KubernetesConfigProvider.GetDefaultConfigAsync(cancellationToken);
-                _default = new KubernetesCluster(config, LoggerFactory.CreateLogger<KubernetesCluster>());
+                var kubernetes = new Kubernetes(config);
+                _default = new KubernetesCluster(kubernetes, LoggerFactory.CreateLogger<KubernetesCluster>());
                 return _default;
             }
             finally

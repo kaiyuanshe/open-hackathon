@@ -8,6 +8,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
         public TemplateEntity TemplateEntity { get; set; }
         public k8s.Models.V1Status Status { get; set; }
 
+        public string GetTemplateResourceName()
+        {
+            return $"{TemplateEntity.HackathonName}-{TemplateEntity.Name}";
+        }
+
+        public string GetNamespace()
+        {
+            return "default";
+        }
+
         public TemplateResource BuildCustomResource()
         {
             var env = TemplateEntity.EnvironmentVariables ?? new Dictionary<string, string>();
@@ -22,8 +32,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
                 Kind = "Template",
                 Metadata = new k8s.Models.V1ObjectMeta
                 {
-                    Name = $"template-{TemplateEntity.HackathonName}-{TemplateEntity.Name}",
-                    NamespaceProperty = "default",
+                    Name = GetTemplateResourceName(),
+                    NamespaceProperty = GetNamespace(),
                     Labels = new Dictionary<string, string>
                     {
                         { "hackathonName", TemplateEntity.HackathonName },
