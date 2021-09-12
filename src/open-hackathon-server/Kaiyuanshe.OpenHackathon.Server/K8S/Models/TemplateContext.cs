@@ -1,4 +1,6 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+﻿using k8s.Models;
+using Kaiyuanshe.OpenHackathon.Server.Storage.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using System.Collections.Generic;
 
 namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
@@ -18,14 +20,21 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
             return "default";
         }
 
-        public TemplateResource BuildCustomResource()
+        public IDictionary<string, string> BuildEnvironmentVariables()
         {
-            var env = TemplateEntity.EnvironmentVariables ?? new Dictionary<string, string>();
+            var env = TemplateEntity.EnvironmentVariables == null ?
+                new Dictionary<string, string>() :
+                new Dictionary<string, string>(TemplateEntity.EnvironmentVariables);
+
             if (TemplateEntity.Vnc?.userName != null)
             {
                 env.Add("USER", TemplateEntity.Vnc.userName);
             }
+            return env;
+        }
 
+        public TemplateResource BuildCustomResource()
+        {
             var tr = new TemplateResource
             {
                 ApiVersion = "hackathon.kaiyuanshe.cn/v1",
@@ -48,7 +57,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
                     PodTemplate = new PodTemplate
                     {
                         Image = TemplateEntity.Image,
-                        EnvironmentVariables = env,
+                        EnvironmentVariables = BuildEnvironmentVariables(),
                         Command = TemplateEntity.Commands,
                     },
                     VncConnection = TemplateEntity.Vnc == null ? null : new VncConnection
@@ -60,6 +69,26 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
             };
 
             return tr;
+        }
+
+        public V1Patch BuildPatch()
+        {
+            var jsonPatch = new JsonPatchDocument<TemplateResource>();
+
+            jsonPatch.Replace(t => t.Data.IngressPort, TemplateEntity.IngressPort);
+            jsonPatch.Replace(t => t.Data.IngressProtocol, TemplateEntity.IngressProtocol.ToString());
+            jsonPatch.Replace(t => t.Data.PodTemplate.Image, TemplateEntity.Image);
+            jsonPatch.Replace(t => t.Data.PodTemplate.EnvironmentVariables, BuildEnvironmentVariables());
+            jsonPatch.Replace(t => t.Data.PodTemplate.Command, TemplateEntity.Commands);
+
+            if (TemplateEntity.Vnc != null)
+            {
+                jsonPatch.Replace(t => t.Data.VncConnection.Username, TemplateEntity.Vnc.userName);
+                jsonPatch.Replace(t => t.Data.VncConnection.Password, TemplateEntity.Vnc.password);
+            }
+
+            var patch = new V1Patch(jsonPatch, V1Patch.PatchType.JsonPatch);
+            return patch;
         }
     }
 }
