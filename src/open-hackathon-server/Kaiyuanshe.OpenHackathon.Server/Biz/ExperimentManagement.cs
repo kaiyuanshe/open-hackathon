@@ -42,6 +42,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
                 CreatedAt = DateTime.UtcNow,
                 EnvironmentVariables = template.environmentVariables,
                 Image = template.image,
+                DisplayName = template.displayName ?? "default",
                 IngressPort = template.ingressPort,
                 IngressProtocol = template.ingressProtocol,
                 Vnc = template.vnc,

@@ -36,6 +36,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
             }
         }
 
+        public string DisplayName { get; set; }
+
         /// <summary>
         /// Container image.
         /// </summary>
