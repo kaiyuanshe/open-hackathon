@@ -30,6 +30,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     { "e1", "v1" },
                     { "e2", "v2" }
                 },
+                displayName = "dp",
                 image = "image",
                 ingressPort = 22,
                 ingressProtocol = IngressProtocol.vnc,
@@ -47,6 +48,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 t.Commands[1] == "b" &&
                 t.EnvironmentVariables.Count == 2 &&
                 t.EnvironmentVariables.Last().Value == "v2" &&
+                t.DisplayName == "dp" &&
                 t.Image == "image" &&
                 t.IngressPort == 22 &&
                 t.IngressProtocol == IngressProtocol.vnc &&
@@ -94,6 +96,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                     { "e1", "v1" },
                     { "e2", "v2" }
                 },
+                displayName = "dp",
                 image = "image",
                 ingressPort = 22,
                 ingressProtocol = IngressProtocol.vnc,
@@ -111,6 +114,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
                 t.Commands[1] == "b" &&
                 t.EnvironmentVariables.Count == 2 &&
                 t.EnvironmentVariables.Last().Value == "v2" &&
+                t.DisplayName == "dp" &&
                 t.Image == "image" &&
                 t.IngressPort == 22 &&
                 t.IngressProtocol == IngressProtocol.vnc &&

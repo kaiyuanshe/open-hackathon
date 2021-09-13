@@ -225,6 +225,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
                     { "e1", "v1" },
                     { "e2", "v2" }
                 },
+                DisplayName = "dp",
                 Image = "image",
                 IngressPort = 22,
                 IngressProtocol = IngressProtocol.ssh,
@@ -254,6 +255,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("e1", template.environmentVariables.First().Key);
             Assert.AreEqual("v1", template.environmentVariables.First().Value);
             Assert.AreEqual("image", template.image);
+            Assert.AreEqual("dp", template.displayName);
             Assert.AreEqual(22, template.ingressPort);
             Assert.AreEqual(IngressProtocol.ssh, template.ingressProtocol);
             Assert.AreEqual("un", template.vnc.userName);
