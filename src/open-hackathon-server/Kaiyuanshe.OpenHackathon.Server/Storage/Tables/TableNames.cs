@@ -5,6 +5,7 @@
         public static readonly string Award = "kysaward";
         public static readonly string AwardAssignment = "kysawardassignemnt";
         public static readonly string Enrollment = "kysenrollment";
+        public static readonly string Experiment = "kysexperiment";
         public static readonly string Hackathon = "kyshackathon";
         public static readonly string HackathonAdmin = "kyshackadmin";
         public static readonly string Judge = "kysjudge";

@@ -17,11 +17,14 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Enrollment BuildEnrollment(EnrollmentEntity enrollmentEntity, UserInfo userInfo);
 
+        //Experiment BuildExperiment(ExperimentEntity experimentEntity, UserInfo userInfo);
+
         Team BuildTeam(TeamEntity teamEntity, UserInfo creator);
 
         TeamMember BuildTeamMember(TeamMemberEntity teamMemberEntity, UserInfo member);
 
         TeamWork BuildTeamWork(TeamWorkEntity teamWorkEntity);
+
         Template BuildTemplate(TemplateContext context);
 
         Award BuildAward(AwardEntity awardEntity);
@@ -127,7 +130,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             return context.TemplateEntity.As<Template>(p =>
             {
                 p.updatedAt = context.TemplateEntity.Timestamp.UtcDateTime;
-                p.status = context.Status;
+                p.status = Status.FromV1Status(context.Status);
             });
         }
 

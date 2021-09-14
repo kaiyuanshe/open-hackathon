@@ -10,6 +10,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         IAwardTable AwardTable { get; }
         IAwardAssignmentTable AwardAssignmentTable { get; }
         IEnrollmentTable EnrollmentTable { get; }
+        IExperimentTable ExperimentTable { get; }
         IHackathonTable HackathonTable { get; }
         IHackathonAdminTable HackathonAdminTable { get; }
         IJudgeTable JudgeTable { get; }
@@ -33,6 +34,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
         public IAwardTable AwardTable { get; }
         public IAwardAssignmentTable AwardAssignmentTable { get; }
         public IEnrollmentTable EnrollmentTable { get; }
+        public IExperimentTable ExperimentTable { get; }
         public IHackathonAdminTable HackathonAdminTable { get; }
         public IHackathonTable HackathonTable { get; }
         public IJudgeTable JudgeTable { get; }
@@ -56,6 +58,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage
             AwardTable = new AwardTable(storageAccount, TableNames.Award);
             AwardAssignmentTable = new AwardAssignmentTable(storageAccount, TableNames.AwardAssignment);
             EnrollmentTable = new EnrollmentTable(storageAccount, TableNames.Enrollment);
+            ExperimentTable = new ExperimentTable(storageAccount, TableNames.Experiment);
             HackathonAdminTable = new HackathonAdminTable(storageAccount, TableNames.HackathonAdmin);
             HackathonTable = new HackathonTable(storageAccount, TableNames.Hackathon);
             JudgeTable = new JudgeTable(storageAccount, TableNames.Judge);

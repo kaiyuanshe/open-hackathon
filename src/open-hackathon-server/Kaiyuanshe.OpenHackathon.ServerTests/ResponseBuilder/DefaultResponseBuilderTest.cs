@@ -262,8 +262,8 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             Assert.AreEqual("pw", template.vnc.password);
             Assert.AreEqual(entity.CreatedAt, template.createdAt);
             Assert.AreEqual(entity.Timestamp.DateTime, template.updatedAt);
-            Assert.AreEqual(200, template.status.Code);
-            Assert.AreEqual("kind", template.status.Kind);
+            Assert.AreEqual(200, template.status.code);
+            Assert.AreEqual("kind", template.status.kind);
         }
         #endregion
 
