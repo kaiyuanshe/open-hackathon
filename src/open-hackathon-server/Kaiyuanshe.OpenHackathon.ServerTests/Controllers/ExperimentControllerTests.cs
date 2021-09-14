@@ -54,7 +54,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var resp = AssertHelper.AssertOKResult<Template>(result);
             Assert.AreEqual("pk", resp.hackathonName);
-            Assert.AreEqual("reason", resp.status.Reason);
+            Assert.AreEqual("reason", resp.status.reason);
         }
         #endregion
     }
