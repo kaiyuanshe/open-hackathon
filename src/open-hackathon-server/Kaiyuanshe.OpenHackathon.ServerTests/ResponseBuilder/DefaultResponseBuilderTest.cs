@@ -109,6 +109,48 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
         }
         #endregion
 
+        #region BuildExperiment
+        [Test]
+        public void BuildExperiment()
+        {
+            ExperimentEntity entity = new ExperimentEntity
+            {
+                PartitionKey = "hack",
+                RowKey = "eid",
+                CreatedAt = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow,
+                TemplateName = "tn",
+                UserId = "uid",
+            };
+            var context = new ExperimentContext
+            {
+                ExperimentEntity = entity,
+                Status = new k8s.Models.V1Status
+                {
+                    Code = 204,
+                    Message = "msg"
+                }
+            };
+            UserInfo userInfo = new UserInfo
+            {
+                PostalCode = "code"
+            };
+
+            var respBuilder = new DefaultResponseBuilder();
+            var experiment = respBuilder.BuildExperiment(context, userInfo);
+
+            Assert.AreEqual("hack", experiment.hackathonName);
+            Assert.AreEqual("uid", experiment.userId);
+            Assert.AreEqual("eid", experiment.id);
+            Assert.AreEqual("tn", experiment.templateName);
+            Assert.AreEqual(204, experiment.status.code);
+            Assert.AreEqual("msg", experiment.status.message);
+            Assert.AreEqual(entity.CreatedAt, experiment.createdAt);
+            Assert.AreEqual(entity.Timestamp.DateTime, experiment.updatedAt);
+            Assert.AreEqual("code", experiment.user.PostalCode);
+        }
+        #endregion
+
         #region BuildTeamTest
         [Test]
         public void BuildTeamTest()

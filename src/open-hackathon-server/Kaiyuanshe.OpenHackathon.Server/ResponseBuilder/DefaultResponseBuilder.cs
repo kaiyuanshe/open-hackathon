@@ -17,7 +17,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
 
         Enrollment BuildEnrollment(EnrollmentEntity enrollmentEntity, UserInfo userInfo);
 
-        //Experiment BuildExperiment(ExperimentEntity experimentEntity, UserInfo userInfo);
+        Experiment BuildExperiment(ExperimentContext context, UserInfo userInfo);
 
         Team BuildTeam(TeamEntity teamEntity, UserInfo creator);
 
@@ -96,6 +96,16 @@ namespace Kaiyuanshe.OpenHackathon.Server.ResponseBuilder
             {
                 p.updatedAt = enrollment.Timestamp.UtcDateTime;
                 p.user = userInfo;
+            });
+        }
+
+        public Experiment BuildExperiment(ExperimentContext context, UserInfo userInfo)
+        {
+            return context.ExperimentEntity.As<Experiment>(p =>
+            {
+                p.updatedAt = context.ExperimentEntity.Timestamp.UtcDateTime;
+                p.user = userInfo;
+                p.status = Status.FromV1Status(context.Status);
             });
         }
 
