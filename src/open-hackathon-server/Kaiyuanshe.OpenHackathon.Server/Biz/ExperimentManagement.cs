@@ -11,10 +11,8 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
 {
     public interface IExperimentManagement
     {
-        /// <summary>
-        /// Create a template.
-        /// </summary>
         Task<TemplateContext> CreateTemplateAsync(Template template, CancellationToken cancellationToken);
+        Task<ExperimentContext> CreateExperimentAsync(Experiment experiment, CancellationToken cancellationToken);
     }
 
     public class ExperimentManagement : ManagementClientBase, IExperimentManagement
@@ -70,5 +68,38 @@ namespace Kaiyuanshe.OpenHackathon.Server.Biz
             return context;
         }
         #endregion
+
+        #region CreateExperimentAsync
+        public async Task<ExperimentContext> CreateExperimentAsync(Experiment experiment, CancellationToken cancellationToken)
+        {
+            if (experiment == null)
+                return null;
+
+            var entity = new ExperimentEntity
+            {
+                PartitionKey = experiment.hackathonName,
+                RowKey = GetExperimentRowKey(experiment.userId, experiment.templateName),
+                CreatedAt = DateTime.UtcNow,
+                Paused = false,
+                TemplateName = experiment.templateName,
+                UserId = experiment.userId,
+            };
+            await StorageContext.ExperimentTable.InsertOrReplaceAsync(entity, cancellationToken);
+
+            // call k8s api
+            entity = await StorageContext.ExperimentTable.RetrieveAsync(entity.PartitionKey, entity.RowKey, cancellationToken);
+            var context = new ExperimentContext
+            {
+                ExperimentEntity = entity,
+            };
+            return context;
+        }
+        #endregion
+
+        private string GetExperimentRowKey(string userId, string templateName)
+        {
+            string salt = $"{userId}-{templateName}".ToLower();
+            return DigestHelper.String2Guid(salt).ToString();
+        }
     }
 }
