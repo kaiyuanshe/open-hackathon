@@ -145,5 +145,44 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Biz
             Assert.AreEqual("pk", result.TemplateEntity.PartitionKey);
         }
         #endregion
+
+        #region CreateExperimentAsync
+        [Test]
+        public async Task CreateExperimentAsync()
+        {
+            var experiment = new Experiment
+            {
+                hackathonName = "hack",
+                templateName = "tn",
+                userId = "uid",
+            };
+            var entity = new ExperimentEntity { PartitionKey = "pk" };
+
+            var experimentTable = new Mock<IExperimentTable>();
+            experimentTable.Setup(t => t.InsertOrReplaceAsync(It.Is<ExperimentEntity>(e =>
+                e.HackathonName == "hack" &&
+                e.RowKey == "c282b009-b95e-b81a-dcf6-fe4d678105f4" &&
+                e.Paused == false &&
+                e.UserId == "uid" &&
+                e.TemplateName == "tn"), default));
+            experimentTable.Setup(e => e.RetrieveAsync("hack", "c282b009-b95e-b81a-dcf6-fe4d678105f4", default)).ReturnsAsync(entity);
+            var storageContext = new Mock<IStorageContext>();
+            storageContext.SetupGet(s => s.ExperimentTable).Returns(experimentTable.Object);
+
+            var logger = new Mock<ILogger<ExperimentManagement>>();
+            var management = new ExperimentManagement(logger.Object)
+            {
+                StorageContext = storageContext.Object,
+            };
+
+            var result = await management.CreateExperimentAsync(experiment, default);
+
+            Mock.VerifyAll(experimentTable, storageContext);
+            experimentTable.VerifyNoOtherCalls();
+            storageContext.VerifyNoOtherCalls();
+
+            Assert.AreEqual("pk", result.ExperimentEntity.HackathonName);
+        }
+        #endregion
     }
 }
