@@ -35,7 +35,7 @@ namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 
         public string TemplateName { get; set; }
 
-        public string UserId { get; internal set; }
+        public string UserId { get; set; }
 
         /// <summary>
         /// paused. retained for future use. `false` for now.

@@ -1,4 +1,5 @@
-﻿using Kaiyuanshe.OpenHackathon.Server.Auth;
+﻿using Kaiyuanshe.OpenHackathon.Server;
+using Kaiyuanshe.OpenHackathon.Server.Auth;
 using Kaiyuanshe.OpenHackathon.Server.Biz;
 using Kaiyuanshe.OpenHackathon.Server.Controllers;
 using Kaiyuanshe.OpenHackathon.Server.K8S.Models;
@@ -54,6 +55,114 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
 
             var resp = AssertHelper.AssertOKResult<Template>(result);
             Assert.AreEqual("pk", resp.hackathonName);
+            Assert.AreEqual("reason", resp.status.reason);
+        }
+        #endregion
+
+        #region CreateExperiment
+        [Test]
+        public async Task CreateExperiment_NotEnrolled()
+        {
+            var parameter = new Experiment();
+            var hackathon = new HackathonEntity();
+            var experiment = new ExperimentEntity { };
+            EnrollmentEntity enrollment = null;
+            var context = new ExperimentContext
+            {
+                ExperimentEntity = experiment,
+                Status = new k8s.Models.V1Status { Reason = "reason" }
+            };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", It.IsAny<string>(), default)).ReturnsAsync(enrollment);
+
+            var controller = new ExperimentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var result = await controller.CreateExperiment("Hack", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, enrollmentManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 404, string.Format(Resources.Enrollment_NotFound, "", "Hack"));
+        }
+
+        [Test]
+        public async Task CreateExperiment_EnrollentNotApproved()
+        {
+            var parameter = new Experiment();
+            var hackathon = new HackathonEntity();
+            var experiment = new ExperimentEntity { };
+            EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.pendingApproval };
+            var context = new ExperimentContext
+            {
+                ExperimentEntity = experiment,
+                Status = new k8s.Models.V1Status { Reason = "reason" }
+            };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", It.IsAny<string>(), default)).ReturnsAsync(enrollment);
+
+            var controller = new ExperimentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
+            };
+            var result = await controller.CreateExperiment("Hack", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, enrollmentManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+
+            AssertHelper.AssertObjectResult(result, 412, Resources.Enrollment_NotApproved);
+        }
+
+        [Test]
+        public async Task CreateExperiment_Success()
+        {
+            var parameter = new Experiment();
+            var hackathon = new HackathonEntity();
+            var experiment = new ExperimentEntity { RowKey = "rk" };
+            EnrollmentEntity enrollment = new EnrollmentEntity { Status = EnrollmentStatus.approved };
+            var context = new ExperimentContext
+            {
+                ExperimentEntity = experiment,
+                Status = new k8s.Models.V1Status { Reason = "reason" }
+            };
+            UserInfo userInfo = new UserInfo { Region = "region" };
+
+            var hackathonManagement = new Mock<IHackathonManagement>();
+            hackathonManagement.Setup(p => p.GetHackathonEntityByNameAsync("hack", default)).ReturnsAsync(hackathon);
+            var enrollmentManagement = new Mock<IEnrollmentManagement>();
+            enrollmentManagement.Setup(p => p.GetEnrollmentAsync("hack", It.IsAny<string>(), default)).ReturnsAsync(enrollment);
+            var experimentManagement = new Mock<IExperimentManagement>();
+            experimentManagement.Setup(j => j.CreateExperimentAsync(It.Is<Experiment>(j =>
+                j.templateName == "default" &&
+                j.hackathonName == "hack"), default)).ReturnsAsync(context);
+
+            var controller = new ExperimentController
+            {
+                HackathonManagement = hackathonManagement.Object,
+                EnrollmentManagement = enrollmentManagement.Object,
+                ExperimentManagement = experimentManagement.Object,
+                ResponseBuilder = new DefaultResponseBuilder(),
+            };
+            var result = await controller.CreateExperiment("Hack", parameter, default);
+
+            Mock.VerifyAll(hackathonManagement, experimentManagement, enrollmentManagement);
+            hackathonManagement.VerifyNoOtherCalls();
+            enrollmentManagement.VerifyNoOtherCalls();
+            experimentManagement.VerifyNoOtherCalls();
+
+            Experiment resp = AssertHelper.AssertOKResult<Experiment>(result);
+            Assert.AreEqual("rk", resp.id);
             Assert.AreEqual("reason", resp.status.reason);
         }
         #endregion
