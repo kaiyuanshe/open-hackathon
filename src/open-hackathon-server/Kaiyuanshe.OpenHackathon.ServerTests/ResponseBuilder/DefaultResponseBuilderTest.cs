@@ -125,7 +125,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.ResponseBuilder
             var context = new ExperimentContext
             {
                 ExperimentEntity = entity,
-                Status = new k8s.Models.V1Status
+                Status = new ExperimentStatus
                 {
                     Code = 204,
                     Message = "msg"

@@ -16,6 +16,6 @@ namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
         public TSpec Spec { get; set; }
 
         [JsonProperty(PropertyName = "status")]
-        public TStatus CStatus { get; set; }
+        public TStatus Status { get; set; }
     }
 }
