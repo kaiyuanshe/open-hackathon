@@ -70,7 +70,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var context = new ExperimentContext
             {
                 ExperimentEntity = experiment,
-                Status = new k8s.Models.V1Status { Reason = "reason" }
+                Status = new ExperimentStatus { Reason = "reason" }
             };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
@@ -102,7 +102,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var context = new ExperimentContext
             {
                 ExperimentEntity = experiment,
-                Status = new k8s.Models.V1Status { Reason = "reason" }
+                Status = new ExperimentStatus { Reason = "reason" }
             };
 
             var hackathonManagement = new Mock<IHackathonManagement>();
@@ -134,7 +134,7 @@ namespace Kaiyuanshe.OpenHackathon.ServerTests.Controllers
             var context = new ExperimentContext
             {
                 ExperimentEntity = experiment,
-                Status = new k8s.Models.V1Status { Reason = "reason" }
+                Status = new ExperimentStatus { Reason = "reason" }
             };
             UserInfo userInfo = new UserInfo { Region = "region" };
 

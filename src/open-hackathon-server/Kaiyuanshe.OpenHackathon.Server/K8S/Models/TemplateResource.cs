@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace Kaiyuanshe.OpenHackathon.Server.K8S.Models
 {
+    /// <summary>
+    /// Template resource definition.
+    /// sample yaml: https://github.com/kaiyuanshe/cloudengine/blob/master/config/samples/hackathon_v1_template.yaml
+    /// </summary>
     public class TemplateResource : CustomResource
     {
         // Properties of CustomResourceDefinition
