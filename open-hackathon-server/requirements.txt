@@ -37,7 +37,7 @@ MarkupSafe==1.1.1
 mock==2.0.0
 mongoengine==0.19.1
 more-itertools==8.2.0
-numpy==1.18.2
+numpy==1.21.0
 oauthlib==3.1.0
 packaging==20.3
 pbr==5.4.4
